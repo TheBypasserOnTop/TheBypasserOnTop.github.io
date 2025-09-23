@@ -1,26 +1,690 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coming Soon</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        .message {
-            font-size: 3rem;
-            color: #333;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Website Unblockers</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&display=swap" rel="stylesheet" />
+
+  <!-- AOS Animate On Scroll -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Rubik", sans-serif;
+      color: white;
+      background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f0c29);
+      background-size: 400% 400%;
+      animation: gradientBackground 10s ease infinite;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Blur main content when menu open */
+    #mainContent.menu-open {
+      filter: blur(6px);
+      pointer-events: none;
+      user-select: none;
+      transition: filter 0.3s ease;
+    }
+
+    /* Exclude panel and hamburger from blur & pointer-events */
+    #sidePanel,
+    #hamburger {
+      pointer-events: auto;
+      user-select: auto;
+      filter: none;
+      position: fixed;
+      z-index: 9999;
+    }
+
+    /* Hamburger Menu */
+    #hamburger {
+      top: 20px;
+      left: 20px;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 10000;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Hide hamburger when menu open */
+    body.menu-open #hamburger {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Hamburger lines */
+    .bar {
+      height: 4px;
+      width: 100%;
+      background: #00ffc3;
+      border-radius: 2px;
+      transition: background 0.3s ease;
+    }
+
+    /* Side Panel */
+    #sidePanel {
+      top: 0;
+      left: 0;
+      height: 100vh; /* Full height */
+      width: 300px;
+      background: #111a21;
+      box-shadow: 2px 0 12px rgba(0, 255, 195, 0.4);
+      transform: translateX(-100%);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 25px;
+      overflow-y: auto;
+    }
+
+    /* Show panel when menu open */
+    #sidePanel.open {
+      transform: translateX(0);
+    }
+
+    /* Panel Header (Removed title) */
+    #sidePanel header {
+      display: none; /* Hide header */
+    }
+
+    #sidePanel hr {
+      border: none;
+      height: 2px;
+      background: #00adb5;
+      margin-bottom: 10px;
+      border-radius: 2px;
+    }
+
+    /* Close button */
+    #closeBtn {
+      position: absolute;
+      top: 20px; /* Positioned to the top of the panel */
+      right: 20px;
+      font-size: 2rem;
+      color: #00ffc3;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.3s ease;
+      border: none;
+      background: transparent;
+      z-index: 10001;
+    }
+
+    #closeBtn:hover {
+      color: #00adb5;
+    }
+
+    /* Tabs container */
+    #tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 40px; /* Added margin-top to shift tabs down */
+    }
+
+    /* Tab buttons vertical style */
+    .tab {
+      padding: 12px 15px;
+      background: transparent;
+      border: 2px solid #00adb5;
+      border-radius: 8px;
+      color: #00adb5;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      user-select: none;
+    }
+
+    .tab:hover:not(.active) {
+      background-color: #00adb5;
+      color: #111;
+    }
+
+    /* Active tab style */
+    .tab.active {
+      background-color: #00ffc3;
+      border-color: #00ffc3;
+      color: #111;
+      cursor: default;
+    }
+
+    /* Divider between tabs and content */
+    #tabDivider {
+      border: none;
+      height: 2px;
+      background: #00adb5;
+      margin: 20px 0;
+      border-radius: 2px;
+    }
+
+    /* Tab content area */
+    #tabContent {
+      color: #ccc;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      user-select: text;
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-top: 20px; /* Added margin-top to move content down */
+    }
+
+    /* Header section */
+    header {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 20px;
+      z-index: 0;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transform: translateY(40px);
+      animation: slideFadeIn 2.5s ease forwards;
+      margin-bottom: 20px;
+    }
+
+    .typewriter {
+      font-size: 1.4rem;
+      color: #00ffc3;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 2px solid #00ffc3;
+      width: 0;
+      animation: typing 6s steps(70, end) 2s forwards, blink 0.7s step-end infinite;
+    }
+
+    /* Remove blinking cursor after typing finishes */
+    .typewriter.finished {
+      border-right: none;
+      animation: none;
+      width: auto;
+    }
+
+    @keyframes typing {
+      from {
+        width: 0;
+      }
+      to {
+        width: 100%;
+      }
+    }
+
+    @keyframes blink {
+      0%,
+      100% {
+        border-color: transparent;
+      }
+      50% {
+        border-color: #00ffc3;
+      }
+    }
+
+    @keyframes gradientBackground {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes slideFadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .content-section {
+      padding: 60px 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 0;
+    }
+
+    .box {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 50px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #00adb5;
+    }
+
+    .box h2 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .box h2::after {
+      content: "";
+      display: block;
+      width: 60px;
+      height: 3px;
+      background: #00adb5;
+      margin-top: 8px;
+    }
+
+    .box p {
+      font-size: 1.1rem;
+      color: #ccc;
+      margin-top: 10px;
+      z-index: 2;
+      position: relative;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: #888;
+      font-size: 0.9rem;
+      background: #111;
+      position: relative;
+      z-index: 0;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 2.5rem;
+      }
+
+      .typewriter {
+        font-size: 1.2rem;
+      }
+    }
+
+    /* === NEW Generate page styles === */
+    /* === GLOBAL STYLES === */
+    #mainContent {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+      min-height: 100vh;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .animated-title {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #00ffc3;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    .animated-title::after {
+      content: "";
+      display: block;
+      width: 60px;
+      height: 3px;
+      background: #00adb5;
+      margin: 10px auto 0;
+      border-radius: 2px;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .output-box {
+      width: 90%;
+      max-width: 500px;
+      height: 120px;
+      background: #1a1a1a;
+      border: 2px solid #00adb5;
+      border-radius: 10px;
+      padding: 20px;
+      color: #ccc;
+      font-size: 1.2rem;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      user-select: none;
+    }
+
+    #generateBtn {
+      padding: 12px 25px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: #00ffc3;
+      color: #111;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #generateBtn:disabled {
+      background-color: #555;
+      color: #aaa;
+      cursor: not-allowed;
+    }
+
+    .generate-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .divider {
+      width: 100%;
+      max-width: 600px;
+      height: 2px;
+      background: #00adb5;
+      margin: 40px 0 20px;
+      border-radius: 2px;
+    }
+
+    .generated-list {
+      width: 100%;
+      max-width: 600px;
+      padding: 0 10px;
+    }
+
+    .generated-list h2 {
+      color: #00ffc3;
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .generated-list ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .generated-list li {
+      margin: 8px 0;
+    }
+
+    .generated-list a {
+      color: #00adb5;
+      text-decoration: underline;
+      word-break: break-all;
+    }
+  </style>
 </head>
 <body>
-    <div class="message">Coming Soon!</div>
+
+  <!-- Hamburger -->
+  <div id="hamburger" aria-label="Open menu" role="button" tabindex="0">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+
+  <!-- Side Panel -->
+  <aside id="sidePanel" role="navigation" aria-label="Main Menu">
+    <button id="closeBtn" aria-label="Close menu">&times;</button>
+    <hr id="tabDivider" />
+    <div id="tabs" role="tablist" aria-orientation="vertical">
+              <button class="tab" role="tab" aria-selected="false" aria-controls="tabContent" id="tabGenerate" tabindex="0">Home</button>
+      <button class="tab active" role="tab" aria-selected="true" aria-controls="tabContent" id="tabUnblocker" tabindex="-1">Unblockers</button>
+    </div>
+    <!-- If home tab selected, make it auto change the website link to https://thebypasserontop.github.io/index.html -->
+    <hr id="tabDivider" />
+    <div id="tabContent" tabindex="0" aria-live="polite" aria-atomic="true">
+      <!-- Tab content changes dynamically -->
+      <!-- This content is untouched as per instruction -->
+      <p>Welcome to Website Unblockers! Choose a tab to explore.</p>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main id="mainContent" tabindex="-1" aria-label="Main Content">
+    <!-- Here goes your new Generate page content -->
+    <div class="generate-wrapper">
+      <!-- TITLE -->
+      <h1 class="animated-title">Generate Website</h1>
+
+      <!-- TEXTBOX -->
+      <div class="output-box" id="outputBox">Click the button to generate a website</div>
+
+      <!-- BUTTON -->
+      <button id="generateBtn">Generate Website</button>
+    </div>
+
+    <!-- DIVIDER & GENERATED LIST -->
+    <div class="divider"></div>
+
+    <div class="generated-list" id="generatedListSection">
+      <h2>Generated Websites</h2>
+      <ul id="generatedList"></ul>
+    </div>
+  </main>
+
+  <script>
+    // Hamburger toggle
+    const hamburger = document.getElementById("hamburger");
+    const sidePanel = document.getElementById("sidePanel");
+    const mainContent = document.getElementById("mainContent");
+    const closeBtn = document.getElementById("closeBtn");
+    const tabs = document.querySelectorAll(".tab");
+    const tabContent = document.getElementById("tabContent");
+
+    function openMenu() {
+      document.body.classList.add("menu-open");
+      sidePanel.classList.add("open");
+      mainContent.classList.add("menu-open");
+      sidePanel.setAttribute("aria-hidden", "false");
+      hamburger.setAttribute("aria-expanded", "true");
+      closeBtn.focus();
+    }
+
+    function closeMenu() {
+      document.body.classList.remove("menu-open");
+      sidePanel.classList.remove("open");
+      mainContent.classList.remove("menu-open");
+      sidePanel.setAttribute("aria-hidden", "true");
+      hamburger.setAttribute("aria-expanded", "false");
+      hamburger.focus();
+    }
+
+    hamburger.addEventListener("click", openMenu);
+    closeBtn.addEventListener("click", closeMenu);
+
+    // Accessibility keyboard handling for hamburger and close button
+    hamburger.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openMenu();
+      }
+    });
+
+    closeBtn.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        closeMenu();
+      }
+    });
+
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    tabs.forEach(t => {
+      t.classList.remove("active");
+      t.setAttribute("aria-selected", "false");
+      t.setAttribute("tabindex", "-1");
+    });
+    tab.classList.add("active");
+    tab.setAttribute("aria-selected", "true");
+    tab.setAttribute("tabindex", "0");
+
+    // Redirect if Home tab selected
+    if (tab.id === "tabGenerate") {
+      window.location.href = "https://thebypasserontop.github.io/index.html";
+    }
+  });
+});
+
+
+    // === NEW Generate page script ===
+    // WEBSITE POOL
+    const websites = [
+      "learningeducation.twilightparadox.com/",
+      "koenigseggagera.twilightparadox.com/",
+      "lolsites332.ftp.sh/",
+      "schooliscool.verymad.net/",
+      "churchstudies.developer.li/",
+      "kingston-made-this.zanity.net/",
+      "artt.fullsusmtb.org.ycare.org/",
+      "tuffmangos67hub.fri67.com/",
+      "mrarlienisabusyman.duckdns.org/",
+      "sieteisabot.oops.wtf/",
+      "free-books.ledsolarbarak.cl/",
+      "spigglewiggle.rossco.uk/",
+      "made.by.j.thank.me.later.strangled.net/",
+      "made.by.eeffoc.keriss.co.id/",
+      "study.niceandhealthy.com.mx/",
+      "buy.lugia.rocks/",
+      "edu.knitido.cl/",
+      "use.gethow.com/"
+    ];
+
+    const outputBox = document.getElementById("outputBox");
+    const generateBtn = document.getElementById("generateBtn");
+    const generatedList = document.getElementById("generatedList");
+
+    const COOLDOWN_DURATION = 60; // seconds
+    const STORAGE_KEY = "generateCooldown";
+    const USED_KEY = "usedWebsites";
+
+    // UTILITIES
+    const saveCooldown = (endTime) => localStorage.setItem(STORAGE_KEY, endTime);
+    const getCooldown = () => parseInt(localStorage.getItem(STORAGE_KEY) || "0");
+    const now = () => Math.floor(Date.now() / 1000);
+
+    const saveUsedWebsites = (list) => localStorage.setItem(USED_KEY, JSON.stringify(list));
+    const getUsedWebsites = () => JSON.parse(localStorage.getItem(USED_KEY) || "[]");
+
+    const updateGeneratedList = () => {
+      const used = getUsedWebsites();
+      generatedList.innerHTML = "";
+      used.forEach(site => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="https://${site}" target="_blank" rel="noopener noreferrer">${site}</a>`;
+        generatedList.appendChild(li);
+      });
+    };
+
+    const startCooldown = (seconds) => {
+      const end = now() + seconds;
+      saveCooldown(end);
+      generateBtn.disabled = true;
+
+      const interval = setInterval(() => {
+        const timeLeft = getCooldown() - now();
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          generateBtn.disabled = false;
+          generateBtn.textContent = "Generate Website";
+          saveCooldown(0);
+        } else {
+          generateBtn.textContent = `Wait (${timeLeft})`;
+        }
+      }, 1000);
+    };
+
+    const animateDots = (baseText) => {
+      let dots = "";
+      let count = 0;
+      outputBox.textContent = baseText;
+      return setInterval(() => {
+        dots += ".";
+        count++;
+        if (count > 3) {
+          dots = "";
+          count = 0;
+        }
+        outputBox.textContent = baseText + dots;
+      }, 500);
+    };
+
+    const initCooldownCheck = () => {
+      const cooldownEnd = getCooldown();
+      const timeLeft = cooldownEnd - now();
+      if (timeLeft > 0) {
+        startCooldown(timeLeft);
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateGeneratedList();
+      initCooldownCheck();
+    });
+
+generateBtn.addEventListener("click", () => {
+  generateBtn.disabled = true;
+  const dotsInterval = animateDots("Checking requirements");
+
+  setTimeout(() => {
+    clearInterval(dotsInterval);
+
+    const used = getUsedWebsites();
+    const available = websites.filter(w => !used.includes(w));
+
+    if (available.length === 0) {
+      outputBox.textContent = "NO SITES IN STOCK (wait for riley to add more duh)";
+      generateBtn.disabled = true;
+      return;
+    }
+
+    const selected = available[Math.floor(Math.random() * available.length)];
+    used.push(selected);
+    saveUsedWebsites(used);
+    updateGeneratedList();
+
+    outputBox.textContent = `Generated: ${selected}`;
+    startCooldown(COOLDOWN_DURATION);
+  }, 2000);
+});
+
+  </script>
 </body>
 </html>
