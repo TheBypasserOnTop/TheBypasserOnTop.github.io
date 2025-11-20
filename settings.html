@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Settings - Bypass Zone</title>
-
 <style>
-/* ===== GLOBAL STYLES ===== */
+/* GLOBAL STYLES */
 * { margin:0; padding:0; box-sizing:border-box; font-family:"Inter", sans-serif; }
-
 body {
     display:flex;
     min-height:100vh;
@@ -17,14 +15,13 @@ body {
     animation: gradientMove 12s infinite ease-in-out;
     color:white;
 }
-
 @keyframes gradientMove {
     0% {background-position:0 0;}
     50%{background-position:100% 100%;}
     100%{background-position:0 0;}
 }
 
-/* ===== SIDEBAR ===== */
+/* SIDEBAR */
 #sidebar {
     width:250px;
     background: rgba(0,0,0,0.25);
@@ -38,64 +35,27 @@ body {
     color:#fff;
 }
 #sidebar.collapsed { width:70px; }
-
-#hamburger-title {
-    display:flex;
-    align-items:center;
-    gap:15px;
-    cursor:pointer;
-}
-
+#hamburger-title { display:flex; align-items:center; gap:15px; cursor:pointer; }
 .hamburger { width:25px; height:2px; background:white; position:relative; }
-.hamburger::before, .hamburger::after {
-    content:""; width:25px; height:2px; background:white; position:absolute; left:0; transition:0.25s;
-}
+.hamburger::before, .hamburger::after { content:""; width:25px; height:2px; background:white; position:absolute; left:0; transition:0.25s; }
 .hamburger::before { top:-8px; }
 .hamburger::after { top:8px; }
-
-#sidebar h1 {
-    font-size:22px; font-weight:600; white-space: nowrap;
-    transition: 0.3s ease, opacity 0.3s ease;
-}
+#sidebar h1 { font-size:22px; font-weight:600; white-space:nowrap; transition:0.3s ease, opacity 0.3s ease; }
 #sidebar.collapsed h1 { opacity:0; width:0; overflow:hidden; }
 
-/* ===== TABS ===== */
+/* TABS */
 .tabs { display:flex; flex-direction:column; gap:10px; }
-.tab {
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:12px 10px;
-    border-radius:8px;
-    cursor:pointer;
-    transition: background 0.25s;
-}
+.tab { display:flex; align-items:center; gap:10px; padding:12px 10px; border-radius:8px; cursor:pointer; transition: background 0.25s; }
 .tab.active, .tab:hover { background: rgba(0,200,255,0.25); }
-
 .tab .label { white-space:nowrap; }
 #sidebar.collapsed .label { opacity:0; width:0; overflow:hidden; }
-
-/* ICON SIZE FIX */
 .tab .icon { font-size:18px; width:18px; display:inline-block; text-align:center; }
 
-/* ===== MAIN CONTENT ===== */
-#main {
-    flex:1;
-    padding:40px;
-    margin-right:100px;
-    display:flex;
-    flex-direction:column;
-    gap:25px;
-}
+/* MAIN CONTENT */
+#main { flex:1; padding:40px; margin-right:100px; display:flex; flex-direction:column; gap:25px; }
+.content-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); padding:25px; border-radius:15px; }
 
-.content-card {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(20px);
-    padding:25px;
-    border-radius:15px;
-}
-
-/* ===== PROFILE ===== */
+/* PROFILE */
 #profile-container { position:absolute; top:25px; right:25px; }
 #pfp {
     width:55px; height:55px; border-radius:50%;
@@ -112,117 +72,64 @@ body {
     padding:15px; border-radius:12px;
     display:none;
 }
-#logout-btn {
-    width:100%; padding:10px; background:#ff4545;
-    border:none; border-radius:8px; color:white; cursor:pointer;
-}
+#logout-btn { width:100%; padding:10px; background:#ff4545; border:none; border-radius:8px; color:white; cursor:pointer; }
 #logout-btn:hover { background:#d93636; }
 
-/* ===== ADMIN POPUP ===== */
+/* ADMIN POPUP */
 #admin-popup-wrapper {
-    position: fixed;
+    position:fixed;
     top:0; left:0; right:0; bottom:0;
     display:none;
     justify-content:center;
     align-items:center;
-    backdrop-filter: blur(6px);
-    background: rgba(0,0,0,0.45);
+    background: rgba(0,0,0,0.35);
     z-index:999;
 }
-
 #admin-popup {
-    background: rgba(255,255,255,0.12);
-    backdrop-filter: blur(25px);
-    padding: 25px;
-    border-radius: 18px;
-    width: 350px;
-    position: relative;
-    text-align: center;
-    color: white;
-    box-shadow:
-        0 0 25px rgba(0,200,255,0.4),
-        0 0 60px rgba(0,200,255,0.25);
+    background: rgba(0,0,0,0.9);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    padding:25px;
+    border-radius:15px;
+    width:350px;
+    position:relative;
+    text-align:center;
+    color:white;
 }
-
-#admin-popup input {
-    width: 90%;
-    padding: 10px;
-    margin-top: 15px;
-    border-radius: 8px;
-    border: none;
-}
-
-#admin-popup button {
-    margin-top: 15px;
-    width:100%;
-    padding:10px;
-    background:#00c8ff;
-    border:none;
-    border-radius:8px;
-    color:black;
-    font-weight:bold;
-    cursor:pointer;
-}
+#admin-popup input { width:90%; padding:10px; margin-top:15px; border-radius:8px; border:none; }
+#admin-popup button { margin-top:15px; width:100%; padding:10px; background:#00c8ff; border:none; border-radius:8px; color:black; font-weight:bold; cursor:pointer; }
 #admin-popup button:hover { background:#00b5e6; }
-
-#admin-error {
-    color:#ff4d4d;
-    margin-top:10px;
-    display:none;
-}
-
-#close-popup {
-    position:absolute;
-    top:10px;
-    right:15px;
-    cursor:pointer;
-    font-size:20px;
-    font-weight:bold;
-}
+#admin-error { color:#ff4d4d; margin-top:10px; display:none; }
+#close-popup { position:absolute; top:10px; right:15px; cursor:pointer; font-size:20px; font-weight:bold; }
 #close-popup:hover { color:#ff4747; }
 </style>
 </head>
 <body>
 
-<!-- ===== SIDEBAR ===== -->
+<!-- SIDEBAR -->
 <div id="sidebar">
     <div id="hamburger-title">
         <div class="hamburger"></div>
         <h1>Bypass Zone</h1>
     </div>
-
     <div class="tabs">
-        <div class="tab" id="dashboard-tab">
-            <span class="icon">🏠</span>
-            <span class="label">Dashboard</span>
-        </div>
-
-        <div class="tab" id="websites-tab">
-            <span class="icon">🔗</span>
-            <span class="label">Websites</span>
-        </div>
-
-        <div class="tab active" id="settings-tab">
-            <span class="icon">⚙️</span>
-            <span class="label">Settings</span>
-        </div>
+        <div class="tab" id="dashboard-tab"><span class="icon">🏠</span><span class="label">Dashboard</span></div>
+        <div class="tab" id="websites-tab"><span class="icon">🔗</span><span class="label">Websites</span></div>
+        <div class="tab active" id="settings-tab"><span class="icon">⚙️</span><span class="label">Settings</span></div>
     </div>
 </div>
 
-<!-- ===== MAIN ===== -->
+<!-- MAIN -->
 <div id="main">
     <div class="content-card">
         <h2>Account Settings</h2>
-
         <p><b>Username:</b> <span id="user-display"></span></p>
         <p><b>Password:</b> <span id="password-dots">••••••••</span></p>
-
         <button id="view-pass-btn" style="margin-top:10px;">View Password</button>
         <button id="change-pass-btn" style="margin-top:10px;">Change Password</button>
     </div>
 </div>
 
-<!-- ===== PROFILE ===== -->
+<!-- PROFILE -->
 <div id="profile-container">
     <div id="pfp">A</div>
     <div id="dropdown">
@@ -231,7 +138,7 @@ body {
     </div>
 </div>
 
-<!-- ===== ADMIN POPUP ===== -->
+<!-- ADMIN POPUP -->
 <div id="admin-popup-wrapper">
     <div id="admin-popup">
         <div id="close-popup">✖</div>
@@ -243,73 +150,65 @@ body {
 </div>
 
 <script>
-/* ===== ACCESS CONTROL ===== */
+// ACCESS CONTROL
 const username = sessionStorage.getItem("loggedInUser");
-const password = sessionStorage.getItem("loggedInPass");
-
-if(!username) window.location.href="index.html";
-
+if (!username) window.location.href="index.html";
 document.getElementById("user-display").textContent = username;
 document.getElementById("username-display").textContent = username;
 
-/* ===== PFP COLOR ===== */
+// PFP COLOR
 const pfp = document.getElementById("pfp");
 pfp.textContent = username.charAt(0).toUpperCase();
-
 let savedColor = sessionStorage.getItem("pfpColor");
-if(!savedColor){
-    const colors=["#1E90FF","#FF4500","#32CD32","#FFD700","#6A5ACD","#FF69B4","#00CED1"];
+if (!savedColor) {
+    const colors = ["#1E90FF","#FF4500","#32CD32","#FFD700","#6A5ACD","#FF69B4","#00CED1"];
     savedColor = colors[Math.floor(Math.random()*colors.length)];
     sessionStorage.setItem("pfpColor", savedColor);
 }
 pfp.style.backgroundColor = savedColor;
 
-/* ===== PROFILE DROPDOWN ===== */
+// DROPDOWN
 let openDrop=false;
 const dropdown=document.getElementById("dropdown");
-pfp.addEventListener("click",()=>{
-    openDrop=!openDrop;
-    dropdown.style.display=openDrop?"block":"none";
-});
-document.addEventListener("click",(e)=>{
-    if(!pfp.contains(e.target)&&!dropdown.contains(e.target)){
-        dropdown.style.display="none";
-        openDrop=false;
-    }
-});
-document.getElementById("logout-btn").addEventListener("click",()=>{
-    sessionStorage.clear();
-    window.location.href="index.html";
-});
+pfp.addEventListener("click",()=>{ openDrop=!openDrop; dropdown.style.display=openDrop?"block":"none"; });
+document.addEventListener("click",(e)=>{ if(!pfp.contains(e.target)&&!dropdown.contains(e.target)){ dropdown.style.display="none"; openDrop=false; }});
+document.getElementById("logout-btn").addEventListener("click",()=>{ sessionStorage.clear(); window.location.href="index.html"; });
 
-/* ===== TAB REDIRECTS ===== */
+// TAB REDIRECTS
 document.getElementById("dashboard-tab").addEventListener("click",()=>{ window.location.href="dashboard.html"; });
 document.getElementById("websites-tab").addEventListener("click",()=>{ window.location.href="websites.html"; });
 
-/* ===== SIDEBAR COLLAPSE ===== */
-document.getElementById("hamburger-title").addEventListener("click",()=>{
-    document.getElementById("sidebar").classList.toggle("collapsed");
-});
+// SIDEBAR COLLAPSE
+document.getElementById("hamburger-title").addEventListener("click",()=>{ document.getElementById("sidebar").classList.toggle("collapsed"); });
+
+// ADMIN POPUP LOGIC
+const popupWrapper = document.getElementById("admin-popup-wrapper");
+const adminError = document.getElementById("admin-error");
+let pendingAction = null;
+
 function requireAdmin(action){
     pendingAction = action;
-    popup.style.display = "flex";
+    popupWrapper.style.display = "flex";
     adminError.style.display = "none";
     document.getElementById("admin-code").value = "";
 }
 
+document.getElementById("close-popup").addEventListener("click",()=>{ popupWrapper.style.display="none"; });
+
 document.getElementById("admin-continue").addEventListener("click", ()=>{
     const code = document.getElementById("admin-code").value;
-    const correctCode = "1234"; // your admin code
+    const correctCode = "1234";
 
     if(code !== correctCode){
         adminError.style.display="block";
         return;
     }
 
-    popup.style.display="none";
+    popupWrapper.style.display="none";
+
+    let savedPass = sessionStorage.getItem("loggedInPass") || "";
 
     if(pendingAction === "view"){
-        const savedPass = sessionStorage.getItem("loggedInPass");
         document.getElementById("password-dots").textContent = savedPass || "••••••••";
     }
 
@@ -321,12 +220,13 @@ document.getElementById("admin-continue").addEventListener("click", ()=>{
             alert("Password successfully changed!");
         }
     }
+
+    pendingAction = null;
 });
 
-
-/* ===== BUTTONS ===== */
-document.getElementById("view-pass-btn").addEventListener("click",()=>{ requireAdmin("view"); });
-document.getElementById("change-pass-btn").addEventListener("click",()=>{ requireAdmin("change"); });
+// BUTTONS
+document.getElementById("view-pass-btn").addEventListener("click", ()=> requireAdmin("view"));
+document.getElementById("change-pass-btn").addEventListener("click", ()=> requireAdmin("change"));
 </script>
 
 </body>
