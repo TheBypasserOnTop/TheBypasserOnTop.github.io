@@ -290,12 +290,6 @@ document.getElementById("websites-tab").addEventListener("click",()=>{ window.lo
 document.getElementById("hamburger-title").addEventListener("click",()=>{
     document.getElementById("sidebar").classList.toggle("collapsed");
 });
-
-/* ===== ADMIN POPUP LOGIC ===== */
-const popup = document.getElementById("admin-popup-wrapper");
-const adminError = document.getElementById("admin-error");
-let pendingAction = null;
-
 function requireAdmin(action){
     pendingAction = action;
     popup.style.display = "flex";
@@ -303,13 +297,9 @@ function requireAdmin(action){
     document.getElementById("admin-code").value = "";
 }
 
-document.getElementById("close-popup").addEventListener("click",()=>{
-    popup.style.display="none";
-});
-
-document.getElementById("admin-continue").addEventListener("click",()=>{
+document.getElementById("admin-continue").addEventListener("click", ()=>{
     const code = document.getElementById("admin-code").value;
-    const correctCode = "1234";
+    const correctCode = "1234"; // your admin code
 
     if(code !== correctCode){
         adminError.style.display="block";
@@ -318,19 +308,21 @@ document.getElementById("admin-continue").addEventListener("click",()=>{
 
     popup.style.display="none";
 
-    if(pendingAction==="view"){
-        document.getElementById("password-dots").textContent = password;
+    if(pendingAction === "view"){
+        const savedPass = sessionStorage.getItem("loggedInPass");
+        document.getElementById("password-dots").textContent = savedPass || "••••••••";
     }
 
-    if(pendingAction==="change"){
+    if(pendingAction === "change"){
         let newPass = prompt("Enter a new password:");
-        if(newPass && newPass.trim()!==""){
+        if(newPass && newPass.trim() !== ""){
             sessionStorage.setItem("loggedInPass", newPass);
             document.getElementById("password-dots").textContent = "••••••••";
             alert("Password successfully changed!");
         }
     }
 });
+
 
 /* ===== BUTTONS ===== */
 document.getElementById("view-pass-btn").addEventListener("click",()=>{ requireAdmin("view"); });
