@@ -58,16 +58,18 @@ body {
 
 .tab span.label { white-space: nowrap; transition: opacity 0.3s ease, width 0.3s ease; }
 #sidebar.collapsed .tab span.label { opacity:0; width:0; overflow:hidden; }
-
 #sidebar.collapsed .tab { justify-content:center; padding:12px 0; }
+.tab .icon { font-size:18px; width:18px; display:inline-block; text-align:center; }
 
-/* Tab icons (fix size issue) */
-.tab .icon {
-    font-size:18px;
-    width:18px;
-    display:inline-block;
-    text-align:center;
+/* DROPDOWN STYLE */
+.dropdown-content {
+    display: none;
+    flex-direction: column;
+    margin-left: 20px;
 }
+.dropdown-label .label::after { content: " ▾"; font-size:0.7em; margin-left:5px; }
+.minigame-tab { padding-left:15px; }
+.minigame-tab:hover { background: rgba(0,200,255,0.25); }
 
 /* ===== MAIN CONTENT ===== */
 #main {
@@ -108,7 +110,6 @@ body {
     border:none; border-radius:8px; color:white; cursor:pointer;
 }
 #logout-btn:hover { background:#d93636; }
-
 </style>
 </head>
 <body>
@@ -129,6 +130,20 @@ body {
         <div class="tab" id="websites-tab">
             <span class="icon">🔗</span>
             <span class="label">Websites</span>
+        </div>
+
+        <!-- Minigames Dropdown -->
+        <div class="dropdown-tab">
+            <div class="tab dropdown-label" id="minigames-tab">
+                <span class="icon">🎮</span>
+                <span class="label">Minigames</span>
+            </div>
+            <div class="dropdown-content" id="minigames-dropdown">
+                <div class="tab minigame-tab" id="lib-launcher-tab">
+                    <span class="icon">🛠️</span>
+                    <span class="label">Lib Launcher</span>
+                </div>
+            </div>
         </div>
 
         <div class="tab" id="settings-tab">
@@ -163,7 +178,7 @@ if (!loggedInUser) window.location.href = "index.html";
 document.getElementById("username-span").textContent = loggedInUser;
 document.getElementById("username-display").textContent = loggedInUser;
 
-// ===== PFP COLOR (persistent across pages) =====
+// ===== PFP COLOR =====
 const pfp = document.getElementById("pfp");
 pfp.textContent = loggedInUser.charAt(0).toUpperCase();
 
@@ -194,11 +209,28 @@ document.getElementById("logout-btn").addEventListener("click",()=>{
 });
 
 // ===== REDIRECT TABS =====
-document.getElementById("websites-tab").addEventListener("click",()=>{
-    window.location.href="websites.html";
+document.getElementById("dashboard-tab").addEventListener("click",()=>{ alert("Dashboard clicked!"); });
+document.getElementById("websites-tab").addEventListener("click",()=>{ window.location.href="websites.html"; });
+document.getElementById("settings-tab").addEventListener("click",()=>{ window.location.href="settings.html"; });
+
+// ===== DROPDOWN TOGGLE =====
+const minigamesTab = document.getElementById("minigames-tab");
+const minigamesDropdown = document.getElementById("minigames-dropdown");
+minigamesTab.addEventListener("click",(e)=>{
+    e.stopPropagation(); // prevent document click
+    minigamesDropdown.style.display = minigamesDropdown.style.display === "flex" ? "none" : "flex";
 });
-document.getElementById("settings-tab").addEventListener("click",()=>{
-    window.location.href="settings.html";
+
+// CLOSE DROPDOWN ON OUTSIDE CLICK
+document.addEventListener("click",(e)=>{
+    if(!minigamesTab.contains(e.target)&&!minigamesDropdown.contains(e.target)){
+        minigamesDropdown.style.display="none";
+    }
+});
+
+// ===== MINIGAME TAB CLICK =====
+document.getElementById("lib-launcher-tab").addEventListener("click",()=>{
+    alert("Lib Launcher clicked!"); // replace with redirect or logic
 });
 
 // ===== SIDEBAR COLLAPSE =====
