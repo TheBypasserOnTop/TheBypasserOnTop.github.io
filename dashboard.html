@@ -33,12 +33,7 @@ body {
 }
 #sidebar.collapsed { width:70px; }
 
-#hamburger-title {
-    display:flex;
-    align-items:center;
-    gap:15px;
-    cursor:pointer;
-}
+#hamburger-title { display:flex; align-items:center; gap:15px; cursor:pointer; }
 .hamburger { width:25px; height:2px; background:white; position:relative; }
 .hamburger::before, .hamburger::after {
     content:""; width:25px; height:2px; background:white; position:absolute; left:0; transition:0.25s;
@@ -46,18 +41,16 @@ body {
 .hamburger::before { top:-8px; }
 .hamburger::after { top:8px; }
 
-#sidebar h1 { font-size:22px; font-weight:600; white-space: nowrap; transition: 0.3s ease, opacity 0.3s ease; }
+#sidebar h1 {
+    font-size:22px; font-weight:600; white-space: nowrap;
+    transition: 0.3s ease, opacity 0.3s ease;
+}
 #sidebar.collapsed h1 { opacity:0; width:0; overflow:hidden; }
 
 .tabs { display:flex; flex-direction:column; gap:10px; }
 .tab {
-    display:flex;
-    align-items:center;
-    justify-content:flex-start;
-    gap:10px;
-    padding:12px 10px;
-    border-radius:8px;
-    cursor:pointer;
+    display:flex; align-items:center; justify-content:flex-start;
+    gap:10px; padding:12px 10px; border-radius:8px; cursor:pointer;
     transition: background 0.2s, padding 0.3s;
     color:#fff;
 }
@@ -66,69 +59,55 @@ body {
 .tab span.label { white-space: nowrap; transition: opacity 0.3s ease, width 0.3s ease; }
 #sidebar.collapsed .tab span.label { opacity:0; width:0; overflow:hidden; }
 
-#sidebar.collapsed .tab {
-    justify-content:center;
-    padding:12px 0;
+#sidebar.collapsed .tab { justify-content:center; padding:12px 0; }
+
+/* Tab icons (fix size issue) */
+.tab .icon {
+    font-size:18px;
+    width:18px;
+    display:inline-block;
+    text-align:center;
 }
 
 /* ===== MAIN CONTENT ===== */
 #main {
-    flex: 1;
-    padding: 40px;
-    margin-right:100px; /* space for profile circle */
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
+    flex: 1; padding: 40px;
+    margin-right:100px;
+    display: flex; flex-direction: column; gap: 25px;
     transition: padding 0.3s ease;
 }
+#sidebar.collapsed ~ #main { margin-left:70px; }
 
-#sidebar.collapsed ~ #main { 
-    margin-left:70px; /* match collapsed sidebar width */
-}
-
-.content-card { 
-    background: rgba(255,255,255,0.08); 
-    backdrop-filter: blur(20px); 
-    padding:25px; 
-    border-radius:15px; 
+.content-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    padding:25px;
+    border-radius:15px;
     color:white;
 }
 
 /* ===== PROFILE ===== */
 #profile-container { position:absolute; top:25px; right:25px; }
 #pfp {
-    width:55px;
-    height:55px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:white;
-    font-size:24px;
-    font-weight:bold;
-    cursor:pointer;
-    border:2px solid rgba(255,255,255,0.4);
-    user-select:none;
+    width:55px; height:55px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    color:white; font-size:24px; font-weight:bold; cursor:pointer;
+    border:2px solid rgba(255,255,255,0.4); user-select:none;
 }
 #pfp:hover { transform: scale(1.05); }
 
 #dropdown {
-    position:absolute;
-    right:0;
-    top:70px;
-    width:200px;
-    background: rgba(255,255,255,0.08);
+    position:absolute; right:0; top:70px;
+    width:200px; background: rgba(255,255,255,0.08);
     backdrop-filter: blur(12px);
-    border-radius:12px;
-    padding:15px;
-    display:none;
+    border-radius:12px; padding:15px; display:none;
 }
 #username-display { text-align:center; font-weight:600; margin-bottom:15px; }
-#logout-btn { width:100%; padding:10px; background:#ff4545; border:none; border-radius:8px; color:white; cursor:pointer; }
+#logout-btn {
+    width:100%; padding:10px; background:#ff4545;
+    border:none; border-radius:8px; color:white; cursor:pointer;
+}
 #logout-btn:hover { background:#d93636; }
-
-/* ===== SIMPLE TAB ICONS ===== */
-.tab .icon { font-size:18px; width:18px; display:inline-block; text-align:center; }
 
 </style>
 </head>
@@ -142,36 +121,28 @@ body {
     </div>
 
     <div class="tabs">
-        <div class="tab active" data-tab="dashboard">
+        <div class="tab active" id="dashboard-tab">
             <span class="icon">🏠</span>
             <span class="label">Dashboard</span>
         </div>
+
         <div class="tab" id="websites-tab">
             <span class="icon">🔗</span>
             <span class="label">Websites</span>
         </div>
-        <div class="tab" data-tab="example2">
+
+        <div class="tab" id="example2-tab">
             <span class="icon">⚙️</span>
             <span class="label">Example Tab 2</span>
         </div>
     </div>
 </div>
 
-<!-- MAIN CONTENT -->
+<!-- MAIN -->
 <div id="main">
-    <div class="content-card" id="dashboard-content">
+    <div class="content-card">
         <h2>Welcome, <span id="username-span">User</span>!</h2>
-        <p>This is your dashboard. Here you can see all about the website and navigate through tabs.</p>
-    </div>
-
-    <div class="content-card" id="example1-content" style="display:none;">
-        <h2>Example Tab 1</h2>
-        <p>Content for example tab 1 goes here.</p>
-    </div>
-
-    <div class="content-card" id="example2-content" style="display:none;">
-        <h2>Example Tab 2</h2>
-        <p>Content for example tab 2 goes here.</p>
+        <p>This is your dashboard. Navigate through the tabs on the left.</p>
     </div>
 </div>
 
@@ -187,51 +158,53 @@ body {
 <script>
 // ===== ACCESS CONTROL =====
 const loggedInUser = sessionStorage.getItem("loggedInUser");
-if(!loggedInUser) window.location.href = "index.html";
+if (!loggedInUser) window.location.href = "index.html";
+
 document.getElementById("username-span").textContent = loggedInUser;
 document.getElementById("username-display").textContent = loggedInUser;
 
-// ===== PROFILE CIRCLE =====
+// ===== PFP COLOR (persistent across pages) =====
 const pfp = document.getElementById("pfp");
-const firstLetter = loggedInUser.charAt(0).toUpperCase();
-pfp.textContent = firstLetter;
-const colors = ["#1E90FF","#FF4500","#32CD32","#FFD700","#6A5ACD","#FF69B4","#00CED1"];
-pfp.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+pfp.textContent = loggedInUser.charAt(0).toUpperCase();
 
-// Profile dropdown
-const dropdown = document.getElementById("dropdown");
+let savedColor = sessionStorage.getItem("pfpColor");
+if (!savedColor) {
+    const colors = ["#1E90FF","#FF4500","#32CD32","#FFD700","#6A5ACD","#FF69B4","#00CED1"];
+    savedColor = colors[Math.floor(Math.random()*colors.length)];
+    sessionStorage.setItem("pfpColor", savedColor);
+}
+pfp.style.backgroundColor = savedColor;
+
+// ===== PROFILE DROPDOWN =====
 let isOpen=false;
-pfp.addEventListener("click", ()=>{isOpen=!isOpen; dropdown.style.display=isOpen?"block":"none";});
-document.addEventListener("click",(e)=>{if(!pfp.contains(e.target)&&!dropdown.contains(e.target)){dropdown.style.display="none"; isOpen=false;}});
-document.getElementById("logout-btn").addEventListener("click",()=>{sessionStorage.removeItem("loggedInUser"); window.location.href="index.html";});
+const dropdown=document.getElementById("dropdown");
+pfp.addEventListener("click",()=>{
+    isOpen=!isOpen;
+    dropdown.style.display=isOpen?"block":"none";
+});
+document.addEventListener("click",(e)=>{
+    if(!pfp.contains(e.target)&&!dropdown.contains(e.target)){
+        dropdown.style.display="none";
+        isOpen=false;
+    }
+});
+document.getElementById("logout-btn").addEventListener("click",()=>{
+    sessionStorage.clear();
+    window.location.href="index.html";
+});
 
-// ===== TABS =====
-const tabs=document.querySelectorAll(".tab");
-tabs.forEach(tab=>{
-    tab.addEventListener("click",()=>{
-        tabs.forEach(t=>t.classList.remove("active"));
-        tab.classList.add("active");
-        // Hide all content
-        document.getElementById("dashboard-content").style.display="none";
-        document.getElementById("example1-content").style.display="none";
-        document.getElementById("example2-content").style.display="none";
-        // Show selected
-        document.getElementById(`${tab.dataset.tab}-content`).style.display="block";
-    });
+// ===== REDIRECT TABS =====
+document.getElementById("websites-tab").addEventListener("click",()=>{
+    window.location.href="websites.html";
+});
+document.getElementById("example2-tab").addEventListener("click",()=>{
+    window.location.href="example2.html";
 });
 
 // ===== SIDEBAR COLLAPSE =====
-const sidebar = document.getElementById("sidebar");
 document.getElementById("hamburger-title").addEventListener("click",()=>{
-    sidebar.classList.toggle("collapsed");
+    document.getElementById("sidebar").classList.toggle("collapsed");
 });
-
-
-// ===== REDIRECT WEBSITES TAB =====
-document.getElementById("websites-tab").addEventListener("click", () => {
-    window.location.href = "websites.html";
-});
-
 </script>
 </body>
 </html>
