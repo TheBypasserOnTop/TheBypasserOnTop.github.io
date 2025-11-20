@@ -5,11 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dashboard - Bypass Zone</title>
 
-<!-- Lucide Icons -->
-<script src="https://unpkg.com/lucide/dist/lucide.js"></script>
-
 <style>
-/* ===== GENERAL ===== */
 * { margin:0; padding:0; box-sizing:border-box; font-family:"Inter", sans-serif; }
 
 body {
@@ -50,19 +46,10 @@ body {
 .hamburger::before { top:-8px; }
 .hamburger::after { top:8px; }
 
-#sidebar h1 {
-    font-size:22px;
-    font-weight:600;
-    white-space: nowrap;
-    transition: 0.3s ease, opacity 0.3s ease;
-}
+#sidebar h1 { font-size:22px; font-weight:600; white-space: nowrap; transition: 0.3s ease, opacity 0.3s ease; }
 #sidebar.collapsed h1 { opacity:0; width:0; overflow:hidden; }
 
-.tabs {
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
+.tabs { display:flex; flex-direction:column; gap:10px; }
 .tab {
     display:flex;
     align-items:center;
@@ -75,21 +62,15 @@ body {
 }
 .tab.active, .tab:hover { background: rgba(0,200,255,0.25); }
 
-.tab span.label {
-    white-space: nowrap;
-    transition: opacity 0.3s ease, width 0.3s ease;
-}
-#sidebar.collapsed .tab span.label {
-    opacity:0;
-    width:0;
-    overflow:hidden;
-}
+.tab span.label { white-space: nowrap; transition: opacity 0.3s ease, width 0.3s ease; }
+#sidebar.collapsed .tab span.label { opacity:0; width:0; overflow:hidden; }
 
 /* ===== MAIN CONTENT ===== */
 #main {
     flex:1;
-    padding:40px;
-    margin-left:250px;
+    padding:40px 40px 40px 20px; /* top right bottom left */
+    margin-left:250px; /* width of sidebar */
+    margin-right:100px; /* space for profile circle */
     display:flex;
     flex-direction:column;
     gap:25px;
@@ -106,11 +87,7 @@ body {
 }
 
 /* ===== PROFILE ===== */
-#profile-container {
-    position:absolute;
-    top:25px;
-    right:25px;
-}
+#profile-container { position:absolute; top:25px; right:25px; }
 #pfp {
     width:55px;
     height:55px;
@@ -142,8 +119,9 @@ body {
 #logout-btn { width:100%; padding:10px; background:#ff4545; border:none; border-radius:8px; color:white; cursor:pointer; }
 #logout-btn:hover { background:#d93636; }
 
-/* ===== LUCIDE ICONS COLOR ===== */
-.tab i { stroke:white; }
+/* ===== SIMPLE TAB ICONS ===== */
+.tab .icon { font-size:18px; width:18px; display:inline-block; text-align:center; }
+
 </style>
 </head>
 <body>
@@ -157,15 +135,15 @@ body {
 
     <div class="tabs">
         <div class="tab active" data-tab="dashboard">
-            <i data-lucide="home"></i>
+            <span class="icon">🏠</span>
             <span class="label">Dashboard</span>
         </div>
         <div class="tab" data-tab="example1">
-            <i data-lucide="file-text"></i>
+            <span class="icon">📄</span>
             <span class="label">Example Tab 1</span>
         </div>
         <div class="tab" data-tab="example2">
-            <i data-lucide="settings"></i>
+            <span class="icon">⚙️</span>
             <span class="label">Example Tab 2</span>
         </div>
     </div>
@@ -238,11 +216,6 @@ tabs.forEach(tab=>{
 const sidebar = document.getElementById("sidebar");
 document.getElementById("hamburger-title").addEventListener("click",()=>{
     sidebar.classList.toggle("collapsed");
-});
-
-// ===== INIT LUCIDE ICONS =====
-window.addEventListener("DOMContentLoaded", () => {
-    lucide.createIcons();
 });
 </script>
 </body>
