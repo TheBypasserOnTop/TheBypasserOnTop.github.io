@@ -1,37 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dashboard - Bypass Zone</title>
 
-<style>
-/* ===== GENERAL ===== */
-* { margin:0; padding:0; box-sizing:border-box; font-family:"Inter", sans-serif; }
-body { 
-    height:100vh; 
-    display:flex; 
-    background: linear-gradient(135deg, #02070b, #031423, #041b33);
-    background-size: 200% 200%; 
-    animation: gradientMove 12s infinite ease-in-out; 
-    color:white;
-}
-@keyframes gradientMove { 
-    0% { background-position:0% 0%; } 
-    50% { background-position:100% 100%; } 
-    100% { background-position:0% 0%; } 
-}
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide/dist/lucide.js"></script>
 
-/* ===== SIDEBAR ===== */
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Inter", sans-serif; }
+
+body {
+    display:flex;
+    min-height:100vh;
+    background: linear-gradient(135deg, #02070b, #031423, #041b33);
+    background-size: 200% 200%;
+    animation: gradientMove 12s infinite ease-in-out;
+}
+@keyframes gradientMove { 0% {background-position:0 0;} 50%{background-position:100% 100%;} 100%{background-position:0 0;} }
+
 #sidebar {
     width:250px;
     background: rgba(0,0,0,0.25);
     backdrop-filter: blur(20px);
-    padding:25px;
+    padding:25px 20px;
     display:flex;
     flex-direction:column;
     gap:30px;
+    transition: 0.3s ease;
+    overflow:hidden;
 }
+
+#sidebar.collapsed { width:70px; }
 
 #hamburger-title {
     display:flex;
@@ -39,26 +40,14 @@ body {
     gap:15px;
     cursor:pointer;
 }
-
-.hamburger {
-    width:25px;
-    height:2px;
-    background:white;
-    position:relative;
-}
+.hamburger { width:25px; height:2px; background:white; position:relative; }
 .hamburger::before, .hamburger::after {
-    content:"";
-    width:25px;
-    height:2px;
-    background:white;
-    position:absolute;
-    left:0;
-    transition:0.25s;
+    content:""; width:25px; height:2px; background:white; position:absolute; left:0; transition:0.25s;
 }
 .hamburger::before { top:-8px; }
 .hamburger::after { top:8px; }
 
-#sidebar h1 { font-size:22px; font-weight:600; }
+#sidebar h1 { font-size:22px; font-weight:600; white-space: nowrap; transition:0.3s ease; }
 
 .tabs {
     display:flex;
@@ -66,33 +55,39 @@ body {
     gap:10px;
 }
 .tab {
+    display:flex;
+    align-items:center;
+    gap:10px;
     padding:12px 15px;
     border-radius:8px;
     cursor:pointer;
     transition:0.2s;
 }
-.tab.active, .tab:hover {
-    background: rgba(0,200,255,0.25);
-}
+.tab.active, .tab:hover { background: rgba(0,200,255,0.25); }
 
-/* ===== MAIN CONTENT ===== */
+.tab span.label { white-space: nowrap; transition:0.3s ease; }
+
+#sidebar.collapsed .tab span.label { opacity:0; width:0; overflow:hidden; }
+
 #main {
     flex:1;
     padding:40px;
     display:flex;
     flex-direction:column;
     gap:25px;
+    margin-left:0;
+    transition:0.3s ease;
 }
 
-/* Content area card */
-.content-card {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(20px);
-    padding:25px;
-    border-radius:15px;
+/* Content card */
+.content-card { 
+    background: rgba(255,255,255,0.08); 
+    backdrop-filter: blur(20px); 
+    padding:25px; 
+    border-radius:15px; 
 }
 
-/* Top-right profile circle */
+/* PROFILE */
 #profile-container {
     position:absolute;
     top:25px;
@@ -113,6 +108,7 @@ body {
     user-select:none;
 }
 #pfp:hover { transform: scale(1.05); }
+
 #dropdown {
     position:absolute;
     right:0;
@@ -125,10 +121,9 @@ body {
     display:none;
 }
 #username-display { text-align:center; font-weight:600; margin-bottom:15px; }
-#logout-btn {
-    width:100%; padding:10px; background:#ff4545; border:none; border-radius:8px; color:white; cursor:pointer;
-}
+#logout-btn { width:100%; padding:10px; background:#ff4545; border:none; border-radius:8px; color:white; cursor:pointer; }
 #logout-btn:hover { background:#d93636; }
+
 </style>
 </head>
 <body>
@@ -141,9 +136,18 @@ body {
     </div>
 
     <div class="tabs">
-        <div class="tab active" data-tab="dashboard">Dashboard</div>
-        <div class="tab" data-tab="example1">Example Tab 1</div>
-        <div class="tab" data-tab="example2">Example Tab 2</div>
+        <div class="tab active" data-tab="dashboard">
+            <i data-lucide="home"></i>
+            <span class="label">Dashboard</span>
+        </div>
+        <div class="tab" data-tab="example1">
+            <i data-lucide="file-text"></i>
+            <span class="label">Example Tab 1</span>
+        </div>
+        <div class="tab" data-tab="example2">
+            <i data-lucide="settings"></i>
+            <span class="label">Example Tab 2</span>
+        </div>
     </div>
 </div>
 
@@ -175,30 +179,27 @@ body {
 </div>
 
 <script>
-/* ===== ACCESS CONTROL ===== */
+// ===== ACCESS CONTROL =====
 const loggedInUser = sessionStorage.getItem("loggedInUser");
 if(!loggedInUser) window.location.href = "index.html";
 document.getElementById("username-span").textContent = loggedInUser;
 document.getElementById("username-display").textContent = loggedInUser;
 
-/* ===== PROFILE INITIAL ===== */
+// ===== PROFILE CIRCLE =====
 const pfp = document.getElementById("pfp");
 const firstLetter = loggedInUser.charAt(0).toUpperCase();
 pfp.textContent = firstLetter;
 const colors = ["#1E90FF","#FF4500","#32CD32","#FFD700","#6A5ACD","#FF69B4","#00CED1"];
 pfp.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
 
-/* ===== PROFILE DROPDOWN ===== */
+// Profile dropdown
 const dropdown = document.getElementById("dropdown");
 let isOpen=false;
 pfp.addEventListener("click", ()=>{isOpen=!isOpen; dropdown.style.display=isOpen?"block":"none";});
 document.addEventListener("click",(e)=>{if(!pfp.contains(e.target)&&!dropdown.contains(e.target)){dropdown.style.display="none"; isOpen=false;}});
-document.getElementById("logout-btn").addEventListener("click",()=>{
-    sessionStorage.removeItem("loggedInUser");
-    window.location.href="index.html";
-});
+document.getElementById("logout-btn").addEventListener("click",()=>{sessionStorage.removeItem("loggedInUser"); window.location.href="index.html";});
 
-/* ===== TABS ===== */
+// ===== TABS =====
 const tabs=document.querySelectorAll(".tab");
 tabs.forEach(tab=>{
     tab.addEventListener("click",()=>{
@@ -212,7 +213,15 @@ tabs.forEach(tab=>{
         document.getElementById(`${tab.dataset.tab}-content`).style.display="block";
     });
 });
-</script>
 
+// ===== SIDEBAR COLLAPSE =====
+const sidebar = document.getElementById("sidebar");
+document.getElementById("hamburger-title").addEventListener("click",()=>{
+    sidebar.classList.toggle("collapsed");
+});
+
+// ===== INIT LUCIDE ICONS =====
+lucide.createIcons();
+</script>
 </body>
 </html>
