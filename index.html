@@ -197,32 +197,41 @@
         };
 
         /* Login Logic */
-        function attemptLogin() {
-            if (!humanVerified) {
-                alert("Please complete the human verification.");
-                return;
-            }
+function attemptLogin() {
+    if (!humanVerified) {
+        alert("Please complete the human verification.");
+        return;
+    }
 
-            const u = document.getElementById("username").value;
-            const p = document.getElementById("password").value;
-            const error = document.getElementById("error-message");
+    const u = document.getElementById("username").value;
+    const p = document.getElementById("password").value;
+    const error = document.getElementById("error-message");
 
-            if (allowedAccounts[u] === p) {
-                error.style.display = "none";
-                sessionStorage.setItem("loggedInUser", u);
-                sessionStorage.setItem("loggedInPass", p);
-                const box = document.getElementById("login-box");
-                box.style.animation = "fadeOut 0.6s ease forwards";
+    // Check if a saved password exists in sessionStorage
+    const savedPass = sessionStorage.getItem("loggedInPass");
+    const allowedPass = allowedAccounts[u];
 
-                setTimeout(() => {
-                    window.location.href = "https://thebypasserontop.github.io/dashboard.html";
-                }, 650);
+    if ((savedPass && u === sessionStorage.getItem("loggedInUser") && p === savedPass) ||
+        (!savedPass && allowedPass && p === allowedPass)) {
+        
+        error.style.display = "none";
 
-            } else {
-                error.style.display = "block";
-                document.getElementById("password").value = "";
-            }
-        }
+        sessionStorage.setItem("loggedInUser", u);
+        sessionStorage.setItem("loggedInPass", p); // save current password
+
+        const box = document.getElementById("login-box");
+        box.style.animation = "fadeOut 0.6s ease forwards";
+
+        setTimeout(() => {
+            window.location.href = "dashboard.html";
+        }, 650);
+
+    } else {
+        error.style.display = "block";
+        document.getElementById("password").value = "";
+    }
+}
+
     </script>
 
 </body>
