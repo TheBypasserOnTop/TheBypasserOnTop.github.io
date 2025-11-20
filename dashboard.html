@@ -1,147 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - Bypass Zone</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Bypass Zone</title>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Inter", sans-serif;
-        }
+<style>
+/* ===== GENERAL ===== */
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Inter", sans-serif; }
+body { 
+    height:100vh; 
+    display:flex; 
+    background: linear-gradient(135deg, #02070b, #031423, #041b33);
+    background-size: 200% 200%; 
+    animation: gradientMove 12s infinite ease-in-out; 
+    color:white;
+}
+@keyframes gradientMove { 
+    0% { background-position:0% 0%; } 
+    50% { background-position:100% 100%; } 
+    100% { background-position:0% 0%; } 
+}
 
-        body {
-            height: 100vh;
-            background: linear-gradient(135deg, #02070b, #031423, #041b33);
-            background-size: 200% 200%;
-            animation: gradientMove 12s infinite ease-in-out;
-            overflow: hidden;
-        }
+/* ===== SIDEBAR ===== */
+#sidebar {
+    width:250px;
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(20px);
+    padding:25px;
+    display:flex;
+    flex-direction:column;
+    gap:30px;
+}
 
-        @keyframes gradientMove {
-            0% { background-position: 0% 0%; }
-            50% { background-position: 100% 100%; }
-            100% { background-position: 0% 0%; }
-        }
+#hamburger-title {
+    display:flex;
+    align-items:center;
+    gap:15px;
+    cursor:pointer;
+}
 
-        /* Profile Circle */
-        #profile-container {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-        }
+.hamburger {
+    width:25px;
+    height:2px;
+    background:white;
+    position:relative;
+}
+.hamburger::before, .hamburger::after {
+    content:"";
+    width:25px;
+    height:2px;
+    background:white;
+    position:absolute;
+    left:0;
+    transition:0.25s;
+}
+.hamburger::before { top:-8px; }
+.hamburger::after { top:8px; }
 
-        #pfp {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            background: url("https://i.imgur.com/4Z7lmgW.png") center/cover no-repeat;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            cursor: pointer;
-            transition: 0.25s;
-        }
+#sidebar h1 { font-size:22px; font-weight:600; }
 
-        #pfp:hover {
-            transform: scale(1.05);
-        }
+.tabs {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.tab {
+    padding:12px 15px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:0.2s;
+}
+.tab.active, .tab:hover {
+    background: rgba(0,200,255,0.25);
+}
 
-        /* Dropdown */
-        #dropdown {
-            position: absolute;
-            right: 0;
-            top: 70px;
-            width: 200px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            border-radius: 12px;
-            padding: 15px;
-            display: none;
-            animation: fadeIn 0.2s ease;
-        }
+/* ===== MAIN CONTENT ===== */
+#main {
+    flex:1;
+    padding:40px;
+    display:flex;
+    flex-direction:column;
+    gap:25px;
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+/* Content area card */
+.content-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    padding:25px;
+    border-radius:15px;
+}
 
-        #username-display {
-            color: white;
-            font-size: 18px;
-            text-align: center;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        #logout-btn {
-            width: 100%;
-            padding: 10px;
-            background: #ff4545;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        #logout-btn:hover {
-            background: #d93636;
-        }
-    </style>
+/* Top-right profile circle */
+#profile-container {
+    position:absolute;
+    top:25px;
+    right:25px;
+}
+#pfp {
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:24px;
+    font-weight:bold;
+    cursor:pointer;
+    border:2px solid rgba(255,255,255,0.4);
+    user-select:none;
+}
+#pfp:hover { transform: scale(1.05); }
+#dropdown {
+    position:absolute;
+    right:0;
+    top:70px;
+    width:200px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    border-radius:12px;
+    padding:15px;
+    display:none;
+}
+#username-display { text-align:center; font-weight:600; margin-bottom:15px; }
+#logout-btn {
+    width:100%; padding:10px; background:#ff4545; border:none; border-radius:8px; color:white; cursor:pointer;
+}
+#logout-btn:hover { background:#d93636; }
+</style>
 </head>
-
 <body>
 
-    <!-- Profile Button -->
-    <div id="profile-container">
-        <div id="pfp"></div>
-
-        <!-- Dropdown -->
-        <div id="dropdown">
-            <div id="username-display">Loading...</div>
-            <button id="logout-btn">Log Out</button>
-        </div>
+<!-- SIDEBAR -->
+<div id="sidebar">
+    <div id="hamburger-title">
+        <div class="hamburger"></div>
+        <h1>Bypass Zone</h1>
     </div>
 
-    <script>
-        /* ===== PREVENT DIRECT ACCESS ===== */
-        const loggedInUser = sessionStorage.getItem("loggedInUser");
+    <div class="tabs">
+        <div class="tab active" data-tab="dashboard">Dashboard</div>
+        <div class="tab" data-tab="example1">Example Tab 1</div>
+        <div class="tab" data-tab="example2">Example Tab 2</div>
+    </div>
+</div>
 
-        if (!loggedInUser) {
-            window.location.href = "index.html"; // redirect to login
-        }
+<!-- MAIN CONTENT -->
+<div id="main">
+    <div class="content-card" id="dashboard-content">
+        <h2>Welcome, <span id="username-span">User</span>!</h2>
+        <p>This is your dashboard. Here you can see all about the website and navigate through tabs.</p>
+    </div>
 
-        /* Insert username into dropdown */
-        document.getElementById("username-display").textContent = loggedInUser;
+    <div class="content-card" id="example1-content" style="display:none;">
+        <h2>Example Tab 1</h2>
+        <p>Content for example tab 1 goes here.</p>
+    </div>
 
-        /* Dropdown Toggle */
-        const pfp = document.getElementById("pfp");
-        const dropdown = document.getElementById("dropdown");
+    <div class="content-card" id="example2-content" style="display:none;">
+        <h2>Example Tab 2</h2>
+        <p>Content for example tab 2 goes here.</p>
+    </div>
+</div>
 
-        let isOpen = false;
+<!-- PROFILE -->
+<div id="profile-container">
+    <div id="pfp">A</div>
+    <div id="dropdown">
+        <div id="username-display">Loading...</div>
+        <button id="logout-btn">Log Out</button>
+    </div>
+</div>
 
-        pfp.addEventListener("click", () => {
-            isOpen = !isOpen;
-            dropdown.style.display = isOpen ? "block" : "none";
-        });
+<script>
+/* ===== ACCESS CONTROL ===== */
+const loggedInUser = sessionStorage.getItem("loggedInUser");
+if(!loggedInUser) window.location.href = "index.html";
+document.getElementById("username-span").textContent = loggedInUser;
+document.getElementById("username-display").textContent = loggedInUser;
 
-        /* Close dropdown when clicking anywhere else */
-        document.addEventListener("click", (e) => {
-            if (!pfp.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = "none";
-                isOpen = false;
-            }
-        });
+/* ===== PROFILE INITIAL ===== */
+const pfp = document.getElementById("pfp");
+const firstLetter = loggedInUser.charAt(0).toUpperCase();
+pfp.textContent = firstLetter;
+const colors = ["#1E90FF","#FF4500","#32CD32","#FFD700","#6A5ACD","#FF69B4","#00CED1"];
+pfp.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
 
-        /* Logout */
-        document.getElementById("logout-btn").addEventListener("click", () => {
-            sessionStorage.removeItem("loggedInUser");
-            window.location.href = "index.html";
-        });
-    </script>
+/* ===== PROFILE DROPDOWN ===== */
+const dropdown = document.getElementById("dropdown");
+let isOpen=false;
+pfp.addEventListener("click", ()=>{isOpen=!isOpen; dropdown.style.display=isOpen?"block":"none";});
+document.addEventListener("click",(e)=>{if(!pfp.contains(e.target)&&!dropdown.contains(e.target)){dropdown.style.display="none"; isOpen=false;}});
+document.getElementById("logout-btn").addEventListener("click",()=>{
+    sessionStorage.removeItem("loggedInUser");
+    window.location.href="index.html";
+});
+
+/* ===== TABS ===== */
+const tabs=document.querySelectorAll(".tab");
+tabs.forEach(tab=>{
+    tab.addEventListener("click",()=>{
+        tabs.forEach(t=>t.classList.remove("active"));
+        tab.classList.add("active");
+        // Hide all content
+        document.getElementById("dashboard-content").style.display="none";
+        document.getElementById("example1-content").style.display="none";
+        document.getElementById("example2-content").style.display="none";
+        // Show selected
+        document.getElementById(`${tab.dataset.tab}-content`).style.display="block";
+    });
+});
+</script>
 
 </body>
 </html>
