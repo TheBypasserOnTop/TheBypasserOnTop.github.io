@@ -9,6 +9,7 @@
 <script src="https://unpkg.com/lucide/dist/lucide.js"></script>
 
 <style>
+/* ===== GENERAL ===== */
 * { margin:0; padding:0; box-sizing:border-box; font-family:"Inter", sans-serif; }
 
 body {
@@ -17,9 +18,11 @@ body {
     background: linear-gradient(135deg, #02070b, #031423, #041b33);
     background-size: 200% 200%;
     animation: gradientMove 12s infinite ease-in-out;
+    color:white;
 }
 @keyframes gradientMove { 0% {background-position:0 0;} 50%{background-position:100% 100%;} 100%{background-position:0 0;} }
 
+/* ===== SIDEBAR ===== */
 #sidebar {
     width:250px;
     background: rgba(0,0,0,0.25);
@@ -28,10 +31,10 @@ body {
     display:flex;
     flex-direction:column;
     gap:30px;
-    transition: 0.3s ease;
+    transition: width 0.3s ease;
     overflow:hidden;
+    color:#fff;
 }
-
 #sidebar.collapsed { width:70px; }
 
 #hamburger-title {
@@ -47,7 +50,13 @@ body {
 .hamburger::before { top:-8px; }
 .hamburger::after { top:8px; }
 
-#sidebar h1 { font-size:22px; font-weight:600; white-space: nowrap; transition:0.3s ease; }
+#sidebar h1 {
+    font-size:22px;
+    font-weight:600;
+    white-space: nowrap;
+    transition: 0.3s ease, opacity 0.3s ease;
+}
+#sidebar.collapsed h1 { opacity:0; width:0; overflow:hidden; }
 
 .tabs {
     display:flex;
@@ -61,33 +70,42 @@ body {
     padding:12px 15px;
     border-radius:8px;
     cursor:pointer;
-    transition:0.2s;
+    transition: background 0.2s;
+    color:#fff;
 }
 .tab.active, .tab:hover { background: rgba(0,200,255,0.25); }
 
-.tab span.label { white-space: nowrap; transition:0.3s ease; }
+.tab span.label {
+    white-space: nowrap;
+    transition: opacity 0.3s ease, width 0.3s ease;
+}
+#sidebar.collapsed .tab span.label {
+    opacity:0;
+    width:0;
+    overflow:hidden;
+}
 
-#sidebar.collapsed .tab span.label { opacity:0; width:0; overflow:hidden; }
-
+/* ===== MAIN CONTENT ===== */
 #main {
     flex:1;
     padding:40px;
+    margin-left:250px;
     display:flex;
     flex-direction:column;
     gap:25px;
-    margin-left:0;
-    transition:0.3s ease;
+    transition: margin-left 0.3s ease;
 }
+#sidebar.collapsed ~ #main { margin-left:70px; }
 
-/* Content card */
 .content-card { 
     background: rgba(255,255,255,0.08); 
     backdrop-filter: blur(20px); 
     padding:25px; 
     border-radius:15px; 
+    color:white;
 }
 
-/* PROFILE */
+/* ===== PROFILE ===== */
 #profile-container {
     position:absolute;
     top:25px;
@@ -124,6 +142,8 @@ body {
 #logout-btn { width:100%; padding:10px; background:#ff4545; border:none; border-radius:8px; color:white; cursor:pointer; }
 #logout-btn:hover { background:#d93636; }
 
+/* ===== LUCIDE ICONS COLOR ===== */
+.tab i { stroke:white; }
 </style>
 </head>
 <body>
@@ -221,7 +241,9 @@ document.getElementById("hamburger-title").addEventListener("click",()=>{
 });
 
 // ===== INIT LUCIDE ICONS =====
-lucide.createIcons();
+window.addEventListener("DOMContentLoaded", () => {
+    lucide.createIcons();
+});
 </script>
 </body>
 </html>
