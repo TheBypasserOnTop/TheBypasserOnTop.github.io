@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Bypass Zone</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            background: linear-gradient(135deg, #02070b, #031423, #041b33);
+            background-size: 200% 200%;
+            animation: gradientMove 12s infinite ease-in-out;
+            overflow: hidden;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        /* Profile Circle */
+        #profile-container {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+        }
+
+        #pfp {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: url("https://i.imgur.com/4Z7lmgW.png") center/cover no-repeat;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        #pfp:hover {
+            transform: scale(1.05);
+        }
+
+        /* Dropdown */
+        #dropdown {
+            position: absolute;
+            right: 0;
+            top: 70px;
+            width: 200px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 15px;
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #username-display {
+            color: white;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        #logout-btn {
+            width: 100%;
+            padding: 10px;
+            background: #ff4545;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #logout-btn:hover {
+            background: #d93636;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Profile Button -->
+    <div id="profile-container">
+        <div id="pfp"></div>
+
+        <!-- Dropdown -->
+        <div id="dropdown">
+            <div id="username-display">Loading...</div>
+            <button id="logout-btn">Log Out</button>
+        </div>
+    </div>
+
+    <script>
+        /* ===== PREVENT DIRECT ACCESS ===== */
+        const loggedInUser = sessionStorage.getItem("loggedInUser");
+
+        if (!loggedInUser) {
+            window.location.href = "index.html"; // redirect to login
+        }
+
+        /* Insert username into dropdown */
+        document.getElementById("username-display").textContent = loggedInUser;
+
+        /* Dropdown Toggle */
+        const pfp = document.getElementById("pfp");
+        const dropdown = document.getElementById("dropdown");
+
+        let isOpen = false;
+
+        pfp.addEventListener("click", () => {
+            isOpen = !isOpen;
+            dropdown.style.display = isOpen ? "block" : "none";
+        });
+
+        /* Close dropdown when clicking anywhere else */
+        document.addEventListener("click", (e) => {
+            if (!pfp.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = "none";
+                isOpen = false;
+            }
+        });
+
+        /* Logout */
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            sessionStorage.removeItem("loggedInUser");
+            window.location.href = "index.html";
+        });
+    </script>
+
+</body>
+</html>

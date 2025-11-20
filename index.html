@@ -9,32 +9,25 @@
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Inter", Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
 
-        /* Dark gradient background */
+        /* Background */
         body {
             height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-
             background: linear-gradient(135deg, #02070b, #031423, #041b33);
             background-size: 200% 200%;
             animation: gradientMove 12s infinite ease-in-out;
         }
-
         @keyframes gradientMove {
             0% { background-position: 0% 0%; }
             50% { background-position: 100% 100%; }
             100% { background-position: 0% 0%; }
         }
 
-        /* Title (hidden until after loading screen) */
+        /* Title */
         #site-title {
             margin-top: 40px;
             font-size: 42px;
@@ -44,110 +37,76 @@
             transition: opacity 0.7s;
         }
 
-        /* Loader screen */
+        /* Loader */
         #loader {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            background: transparent;
         }
-
-        #loader-text {
-            font-size: 2rem;
-            color: white;
-            margin-bottom: 25px;
-        }
+        #loader-text { font-size: 2rem; color: white; margin-bottom: 25px; }
 
         .large-circle {
-            width: 85px;
-            height: 85px;
+            width: 85px; height: 85px;
             border: 8px solid #0d3553;
             border-top-color: #00c8ff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Login wrapper */
+        /* Login */
         #login-wrapper {
             flex: 1;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             width: 100%;
         }
 
-        /* Login box */
         #login-box {
             display: none;
             width: 480px;
             padding: 40px 50px;
             border-radius: 18px;
-
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255,255,255,0.08);
             backdrop-filter: blur(20px);
-
             color: white;
             animation: fadeIn 0.7s ease forwards;
         }
-
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(15px);}
+            to { opacity: 1; transform: translateY(0);}
         }
-
         @keyframes fadeOut {
             from { opacity: 1; }
             to { opacity: 0; transform: translateY(-15px); }
         }
 
-        #login-box h2 {
-            font-size: 30px;
-            margin-bottom: 25px;
-            font-weight: 600;
-        }
+        #login-box h2 { font-size: 30px; margin-bottom: 25px; }
 
-        /* Inputs */
         input {
             width: 100%;
             padding: 14px;
             margin-bottom: 20px;
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 8px;
             color: white;
             font-size: 16px;
         }
+        input:focus { outline: 2px solid #00c8ff; }
 
-        input:focus {
-            outline: 2px solid #00c8ff;
-        }
-
-        /* Checkbox row */
-        #remember-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        /* CF widget container (hidden at first) */
+        #cf-container {
             margin-bottom: 25px;
-            font-size: 15px;
+            display: none;
         }
 
-        #remember-row input {
-            width: 18px;
-            height: 18px;
-            margin: 0;
-        }
-
-        /* Login button */
+        /* Button */
         button {
             width: 100%;
             padding: 14px;
@@ -160,18 +119,14 @@
             cursor: pointer;
             transition: 0.25s;
         }
-
         button:disabled {
             background: #05465a;
             opacity: 0.5;
             cursor: not-allowed;
         }
+        button:hover:not(:disabled) { background: #00a8d4; }
 
-        button:hover:not(:disabled) {
-            background: #00a8d4;
-        }
-
-        /* Incorrect login text */
+        /* Error Text */
         #error-message {
             color: #ff5050;
             margin-top: 12px;
@@ -182,16 +137,16 @@
 </head>
 <body>
 
-    <!-- Title -->
+    <!-- TITLE -->
     <div id="site-title">Bypass Zone</div>
 
-    <!-- Loading screen -->
+    <!-- LOADING SCREEN -->
     <div id="loader">
         <div id="loader-text">Loading</div>
         <div class="large-circle"></div>
     </div>
 
-    <!-- LOGIN SECTION -->
+    <!-- LOGIN -->
     <div id="login-wrapper">
         <div id="login-box">
             <h2>Log In</h2>
@@ -199,13 +154,8 @@
             <input type="text" id="username" placeholder="Username">
             <input type="password" id="password" placeholder="Password">
 
-            <div id="remember-row">
-                <input type="checkbox" id="remember">
-                <label for="remember">Remember me</label>
-            </div>
-
-            <!-- CLOUDFLARE TURNSTILE -->
-            <div id="cf-container" style="margin-bottom: 25px;">
+            <!-- Cloudflare appears ONLY when typing password -->
+            <div id="cf-container">
                 <div class="cf-turnstile"
                      data-sitekey="0x4AAAAAACB7AG5gF1V8EwYN"
                      data-callback="cfVerified"
@@ -223,19 +173,22 @@
         /* Prevent login until verified */
         let humanVerified = false;
 
-        function cfVerified(token) {
+        function cfVerified() {
             humanVerified = true;
             document.getElementById("login-btn").disabled = false;
         }
 
-        /* Loader fade out */
+        /* Show Cloudflare widget after typing password */
+        document.getElementById("password").addEventListener("input", () => {
+            document.getElementById("cf-container").style.display = "block";
+        });
+
+        /* Loader finish */
         setTimeout(() => {
             document.getElementById("loader").style.display = "none";
-
             document.getElementById("login-box").style.display = "block";
             document.getElementById("site-title").style.opacity = "1";
-
-        }, 2200); // 2.2 sec loader
+        }, 2200);
 
         /* Allowed accounts */
         const allowedAccounts = {
@@ -243,26 +196,26 @@
             "TheBypasserOnTop": "bypassOP"
         };
 
-        /* Login logic */
+        /* Login Logic */
         function attemptLogin() {
             if (!humanVerified) {
-                alert("Please verify you're human first.");
+                alert("Please complete the human verification.");
                 return;
             }
 
-            const user = document.getElementById("username").value;
-            const pass = document.getElementById("password").value;
+            const u = document.getElementById("username").value;
+            const p = document.getElementById("password").value;
             const error = document.getElementById("error-message");
 
-            if (allowedAccounts[user] === pass) {
+            if (allowedAccounts[u] === p) {
                 error.style.display = "none";
-
+                sessionStorage.setItem("loggedInUser", u);
                 const box = document.getElementById("login-box");
                 box.style.animation = "fadeOut 0.6s ease forwards";
 
                 setTimeout(() => {
-                    box.style.display = "none";
-                }, 600);
+                    window.location.href = "https://thebypasserontop.github.io/dashboard.html";
+                }, 650);
 
             } else {
                 error.style.display = "block";
