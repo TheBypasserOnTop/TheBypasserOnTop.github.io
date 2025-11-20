@@ -6,7 +6,7 @@
 <title>Settings - Bypass Zone</title>
 
 <style>
-/* SAME GLOBAL STYLE AS OTHER PAGES */
+/* ===== GLOBAL STYLES ===== */
 * { margin:0; padding:0; box-sizing:border-box; font-family:"Inter", sans-serif; }
 
 body {
@@ -24,7 +24,7 @@ body {
     100%{background-position:0 0;}
 }
 
-/* SIDEBAR */
+/* ===== SIDEBAR ===== */
 #sidebar {
     width:250px;
     background: rgba(0,0,0,0.25);
@@ -40,29 +40,34 @@ body {
 #sidebar.collapsed { width:70px; }
 
 #hamburger-title {
-    display:flex; align-items:center; gap:15px; cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:15px;
+    cursor:pointer;
 }
 
 .hamburger { width:25px; height:2px; background:white; position:relative; }
 .hamburger::before, .hamburger::after {
-    content:""; width:25px; height:2px; background:white; position:absolute;
-    left:0; transition:0.25s;
+    content:""; width:25px; height:2px; background:white; position:absolute; left:0; transition:0.25s;
 }
 .hamburger::before { top:-8px; }
 .hamburger::after { top:8px; }
 
 #sidebar h1 {
-    font-size:22px; font-weight:600; white-space:nowrap;
+    font-size:22px; font-weight:600; white-space: nowrap;
     transition: 0.3s ease, opacity 0.3s ease;
 }
 #sidebar.collapsed h1 { opacity:0; width:0; overflow:hidden; }
 
-/* TABS */
+/* ===== TABS ===== */
 .tabs { display:flex; flex-direction:column; gap:10px; }
 .tab {
-    display:flex; align-items:center;
-    gap:10px; padding:12px 10px;
-    border-radius:8px; cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 10px;
+    border-radius:8px;
+    cursor:pointer;
     transition: background 0.25s;
 }
 .tab.active, .tab:hover { background: rgba(0,200,255,0.25); }
@@ -71,18 +76,16 @@ body {
 #sidebar.collapsed .label { opacity:0; width:0; overflow:hidden; }
 
 /* ICON SIZE FIX */
-.tab .icon {
-    font-size:18px;
-    width:18px;
-    display:inline-block;
-    text-align:center;
-}
+.tab .icon { font-size:18px; width:18px; display:inline-block; text-align:center; }
 
-/* MAIN CONTENT */
+/* ===== MAIN CONTENT ===== */
 #main {
-    flex:1; padding:40px;
+    flex:1;
+    padding:40px;
     margin-right:100px;
-    display:flex; flex-direction:column; gap:25px;
+    display:flex;
+    flex-direction:column;
+    gap:25px;
 }
 
 .content-card {
@@ -92,7 +95,7 @@ body {
     border-radius:15px;
 }
 
-/* PROFILE */
+/* ===== PROFILE ===== */
 #profile-container { position:absolute; top:25px; right:25px; }
 #pfp {
     width:55px; height:55px; border-radius:50%;
@@ -115,39 +118,42 @@ body {
 }
 #logout-btn:hover { background:#d93636; }
 
-/* ADMIN POPUP */
+/* ===== ADMIN POPUP ===== */
 #admin-popup-wrapper {
-    position:fixed;
+    position: fixed;
     top:0; left:0; right:0; bottom:0;
     display:none;
     justify-content:center;
     align-items:center;
-    backdrop-filter: blur(5px);
-    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(6px);
+    background: rgba(0,0,0,0.45);
     z-index:999;
 }
 
 #admin-popup {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.12);
     backdrop-filter: blur(25px);
-    padding:25px;
-    border-radius:15px;
-    width:350px;
-    position:relative;
-    text-align:center;
-    color:white;
+    padding: 25px;
+    border-radius: 18px;
+    width: 350px;
+    position: relative;
+    text-align: center;
+    color: white;
+    box-shadow:
+        0 0 25px rgba(0,200,255,0.4),
+        0 0 60px rgba(0,200,255,0.25);
 }
 
 #admin-popup input {
-    width:90%;
-    padding:10px;
-    margin-top:15px;
-    border-radius:8px;
-    border:none;
+    width: 90%;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 8px;
+    border: none;
 }
 
 #admin-popup button {
-    margin-top:15px;
+    margin-top: 15px;
     width:100%;
     padding:10px;
     background:#00c8ff;
@@ -165,7 +171,6 @@ body {
     display:none;
 }
 
-/* X BUTTON */
 #close-popup {
     position:absolute;
     top:10px;
@@ -179,7 +184,7 @@ body {
 </head>
 <body>
 
-<!-- SIDEBAR -->
+<!-- ===== SIDEBAR ===== -->
 <div id="sidebar">
     <div id="hamburger-title">
         <div class="hamburger"></div>
@@ -187,7 +192,6 @@ body {
     </div>
 
     <div class="tabs">
-
         <div class="tab" id="dashboard-tab">
             <span class="icon">🏠</span>
             <span class="label">Dashboard</span>
@@ -198,7 +202,6 @@ body {
             <span class="label">Websites</span>
         </div>
 
-
         <div class="tab active" id="settings-tab">
             <span class="icon">⚙️</span>
             <span class="label">Settings</span>
@@ -206,7 +209,7 @@ body {
     </div>
 </div>
 
-<!-- MAIN -->
+<!-- ===== MAIN ===== -->
 <div id="main">
     <div class="content-card">
         <h2>Account Settings</h2>
@@ -219,53 +222,49 @@ body {
     </div>
 </div>
 
-<!-- PROFILE -->
+<!-- ===== PROFILE ===== -->
 <div id="profile-container">
     <div id="pfp">A</div>
-
     <div id="dropdown">
         <div id="username-display"></div>
         <button id="logout-btn">Log Out</button>
     </div>
 </div>
 
-<!-- ADMIN PERMISSION POPUP -->
+<!-- ===== ADMIN POPUP ===== -->
 <div id="admin-popup-wrapper">
     <div id="admin-popup">
         <div id="close-popup">✖</div>
-
         <h2>Administrator Permission Required</h2>
-
         <input type="password" id="admin-code" placeholder="Enter Administrator Code">
         <button id="admin-continue">Continue</button>
-
         <div id="admin-error">The code you entered is incorrect!</div>
     </div>
 </div>
 
 <script>
-/* ACCESS CONTROL */
+/* ===== ACCESS CONTROL ===== */
 const username = sessionStorage.getItem("loggedInUser");
 const password = sessionStorage.getItem("loggedInPass");
 
-if (!username) window.location.href="index.html";
+if(!username) window.location.href="index.html";
 
 document.getElementById("user-display").textContent = username;
 document.getElementById("username-display").textContent = username;
 
-/* PFP COLOR (persistent) */
+/* ===== PFP COLOR ===== */
 const pfp = document.getElementById("pfp");
 pfp.textContent = username.charAt(0).toUpperCase();
 
 let savedColor = sessionStorage.getItem("pfpColor");
-if (!savedColor) {
-    const colors = ["#1E90FF","#FF4500","#32CD32","#FFD700","#6A5ACD","#FF69B4","#00CED1"];
+if(!savedColor){
+    const colors=["#1E90FF","#FF4500","#32CD32","#FFD700","#6A5ACD","#FF69B4","#00CED1"];
     savedColor = colors[Math.floor(Math.random()*colors.length)];
     sessionStorage.setItem("pfpColor", savedColor);
 }
 pfp.style.backgroundColor = savedColor;
 
-/* DROPDOWN */
+/* ===== PROFILE DROPDOWN ===== */
 let openDrop=false;
 const dropdown=document.getElementById("dropdown");
 pfp.addEventListener("click",()=>{
@@ -274,7 +273,8 @@ pfp.addEventListener("click",()=>{
 });
 document.addEventListener("click",(e)=>{
     if(!pfp.contains(e.target)&&!dropdown.contains(e.target)){
-        dropdown.style.display="none"; openDrop=false;
+        dropdown.style.display="none";
+        openDrop=false;
     }
 });
 document.getElementById("logout-btn").addEventListener("click",()=>{
@@ -282,71 +282,59 @@ document.getElementById("logout-btn").addEventListener("click",()=>{
     window.location.href="index.html";
 });
 
-/* TAB REDIRECTS */
+/* ===== TAB REDIRECTS ===== */
 document.getElementById("dashboard-tab").addEventListener("click",()=>{ window.location.href="dashboard.html"; });
 document.getElementById("websites-tab").addEventListener("click",()=>{ window.location.href="websites.html"; });
 
-/* SIDEBAR COLLAPSE */
+/* ===== SIDEBAR COLLAPSE ===== */
 document.getElementById("hamburger-title").addEventListener("click",()=>{
     document.getElementById("sidebar").classList.toggle("collapsed");
 });
 
-/* ADMIN POPUP LOGIC */
+/* ===== ADMIN POPUP LOGIC ===== */
 const popup = document.getElementById("admin-popup-wrapper");
 const adminError = document.getElementById("admin-error");
+let pendingAction = null;
 
-let pendingAction = null; // "view" or "change"
-
-function requireAdmin(action) {
+function requireAdmin(action){
     pendingAction = action;
     popup.style.display = "flex";
     adminError.style.display = "none";
-    document.body.style.filter = "blur(3px)";
+    document.getElementById("admin-code").value = "";
 }
 
 document.getElementById("close-popup").addEventListener("click",()=>{
-    popup.style.display = "none";
-    document.body.style.filter = "none";
+    popup.style.display="none";
 });
 
 document.getElementById("admin-continue").addEventListener("click",()=>{
     const code = document.getElementById("admin-code").value;
+    const correctCode = "1234";
 
-    const correctCode = "1234"; // CHANGE THIS TO YOUR SECURE CODE
-
-    if (code !== correctCode) {
+    if(code !== correctCode){
         adminError.style.display="block";
         return;
     }
 
-    // success
     popup.style.display="none";
-    document.body.style.filter="none";
 
-    if (pendingAction === "view") {
+    if(pendingAction==="view"){
         document.getElementById("password-dots").textContent = password;
     }
 
-    if (pendingAction === "change") {
+    if(pendingAction==="change"){
         let newPass = prompt("Enter a new password:");
-
-        if (newPass && newPass.trim() !== "") {
+        if(newPass && newPass.trim()!==""){
             sessionStorage.setItem("loggedInPass", newPass);
+            document.getElementById("password-dots").textContent = "••••••••";
             alert("Password successfully changed!");
         }
     }
-
-    document.getElementById("admin-code").value = "";
 });
 
-/* BUTTON ACTIONS */
-document.getElementById("view-pass-btn").addEventListener("click",()=>{
-    requireAdmin("view");
-});
-
-document.getElementById("change-pass-btn").addEventListener("click",()=>{
-    requireAdmin("change");
-});
+/* ===== BUTTONS ===== */
+document.getElementById("view-pass-btn").addEventListener("click",()=>{ requireAdmin("view"); });
+document.getElementById("change-pass-btn").addEventListener("click",()=>{ requireAdmin("change"); });
 </script>
 
 </body>
