@@ -53,11 +53,12 @@ body {
 .tab {
     display:flex;
     align-items:center;
+    justify-content:flex-start; /* left align icons/label */
     gap:10px;
-    padding:12px 15px;
+    padding:12px 10px;
     border-radius:8px;
     cursor:pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, padding 0.3s;
     color:#fff;
 }
 .tab.active, .tab:hover { background: rgba(0,200,255,0.25); }
@@ -65,18 +66,26 @@ body {
 .tab span.label { white-space: nowrap; transition: opacity 0.3s ease, width 0.3s ease; }
 #sidebar.collapsed .tab span.label { opacity:0; width:0; overflow:hidden; }
 
+#sidebar.collapsed .tab {
+    justify-content:center; /* center icon when collapsed */
+    padding:12px 0; /* remove horizontal padding for collapsed state */
+}
+
 /* ===== MAIN CONTENT ===== */
 #main {
     flex:1;
-    padding:40px 40px 40px 20px; /* top right bottom left */
-    margin-left:250px; /* width of sidebar */
+    padding:40px 40px 40px 10px; /* reduced left padding */
+    margin-left:250px; /* expanded sidebar width */
     margin-right:100px; /* space for profile circle */
     display:flex;
     flex-direction:column;
     gap:25px;
-    transition: margin-left 0.3s ease;
+    transition: margin-left 0.3s ease, padding-left 0.3s ease;
 }
-#sidebar.collapsed ~ #main { margin-left:70px; }
+#sidebar.collapsed ~ #main { 
+    margin-left:70px; 
+    padding-left:40px; /* keep some left padding when collapsed */
+}
 
 .content-card { 
     background: rgba(255,255,255,0.08); 
