@@ -53,7 +53,7 @@ body {
 .tab {
     display:flex;
     align-items:center;
-    justify-content:flex-start; /* left align icons/label */
+    justify-content:flex-start;
     gap:10px;
     padding:12px 10px;
     border-radius:8px;
@@ -67,24 +67,23 @@ body {
 #sidebar.collapsed .tab span.label { opacity:0; width:0; overflow:hidden; }
 
 #sidebar.collapsed .tab {
-    justify-content:center; /* center icon when collapsed */
-    padding:12px 0; /* remove horizontal padding for collapsed state */
+    justify-content:center;
+    padding:12px 0;
 }
 
 /* ===== MAIN CONTENT ===== */
 #main {
     flex:1;
-    padding:40px 40px 40px 10px; /* reduced left padding */
-    margin-left:250px; /* expanded sidebar width */
+    padding:40px; /* uniform padding all around */
+    margin-left:250px; /* match expanded sidebar width */
     margin-right:100px; /* space for profile circle */
     display:flex;
     flex-direction:column;
     gap:25px;
-    transition: margin-left 0.3s ease, padding-left 0.3s ease;
+    transition: margin-left 0.3s ease;
 }
 #sidebar.collapsed ~ #main { 
-    margin-left:70px; 
-    padding-left:40px; /* keep some left padding when collapsed */
+    margin-left:70px; /* match collapsed sidebar width */
 }
 
 .content-card { 
