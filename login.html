@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login</title>
 <link rel="icon" href="favicon.ico">
+
 <style>
 body {
   margin:0;
@@ -16,54 +17,52 @@ body {
   font-family:system-ui,sans-serif;
   color:#e6f0ff;
 }
+
 .card {
   width:95vw;
   max-width:420px;
   padding:40px;
-  background:rgba(12,25,55,.75);
+  background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
   border-radius:20px;
   box-shadow:0 20px 60px rgba(0,0,0,.4);
   text-align:center;
 }
+
 h2 { margin-bottom:20px; }
+
 input, button {
   width:100%;
-  padding:15px 15px;
+  padding:15px;
   margin-bottom:12px;
   border-radius:14px;
-  border:2px solid rgba(255,255,255,.2);
+  border:none;
   font-size:1rem;
-  box-sizing:border-box;
-  color:white;
-  background:rgba(255,255,255,.08);
-  position:relative;
 }
+
+input { background:rgba(255,255,255,.08); color:white; }
 button { font-weight:600; cursor:pointer; }
+
 .primary { background:#4da3ff; color:black; }
 .alt { background:rgba(255,255,255,.12); color:white; }
 .error { color:#ff6b6b; min-height:1.2em; }
+
 #createAccountText {
   cursor:pointer;
   color:#4da3ff;
   margin-top:12px;
   text-decoration:underline;
-  user-select:none;
 }
 
-/* Password toggle */
-.password-wrapper { position:relative; }
-.eye { position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:#aaa; font-size:0.9rem; }
-
-/* Signup popup */
+/* Popup */
 .overlay {
-  position:fixed; inset:0;
+  position:fixed;
+  inset:0;
   background:rgba(0,0,0,.4);
   backdrop-filter:blur(6px);
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:1000;
 }
 .popup {
   width:90vw;
@@ -72,44 +71,38 @@ button { font-weight:600; cursor:pointer; }
   padding:30px;
   border-radius:20px;
   text-align:center;
-  position:relative;
 }
 .close { float:right; cursor:pointer; }
-.countdown { margin-top:15px; font-size:0.9rem; opacity:.7; cursor:pointer; }
+.checkmark { color:#4da3ff; margin-left:6px; }
+.xmark { color:#ff6b6b; margin-left:6px; }
 </style>
 </head>
 <body>
 
 <div class="card">
   <h2>Login</h2>
-  <input id="emailInput" placeholder="Email">
-  <div class="password-wrapper">
-    <input id="passwordInput" type="password" placeholder="Password">
-    <span class="eye" id="togglePass">Show</span>
-  </div>
-  <div class="error" id="loginError"></div>
 
-  <button class="primary" onclick="login()">Login</button>
+  <input id="emailPhone" placeholder="Email / Phone">
+  <input id="password" type="password" placeholder="Password (for email)">
+  <div class="error" id="error"></div>
+
+  <button class="primary" onclick="emailOrPhoneLogin()">Login</button>
   <button class="alt" onclick="googleLogin()">Continue with Google</button>
 
   <p id="createAccountText" onclick="openSignup()">Create Account</p>
 </div>
 
-<!-- SIGNUP POPUP -->
+<!-- SIGN UP POPUP -->
 <div class="overlay" id="signupOverlay">
   <div class="popup">
     <span class="close" onclick="closeSignup()">✕</span>
-    <h2>Sign Up</h2>
+    <h2 id="signupTitle">Sign Up</h2>
 
     <div id="signupForm">
-      <input id="signupEmail" placeholder="Email">
-      <input id="signupUsername" placeholder="Username">
-      <div class="error" id="usernameCheck"></div>
-      <div class="password-wrapper">
-        <input id="signupPassword" type="password" placeholder="Password (min 8 chars)">
-        <span class="eye" id="signupTogglePass">Show</span>
-      </div>
-      <input id="signupConfirm" type="password" placeholder="Confirm Password" style="display:none;">
+      <input id="suEmailPhone" placeholder="Email / Phone">
+      <input id="suUsername" placeholder="Username">
+      <span id="usernameCheck"></span>
+      <input id="suPassword" type="password" placeholder="Password (min 8 chars)">
       <div class="error" id="signupError"></div>
       <button class="primary" onclick="signup()">Sign Up</button>
     </div>
@@ -117,12 +110,12 @@ button { font-weight:600; cursor:pointer; }
     <div id="verifyBox" style="display:none;">
       <p><strong>Verify Email</strong></p>
       <p>Check your email: <span id="verifyEmail"></span></p>
-      <p style="opacity:.7">Don't see it? Check spam/trash folder.</p>
-      <p class="countdown" id="resendCountdown">Resend email in 30s</p>
+      <p style="opacity:.7">Don't see it? Check spam or trash.</p>
     </div>
   </div>
 </div>
 
+<!-- Firebase CDN -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
@@ -153,107 +146,86 @@ const signupOverlay = document.getElementById("signupOverlay");
 const signupForm = document.getElementById("signupForm");
 const verifyBox = document.getElementById("verifyBox");
 const verifyEmail = document.getElementById("verifyEmail");
-
-const emailInput = document.getElementById("emailInput");
-const passwordInput = document.getElementById("passwordInput");
-const loginError = document.getElementById("loginError");
-
-const signupEmail = document.getElementById("signupEmail");
-const signupUsername = document.getElementById("signupUsername");
+const usernameInput = document.getElementById("suUsername");
 const usernameCheck = document.getElementById("usernameCheck");
-const signupPassword = document.getElementById("signupPassword");
-const signupConfirm = document.getElementById("signupConfirm");
-const signupError = document.getElementById("signupError");
 
-const togglePass = document.getElementById("togglePass");
-const signupTogglePass = document.getElementById("signupTogglePass");
-
-/* Toggle password */
-togglePass.addEventListener("click", ()=>passwordInput.type = passwordInput.type==="password"?"text":"password");
-signupTogglePass.addEventListener("click", ()=>signupPassword.type = signupPassword.type==="password"?"text":"password");
-
-/* Show confirm password dynamically */
-signupPassword.addEventListener("input", ()=>signupConfirm.style.display = signupPassword.value?"block":"none");
-
-/* Username check */
-signupUsername.addEventListener("input", async ()=>{
-  const val = signupUsername.value.trim();
-  if(!val){ usernameCheck.textContent=""; return; }
-  const snap = await getDoc(doc(db,"usernames",val));
-  usernameCheck.textContent = snap.exists() ? "Username taken" : "Username available";
+/* Realtime username check */
+usernameInput.addEventListener("input", async () => {
+  const val = usernameInput.value.trim();
+  if (!val) { usernameCheck.textContent=""; return; }
+  const usernameRef = doc(db, "usernames", val);
+  const snap = await getDoc(usernameRef);
+  usernameCheck.innerHTML = snap.exists() ? '<span class="xmark">❌</span>' : '<span class="checkmark">✅</span>';
 });
 
-/* Signup */
-let resendTimer;
-function startResendCountdown(){
-  let countdown = 30;
-  const el = document.getElementById("resendCountdown");
-  el.textContent = `Resend email in ${countdown}s`;
-  el.style.pointerEvents = "none";
-  resendTimer = setInterval(()=>{
-    countdown--;
-    if(countdown<=0){
-      clearInterval(resendTimer);
-      el.textContent="Resend Email";
-      el.style.pointerEvents="auto";
-    } else el.textContent=`Resend email in ${countdown}s`;
-  },1000);
-}
+/* Email/Phone login */
+window.emailOrPhoneLogin = async () => {
+  const input = document.getElementById("emailPhone").value.trim();
+  const pass = document.getElementById("password").value;
+  document.getElementById("error").textContent = "";
 
-async function signup(){
-  signupError.textContent="";
-  const email = signupEmail.value.trim();
-  const username = signupUsername.value.trim();
-  const pass = signupPassword.value;
-  const confirm = signupConfirm.value;
-  if(!email || !username || !pass || !confirm){ signupError.textContent="Fill all fields"; return; }
-  if(pass.length<8){ signupError.textContent="Password must be 8+ chars"; return; }
-  if(pass!==confirm){ signupError.textContent="Passwords do not match"; return; }
-
-  try{
-    const snap = await getDoc(doc(db,"usernames",username));
-    if(snap.exists()){ signupError.textContent="Username taken"; return; }
-
-    const cred = await createUserWithEmailAndPassword(auth,email,pass);
-    await setDoc(doc(db,"usernames",username),{uid:cred.user.uid,email});
-    await sendEmailVerification(cred.user);
-
-    signupForm.style.display="none";
-    verifyBox.style.display="block";
-    verifyEmail.textContent=email;
-    startResendCountdown();
-
-    const checkVerified = setInterval(async ()=>{
-      await cred.user.reload();
-      if(cred.user.emailVerified){
-        clearInterval(checkVerified);
-        location.replace("dashboard.html");
-      }
-    },3000);
-
-  }catch(e){ signupError.textContent=e.message; console.error(e);}
-}
-
-/* Login */
-async function login(){
-  loginError.textContent="";
-  try{
-    await signInWithEmailAndPassword(auth,emailInput.value,passwordInput.value);
-    location.replace("dashboard.html");
-  }catch(e){ loginError.textContent="Incorrect email or password"; console.error(e);}
-}
+  try {
+    if(input.includes("@")) {
+      await signInWithEmailAndPassword(auth, input, pass);
+      location.replace("dashboard.html");
+    } else {
+      document.getElementById("error").textContent="Phone login not implemented yet";
+    }
+  } catch(e) {
+    console.error(e);
+    document.getElementById("error").textContent=e.message;
+  }
+};
 
 /* Google login */
-async function googleLogin(){
-  try{
-    await signInWithPopup(auth,provider);
+window.googleLogin = async () => {
+  try {
+    await signInWithPopup(auth, provider);
     location.replace("dashboard.html");
-  }catch(e){ loginError.textContent=e.message; console.error(e);}
-}
+  } catch(e) {
+    console.error(e);
+    document.getElementById("error").textContent=e.message;
+  }
+};
 
-/* Popups */
-window.openSignup=()=>signupOverlay.style.display="flex";
-window.closeSignup=()=>signupOverlay.style.display="none";
+/* Sign Up popup */
+window.openSignup = () => signupOverlay.style.display="flex";
+window.closeSignup = () => signupOverlay.style.display="none";
+
+/* Sign Up flow */
+window.signup = async () => {
+  const input = document.getElementById("suEmailPhone").value.trim();
+  const username = document.getElementById("suUsername").value.trim();
+  const pass = document.getElementById("suPassword").value;
+  const signupError = document.getElementById("signupError");
+
+  signupError.textContent = "";
+
+  if (!input || !username || !pass) { signupError.textContent="Fill all fields"; return; }
+  if (pass.length<8) { signupError.textContent="Password must be 8+ chars"; return; }
+
+  try {
+    // Username check
+    const usernameRef = doc(db, "usernames", username);
+    const snap = await getDoc(usernameRef);
+    if(snap.exists()) { signupError.textContent="Username taken"; return; }
+
+    if(input.includes("@")) {
+      const cred = await createUserWithEmailAndPassword(auth, input, pass);
+      await setDoc(usernameRef, {uid: cred.user.uid});
+      await sendEmailVerification(cred.user);
+      signupForm.style.display="none";
+      verifyBox.style.display="block";
+      verifyEmail.textContent=input;
+    } else {
+      signupError.textContent="Phone signup not implemented yet";
+    }
+  } catch(e) {
+    console.error(e);
+    signupError.textContent=e.message;
+  }
+};
 </script>
+
 </body>
 </html>
