@@ -17,29 +17,95 @@ body {
   font-family:system-ui,sans-serif;
   color:#e6f0ff;
 }
-.box { text-align:center; }
+
+.card {
+  width:95vw;
+  max-width:500px;
+  padding:40px;
+  background:rgba(12,25,55,.65);
+  backdrop-filter:blur(16px);
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  text-align:center;
+}
+
+h2 { margin-bottom:30px; }
+
 button {
-  margin-top:24px;
-  padding:14px 28px;
+  width:80%;
+  padding:15px;
+  margin:12px 0;
   border-radius:14px;
   border:none;
+  font-size:1rem;
   font-weight:600;
-  background:#ff6b6b;
   cursor:pointer;
 }
+
+.primary { background:#4da3ff; color:black; }
+.danger { background:#ff4d4d; color:black; }
+
+/* Remove account popup */
+.overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(6px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+}
+.popup {
+  width:90vw;
+  max-width:400px;
+  background:#0c1937;
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+  position:relative;
+}
+.close { float:right; cursor:pointer; }
+input { 
+  width:90%;
+  padding:12px;
+  margin:12px 0;
+  border-radius:12px;
+  border:2px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.08);
+  color:white;
+  font-size:1rem;
+}
+.error { color:#ff6b6b; min-height:1.2em; }
 </style>
 </head>
-
 <body>
-<div class="box">
-  <h1 id="welcome">Loading...</h1>
-  <button onclick="logout()">Logout</button>
+
+<div class="card">
+  <h2 id="welcomeText">Welcome!</h2>
+  <button class="primary" id="logoutBtn">Logout</button>
+  <button class="danger" id="removeBtn">Remove Account</button>
+</div>
+
+<!-- Remove Account Popup -->
+<div class="overlay" id="removeOverlay">
+  <div class="popup">
+    <span class="close" onclick="closeRemove()">✕</span>
+    <h2>Confirm Account Removal</h2>
+    <p>Enter your password to confirm:</p>
+    <input type="password" id="removePassword" placeholder="Password">
+    <div class="error" id="removeError"></div>
+    <button class="danger" onclick="removeAccount()">Yes, Remove Account</button>
+  </div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+import { getAuth, signOut, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
+/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
@@ -50,23 +116,64 @@ const firebaseConfig = {
   measurementId: "G-1MMT3C4M7K"
 };
 
+/* Init Firebase */
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 const auth = getAuth(app);
-setPersistence(auth,browserSessionPersistence);
+const db = getFirestore(app);
 
-/* Protect dashboard */
-onAuthStateChanged(auth, user => {
-  if(!user) window.location.replace("index.html");
-  else {
-    const name = user.displayName ? user.displayName.split(" ")[0] : user.email.split("@")[0];
-    welcome.textContent = `Welcome, ${name}`;
+/* Elements */
+const welcomeText = document.getElementById("welcomeText");
+const logoutBtn = document.getElementById("logoutBtn");
+const removeBtn = document.getElementById("removeBtn");
+const removeOverlay = document.getElementById("removeOverlay");
+const removePassword = document.getElementById("removePassword");
+const removeError = document.getElementById("removeError");
+
+/* Check user logged in */
+auth.onAuthStateChanged(async user=>{
+  if(!user){
+    location.replace("login.html");
+  } else {
+    let displayName = user.displayName || user.email;
+    // Check Firestore for username
+    const snap = await getDoc(doc(db,"usernames",user.uid));
+    if(snap.exists()) displayName = snap.id || displayName;
+    welcomeText.textContent = `Welcome, ${displayName}`;
   }
 });
 
 /* Logout */
-window.logout = () => {
-  signOut(auth).then(()=> window.location.replace("index.html"));
+logoutBtn.onclick=async()=>{
+  await signOut(auth);
+  location.replace("login.html");
 };
+
+/* Remove Account */
+removeBtn.onclick=()=>removeOverlay.style.display="flex";
+window.closeRemove=()=>removeOverlay.style.display="none";
+
+async function removeAccount(){
+  removeError.textContent="";
+  const password = removePassword.value;
+  if(!password){ removeError.textContent="Enter password"; return; }
+
+  const user = auth.currentUser;
+  const credential = EmailAuthProvider.credential(user.email,password);
+
+  try{
+    // Re-authenticate
+    await reauthenticateWithCredential(user,credential);
+    // Delete Firestore username
+    await deleteDoc(doc(db,"usernames",user.uid));
+    // Delete Firebase user
+    await user.delete();
+    location.replace("login.html");
+  } catch(e){
+    console.error(e);
+    removeError.textContent=e.message;
+  }
+}
 </script>
 </body>
 </html>
