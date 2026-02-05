@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Loading...</title>
 <link rel="icon" href="favicon.ico">
 
@@ -16,16 +17,11 @@ body {
     justify-content: center;
     align-items: center;
     background: radial-gradient(circle at top, #0b1e3d, #050b1a);
-    overflow: hidden;
-}
-
-.loader-wrapper {
-    transition: opacity 0.5s ease;
 }
 
 .loader {
-    width: min(22vw, 90px);
-    height: min(22vw, 90px);
+    width: min(26vw, 96px);
+    height: min(26vw, 96px);
     border: 6px solid rgba(100,150,255,0.2);
     border-top: 6px solid #4da3ff;
     border-radius: 50%;
@@ -36,24 +32,18 @@ body {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
-
-.fade-out {
-    opacity: 0;
-}
 </style>
 </head>
 
 <body>
-<div class="loader-wrapper" id="loader">
-    <div class="loader"></div>
-</div>
+<div class="loader"></div>
 
 <script>
+/* mark that user passed through loader */
+sessionStorage.setItem("fromLoader", "true");
+
 setTimeout(() => {
-    document.getElementById("loader").classList.add("fade-out");
-    setTimeout(() => {
-        window.location.href = "login.html";
-    }, 500);
+    window.location.href = "login.html";
 }, 1700);
 </script>
 </body>
