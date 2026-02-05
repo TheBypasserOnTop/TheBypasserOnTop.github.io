@@ -47,6 +47,13 @@ button { font-weight:600; cursor:pointer; }
 .alt { background:rgba(255,255,255,.12); color:white; }
 .error { color:#ff6b6b; min-height:1.2em; }
 
+#createAccountText {
+  cursor:pointer;
+  color:#4da3ff;
+  margin-top:12px;
+  text-decoration:underline;
+}
+
 /* Popup */
 .overlay {
   position:fixed;
@@ -66,9 +73,8 @@ button { font-weight:600; cursor:pointer; }
   text-align:center;
 }
 .close { float:right; cursor:pointer; }
-
-/* Phone verification container */
-#recaptcha-container { margin-bottom:12px; }
+.checkmark { color:#4da3ff; margin-left:6px; }
+.xmark { color:#ff6b6b; margin-left:6px; }
 </style>
 </head>
 <body>
@@ -76,19 +82,14 @@ button { font-weight:600; cursor:pointer; }
 <div class="card">
   <h2>Login</h2>
 
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+  <input id="emailPhone" placeholder="Email / Phone">
+  <input id="password" type="password" placeholder="Password (for email)">
   <div class="error" id="error"></div>
 
-  <button class="primary" onclick="emailLogin()">Login</button>
+  <button class="primary" onclick="emailOrPhoneLogin()">Login</button>
   <button class="alt" onclick="googleLogin()">Continue with Google</button>
 
-  <hr style="border-color:rgba(255,255,255,.2); margin:15px 0;">
-  <input id="phoneNumber" placeholder="Phone number (+1234567890)">
-  <div id="recaptcha-container"></div>
-  <button class="alt" onclick="phoneLogin()">Login with Phone</button>
-
-  <button class="alt" onclick="openSignup()">Create Account</button>
+  <p id="createAccountText" onclick="openSignup()">Create Account</p>
 </div>
 
 <!-- SIGN UP POPUP -->
@@ -98,11 +99,12 @@ button { font-weight:600; cursor:pointer; }
     <h2 id="signupTitle">Sign Up</h2>
 
     <div id="signupForm">
-      <input id="suEmail" placeholder="Email">
+      <input id="suEmailPhone" placeholder="Email / Phone">
       <input id="suUsername" placeholder="Username">
+      <span id="usernameCheck"></span>
       <input id="suPassword" type="password" placeholder="Password (min 8 chars)">
       <div class="error" id="signupError"></div>
-      <button class="primary" onclick="signup()">Create Account</button>
+      <button class="primary" onclick="signup()">Sign Up</button>
     </div>
 
     <div id="verifyBox" style="display:none;">
@@ -129,6 +131,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
@@ -145,34 +148,54 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 setPersistence(auth, browserSessionPersistence);
 
+/* Elements */
 const signupOverlay = document.getElementById("signupOverlay");
 const signupForm = document.getElementById("signupForm");
 const verifyBox = document.getElementById("verifyBox");
 const verifyEmail = document.getElementById("verifyEmail");
+const usernameInput = document.getElementById("suUsername");
+const usernameCheck = document.getElementById("usernameCheck");
 
-/* Email login */
-window.emailLogin = () => {
-  signInWithEmailAndPassword(auth, email.value, password.value)
-    .then(() => location.replace("dashboard.html"))
-    .catch(() => error.textContent = "Incorrect email or password");
+/* Realtime username check */
+usernameInput.addEventListener("input", async () => {
+  const val = usernameInput.value.trim();
+  if (!val) { usernameCheck.textContent=""; return; }
+  const usernameRef = doc(db, "usernames", val);
+  const snap = await getDoc(usernameRef);
+  if (snap.exists()) usernameCheck.innerHTML = '<span class="xmark">❌</span>';
+  else usernameCheck.innerHTML = '<span class="checkmark">✅</span>';
+});
+
+/* Email or Phone login */
+window.emailOrPhoneLogin = () => {
+  const input = emailPhone.value.trim();
+  const pass = password.value;
+  error.textContent = "";
+
+  if (input.includes("@")) {
+    // Email login
+    signInWithEmailAndPassword(auth, input, pass)
+      .then(()=> location.replace("dashboard.html"))
+      .catch(()=> error.textContent="Incorrect email or password");
+  } else if (input.startsWith("+")) {
+    // Phone login
+    window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {size:'invisible'}, auth);
+    signInWithPhoneNumber(auth, input, window.recaptchaVerifier)
+      .then(confirmationResult => {
+        const code = prompt("Enter the verification code sent to your phone");
+        return confirmationResult.confirm(code);
+      })
+      .then(()=> location.replace("dashboard.html"))
+      .catch(e => error.textContent = e.message);
+  } else {
+    error.textContent = "Invalid email or phone";
+  }
 };
 
 /* Google login */
 window.googleLogin = () => {
   signInWithPopup(auth, provider)
-    .then(() => location.replace("dashboard.html"))
-    .catch(e => error.textContent = e.message);
-};
-
-/* Phone login with reCAPTCHA */
-window.phoneLogin = () => {
-  window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {size:'invisible'}, auth);
-  signInWithPhoneNumber(auth, phoneNumber.value, window.recaptchaVerifier)
-    .then(confirmationResult => {
-      const code = prompt("Enter the verification code sent to your phone");
-      return confirmationResult.confirm(code);
-    })
-    .then(() => location.replace("dashboard.html"))
+    .then(()=> location.replace("dashboard.html"))
     .catch(e => error.textContent = e.message);
 };
 
@@ -180,21 +203,43 @@ window.phoneLogin = () => {
 window.openSignup = () => signupOverlay.style.display="flex";
 window.closeSignup = () => signupOverlay.style.display="none";
 
+/* Sign Up flow */
 window.signup = async () => {
-  signupError.textContent = "";
+  signupError.textContent="";
+  const input = suEmailPhone.value.trim();
+  const pass = suPassword.value;
+  const username = suUsername.value.trim();
 
-  if (suPassword.value.length < 8) return signupError.textContent="Password must be at least 8 chars";
+  if (!username || !input || !pass) return signupError.textContent="Fill all fields";
+  if (pass.length < 8) return signupError.textContent="Password must be 8+ chars";
 
-  const usernameRef = doc(db,"usernames",suUsername.value);
-  if ((await getDoc(usernameRef)).exists()) return signupError.textContent="Username already taken";
+  // Username check
+  const usernameRef = doc(db,"usernames",username);
+  if ((await getDoc(usernameRef)).exists()) return signupError.textContent="Username taken";
 
-  const cred = await createUserWithEmailAndPassword(auth, suEmail.value, suPassword.value);
-  await setDoc(usernameRef, {uid: cred.user.uid});
-  await sendEmailVerification(cred.user);
-
-  signupForm.style.display = "none";
-  verifyBox.style.display = "block";
-  verifyEmail.textContent = suEmail.value;
+  if (input.includes("@")) {
+    // Email signup
+    const cred = await createUserWithEmailAndPassword(auth, input, pass);
+    await setDoc(usernameRef, {uid: cred.user.uid});
+    await sendEmailVerification(cred.user);
+    signupForm.style.display="none";
+    verifyBox.style.display="block";
+    verifyEmail.textContent=input;
+  } else if (input.startsWith("+")) {
+    // Phone signup
+    window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {size:'invisible'}, auth);
+    signInWithPhoneNumber(auth, input, window.recaptchaVerifier)
+      .then(async confirmationResult => {
+        const code = prompt("Enter verification code sent to phone");
+        const cred = await confirmationResult.confirm(code);
+        await setDoc(usernameRef, {uid: cred.user.uid});
+        alert("Phone verified! You can now log in.");
+        closeSignup();
+      })
+      .catch(e=> signupError.textContent=e.message);
+  } else {
+    signupError.textContent="Invalid email or phone";
+  }
 };
 </script>
 
