@@ -8,62 +8,109 @@
 
 <style>
 body {
-    margin:0;
-    min-height:100vh;
-    background:radial-gradient(circle at top,#0b1e3d,#050b1a);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-family:system-ui,sans-serif;
-    color:#e6f0ff;
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:system-ui,sans-serif;
+  color:#e6f0ff;
 }
 
 .card {
-    width:95vw;
-    max-width:420px;
-    padding:40px;
-    background:rgba(12,25,55,.65);
-    backdrop-filter:blur(16px);
-    border-radius:20px;
-    box-shadow:0 20px 60px rgba(0,0,0,.4);
+  width:95vw;
+  max-width:420px;
+  padding:40px;
+  background:rgba(12,25,55,.65);
+  backdrop-filter:blur(16px);
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  text-align:center;
 }
 
-h2 {
-    text-align:center;
-    margin-bottom:24px;
-    font-size:1.8rem;
-}
+h2 { margin-bottom:20px; }
 
 input, button {
-    width:100%;
-    padding:16px;
-    margin-bottom:14px;
-    border-radius:14px;
-    border:none;
-    font-size:1rem;
+  width:100%;
+  padding:15px;
+  margin-bottom:12px;
+  border-radius:14px;
+  border:none;
+  font-size:1rem;
 }
 
 input { background:rgba(255,255,255,.08); color:white; }
-
 button { font-weight:600; cursor:pointer; }
 
 .primary { background:#4da3ff; color:black; }
-.alt { background:rgba(255,255,255,.1); color:white; }
+.alt { background:rgba(255,255,255,.12); color:white; }
+.error { color:#ff6b6b; min-height:1.2em; }
 
-.error { color:#ff6b6b; text-align:center; min-height:1.2em; }
+/* Popup */
+.overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(6px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+.popup {
+  width:90vw;
+  max-width:400px;
+  background:#0c1937;
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+}
+.close { float:right; cursor:pointer; }
+
+/* Phone verification container */
+#recaptcha-container { margin-bottom:12px; }
 </style>
 </head>
-
 <body>
+
 <div class="card">
-    <h2>Login</h2>
+  <h2>Login</h2>
 
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <div class="error" id="error"></div>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <div class="error" id="error"></div>
 
-    <button class="primary" onclick="emailLogin()">Login</button>
-    <button class="alt" onclick="googleLogin()">Continue with Google</button>
+  <button class="primary" onclick="emailLogin()">Login</button>
+  <button class="alt" onclick="googleLogin()">Continue with Google</button>
+
+  <hr style="border-color:rgba(255,255,255,.2); margin:15px 0;">
+  <input id="phoneNumber" placeholder="Phone number (+1234567890)">
+  <div id="recaptcha-container"></div>
+  <button class="alt" onclick="phoneLogin()">Login with Phone</button>
+
+  <button class="alt" onclick="openSignup()">Create Account</button>
+</div>
+
+<!-- SIGN UP POPUP -->
+<div class="overlay" id="signupOverlay">
+  <div class="popup">
+    <span class="close" onclick="closeSignup()">✕</span>
+    <h2 id="signupTitle">Sign Up</h2>
+
+    <div id="signupForm">
+      <input id="suEmail" placeholder="Email">
+      <input id="suUsername" placeholder="Username">
+      <input id="suPassword" type="password" placeholder="Password (min 8 chars)">
+      <div class="error" id="signupError"></div>
+      <button class="primary" onclick="signup()">Create Account</button>
+    </div>
+
+    <div id="verifyBox" style="display:none;">
+      <p><strong>Verify Email</strong></p>
+      <p>Check your email: <span id="verifyEmail"></span></p>
+      <p style="opacity:.7">Don't see it? Check spam or trash.</p>
+    </div>
+  </div>
 </div>
 
 <script type="module">
@@ -73,38 +120,83 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
   setPersistence,
   browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
   projectId: "login-34954",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41"
+  storageBucket: "login-34954.firebasestorage.app",
+  messagingSenderId: "422184727508",
+  appId: "1:422184727508:web:cef39fc913d526febe9c41",
+  measurementId: "G-1MMT3C4M7K"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
-
-/* Session-only persistence: require login every time */
 setPersistence(auth, browserSessionPersistence);
 
-function goDashboard() { window.location.replace("dashboard.html"); }
+const signupOverlay = document.getElementById("signupOverlay");
+const signupForm = document.getElementById("signupForm");
+const verifyBox = document.getElementById("verifyBox");
+const verifyEmail = document.getElementById("verifyEmail");
 
-window.googleLogin = () => {
-    signInWithPopup(auth, provider)
-        .then(goDashboard)
-        .catch(e => error.textContent = e.message);
+/* Email login */
+window.emailLogin = () => {
+  signInWithEmailAndPassword(auth, email.value, password.value)
+    .then(() => location.replace("dashboard.html"))
+    .catch(() => error.textContent = "Incorrect email or password");
 };
 
-window.emailLogin = () => {
-    signInWithEmailAndPassword(auth, email.value, password.value)
-        .then(goDashboard)
-        .catch(() => error.textContent = "Incorrect email or password");
+/* Google login */
+window.googleLogin = () => {
+  signInWithPopup(auth, provider)
+    .then(() => location.replace("dashboard.html"))
+    .catch(e => error.textContent = e.message);
+};
+
+/* Phone login with reCAPTCHA */
+window.phoneLogin = () => {
+  window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {size:'invisible'}, auth);
+  signInWithPhoneNumber(auth, phoneNumber.value, window.recaptchaVerifier)
+    .then(confirmationResult => {
+      const code = prompt("Enter the verification code sent to your phone");
+      return confirmationResult.confirm(code);
+    })
+    .then(() => location.replace("dashboard.html"))
+    .catch(e => error.textContent = e.message);
+};
+
+/* Sign Up popup */
+window.openSignup = () => signupOverlay.style.display="flex";
+window.closeSignup = () => signupOverlay.style.display="none";
+
+window.signup = async () => {
+  signupError.textContent = "";
+
+  if (suPassword.value.length < 8) return signupError.textContent="Password must be at least 8 chars";
+
+  const usernameRef = doc(db,"usernames",suUsername.value);
+  if ((await getDoc(usernameRef)).exists()) return signupError.textContent="Username already taken";
+
+  const cred = await createUserWithEmailAndPassword(auth, suEmail.value, suPassword.value);
+  await setDoc(usernameRef, {uid: cred.user.uid});
+  await sendEmailVerification(cred.user);
+
+  signupForm.style.display = "none";
+  verifyBox.style.display = "block";
+  verifyEmail.textContent = suEmail.value;
 };
 </script>
+
 </body>
 </html>
