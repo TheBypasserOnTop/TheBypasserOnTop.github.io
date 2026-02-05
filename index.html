@@ -7,15 +7,15 @@
 
 <style>
 html, body {
-    height: 100%;
     margin: 0;
+    height: 100%;
 }
 
 body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: radial-gradient(circle at top, #0a1a3a, #040b1c);
+    background: radial-gradient(circle at top, #0b1e3d, #050b1a);
     overflow: hidden;
 }
 
@@ -24,8 +24,8 @@ body {
 }
 
 .loader {
-    width: min(20vw, 90px);
-    height: min(20vw, 90px);
+    width: min(22vw, 90px);
+    height: min(22vw, 90px);
     border: 6px solid rgba(100,150,255,0.2);
     border-top: 6px solid #4da3ff;
     border-radius: 50%;
@@ -51,7 +51,6 @@ body {
 <script>
 setTimeout(() => {
     document.getElementById("loader").classList.add("fade-out");
-
     setTimeout(() => {
         window.location.href = "login.html";
     }, 500);
