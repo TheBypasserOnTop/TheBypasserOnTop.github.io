@@ -9,19 +9,19 @@
 <style>
 html, body { margin:0; height:100%; }
 body {
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background: radial-gradient(circle at top, #0b1e3d, #050b1a);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: radial-gradient(circle at top, #0b1e3d, #050b1a);
 }
 .loader {
-    width:min(26vw,96px);
-    height:min(26vw,96px);
-    border:6px solid rgba(100,150,255,0.2);
-    border-top:6px solid #4da3ff;
-    border-radius:50%;
-    animation:spin 1s linear infinite;
-    box-shadow:0 0 30px rgba(77,163,255,0.6);
+  width:min(26vw,96px);
+  height:min(26vw,96px);
+  border:6px solid rgba(100,150,255,0.2);
+  border-top:6px solid #4da3ff;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  box-shadow:0 0 30px rgba(77,163,255,0.6);
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
@@ -33,26 +33,28 @@ body {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
   projectId: "login-34954",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41"
+  storageBucket: "login-34954.firebasestorage.app",
+  messagingSenderId: "422184727508",
+  appId: "1:422184727508:web:cef39fc913d526febe9c41",
+  measurementId: "G-1MMT3C4M7K"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-/* Always show loader for 1.7s, then route based on auth */
+/* Loader duration 1.7s */
 onAuthStateChanged(auth, user => {
-    setTimeout(() => {
-        if (user) {
-            window.location.replace("dashboard.html");
-        } else {
-            window.location.replace("login.html");
-        }
-    }, 1700);
+  setTimeout(() => {
+    if (user) {
+      window.location.replace("dashboard.html");
+    } else {
+      window.location.replace("login.html");
+    }
+  }, 1700);
 });
 </script>
 </body>
