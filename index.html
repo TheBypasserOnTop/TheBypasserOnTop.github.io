@@ -7,34 +7,25 @@
 <link rel="icon" href="favicon.ico">
 
 <style>
-html, body {
-    margin: 0;
-    height: 100%;
-}
-
+html, body { margin:0; height:100%; }
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display:flex;
+    justify-content:center;
+    align-items:center;
     background: radial-gradient(circle at top, #0b1e3d, #050b1a);
 }
-
 .loader {
-    width: min(26vw, 96px);
-    height: min(26vw, 96px);
-    border: 6px solid rgba(100,150,255,0.2);
-    border-top: 6px solid #4da3ff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    box-shadow: 0 0 30px rgba(77,163,255,0.6);
+    width:min(26vw,96px);
+    height:min(26vw,96px);
+    border:6px solid rgba(100,150,255,0.2);
+    border-top:6px solid #4da3ff;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    box-shadow:0 0 30px rgba(77,163,255,0.6);
 }
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
-
 <body>
 <div class="loader"></div>
 
@@ -53,7 +44,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-/* Wait for Firebase to initialize then redirect after loader */
+/* Always show loader for 1.7s, then route based on auth */
 onAuthStateChanged(auth, user => {
     setTimeout(() => {
         if (user) {
