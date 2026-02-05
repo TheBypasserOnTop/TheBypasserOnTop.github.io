@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<link rel="icon" href="favicon.ico">
+
+<style>
+body {
+    margin:0;
+    min-height:100vh;
+    background:radial-gradient(circle at top,#0b1e3d,#050b1a);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:system-ui,sans-serif;
+    color:#e6f0ff;
+    text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<h1 id="welcome">Loading...</h1>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain: "login-34954.firebaseapp.com",
+  projectId: "login-34954"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, user => {
+    if (!user) {
+        window.location.href = "index.html";
+    } else {
+        const name = user.displayName
+            ? user.displayName.split(" ")[0]
+            : user.email.split("@")[0];
+        welcome.textContent = `Welcome, ${name}`;
+    }
+});
+</script>
+
+</body>
+</html>
