@@ -162,8 +162,7 @@ usernameInput.addEventListener("input", async () => {
   if (!val) { usernameCheck.textContent=""; return; }
   const usernameRef = doc(db, "usernames", val);
   const snap = await getDoc(usernameRef);
-  if (snap.exists()) usernameCheck.innerHTML = '<span class="xmark">❌</span>';
-  else usernameCheck.innerHTML = '<span class="checkmark">✅</span>';
+  usernameCheck.innerHTML = snap.exists() ? '<span class="xmark">❌</span>' : '<span class="checkmark">✅</span>';
 });
 
 /* Email or Phone login */
@@ -221,7 +220,7 @@ window.signup = async () => {
     // Email signup
     const cred = await createUserWithEmailAndPassword(auth, input, pass);
     await setDoc(usernameRef, {uid: cred.user.uid});
-    await sendEmailVerification(cred.user);
+    await sendEmailVerification(cred.user); // ✅ This actually sends email
     signupForm.style.display="none";
     verifyBox.style.display="block";
     verifyEmail.textContent=input;
