@@ -7,78 +7,64 @@
 <link rel="icon" href="favicon.ico">
 
 <style>
-:root {
-    --bg1:#050b1a;
-    --bg2:#0b1e3d;
-    --card:rgba(12,25,55,0.65);
-    --accent:#4da3ff;
-    --text:#e6f0ff;
-}
-
-* { box-sizing: border-box; }
-
 body {
     margin:0;
     min-height:100vh;
-    background:radial-gradient(circle at top,var(--bg2),var(--bg1));
+    background:radial-gradient(circle at top,#0b1e3d,#050b1a);
     display:flex;
     justify-content:center;
     align-items:center;
     font-family:system-ui,sans-serif;
-    color:var(--text);
+    color:#e6f0ff;
 }
 
 .card {
     width:95vw;
-    max-width:400px;
-    padding:36px;
-    background:var(--card);
+    max-width:420px;
+    padding:40px;
+    background:rgba(12,25,55,.65);
     backdrop-filter:blur(16px);
-    border-radius:18px;
+    border-radius:20px;
     box-shadow:0 20px 60px rgba(0,0,0,.4);
 }
 
 h2 {
-    margin:0 0 24px;
+    margin-bottom:24px;
     text-align:center;
-    font-size:1.6rem;
+    font-size:1.8rem;
 }
 
-input {
+input, button {
     width:100%;
     padding:16px;
     margin-bottom:14px;
-    border-radius:12px;
+    border-radius:14px;
     border:none;
-    background:rgba(255,255,255,.08);
-    color:var(--text);
     font-size:1rem;
 }
 
+input {
+    background:rgba(255,255,255,.08);
+    color:white;
+}
+
 button {
-    width:100%;
-    padding:16px;
-    border-radius:12px;
-    border:none;
-    font-size:1rem;
     font-weight:600;
     cursor:pointer;
 }
 
 .primary {
-    background:var(--accent);
-    color:#000;
+    background:#4da3ff;
+    color:black;
 }
 
 .alt {
     background:rgba(255,255,255,.1);
     color:white;
-    margin-top:10px;
 }
 
 .error {
     color:#ff6b6b;
-    font-size:.9rem;
     text-align:center;
     min-height:1.2em;
 }
@@ -95,7 +81,6 @@ button {
     <div class="error" id="error"></div>
 
     <button class="primary" onclick="emailLogin()">Login</button>
-
     <button class="alt" onclick="googleLogin()">Continue with Google</button>
 </div>
 
@@ -109,19 +94,15 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* LOADER CHECK */
+/* MUST COME FROM LOADER */
 if (!sessionStorage.getItem("fromLoader")) {
     window.location.href = "index.html";
-} else {
-    sessionStorage.removeItem("fromLoader");
 }
 
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
   projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app",
-  messagingSenderId: "422184727508",
   appId: "1:422184727508:web:cef39fc913d526febe9c41"
 };
 
@@ -129,20 +110,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+function proceed() {
+    sessionStorage.setItem("authPass", "true");
+    window.location.href = "dashboard.html";
+}
+
 window.googleLogin = () => {
     signInWithPopup(auth, provider)
-        .then(() => window.location.href = "dashboard.html")
+        .then(proceed)
         .catch(e => error.textContent = e.message);
 };
 
 window.emailLogin = () => {
     signInWithEmailAndPassword(auth, email.value, password.value)
-        .then(() => window.location.href = "dashboard.html")
+        .then(proceed)
         .catch(() => error.textContent = "Incorrect email or password");
 };
 
 onAuthStateChanged(auth, user => {
-    if (user) window.location.href = "dashboard.html";
+    if (user) proceed();
 });
 </script>
 
