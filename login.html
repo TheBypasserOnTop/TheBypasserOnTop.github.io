@@ -3,95 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
+<title>Loading...</title>
 <link rel="icon" href="favicon.ico">
 
 <style>
+html, body { margin:0; height:100%; }
 body {
-    margin:0;
-    min-height:100vh;
-    background:radial-gradient(circle at top,#0b1e3d,#050b1a);
     display:flex;
     justify-content:center;
     align-items:center;
-    font-family:system-ui,sans-serif;
-    color:#e6f0ff;
+    background: radial-gradient(circle at top, #0b1e3d, #050b1a);
 }
-
-.card {
-    width:95vw;
-    max-width:420px;
-    padding:40px;
-    background:rgba(12,25,55,.65);
-    backdrop-filter:blur(16px);
-    border-radius:20px;
-    box-shadow:0 20px 60px rgba(0,0,0,.4);
+.loader {
+    width:min(26vw,96px);
+    height:min(26vw,96px);
+    border:6px solid rgba(100,150,255,0.2);
+    border-top:6px solid #4da3ff;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    box-shadow:0 0 30px rgba(77,163,255,0.6);
 }
-
-h2 {
-    text-align:center;
-    margin-bottom:24px;
-    font-size:1.8rem;
-}
-
-input, button {
-    width:100%;
-    padding:16px;
-    margin-bottom:14px;
-    border-radius:14px;
-    border:none;
-    font-size:1rem;
-}
-
-input {
-    background:rgba(255,255,255,.08);
-    color:white;
-}
-
-button {
-    font-weight:600;
-    cursor:pointer;
-}
-
-.primary {
-    background:#4da3ff;
-    color:black;
-}
-
-.alt {
-    background:rgba(255,255,255,.1);
-    color:white;
-}
-
-.error {
-    color:#ff6b6b;
-    text-align:center;
-    min-height:1.2em;
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
-
 <body>
-
-<div class="card">
-    <h2>Login</h2>
-
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <div class="error" id="error"></div>
-
-    <button class="primary" onclick="emailLogin()">Login</button>
-    <button class="alt" onclick="googleLogin()">Continue with Google</button>
-</div>
+<div class="loader"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -103,24 +43,17 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 
-function goDashboard() {
-    window.location.replace("dashboard.html");
-}
-
-window.googleLogin = () => {
-    signInWithPopup(auth, provider)
-        .then(goDashboard)
-        .catch(e => error.textContent = e.message);
-};
-
-window.emailLogin = () => {
-    signInWithEmailAndPassword(auth, email.value, password.value)
-        .then(goDashboard)
-        .catch(() => error.textContent = "Incorrect email or password");
-};
+/* Always show loader for 1.7s, then route based on auth */
+onAuthStateChanged(auth, user => {
+    setTimeout(() => {
+        if (user) {
+            window.location.replace("dashboard.html");
+        } else {
+            window.location.replace("login.html");
+        }
+    }, 1700);
+});
 </script>
-
 </body>
 </html>
