@@ -2,226 +2,127 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login</title>
 <link rel="icon" href="favicon.ico">
 
 <style>
 :root {
-    --bg1: #050b1a;
-    --bg2: #0b1e3d;
-    --card: rgba(12, 25, 55, 0.6);
-    --accent: #4da3ff;
-    --text: #e6f0ff;
+    --bg1:#050b1a;
+    --bg2:#0b1e3d;
+    --card:rgba(12,25,55,0.65);
+    --accent:#4da3ff;
+    --text:#e6f0ff;
 }
 
 * { box-sizing: border-box; }
 
 body {
-    margin: 0;
-    min-height: 100vh;
-    background: radial-gradient(circle at top, var(--bg2), var(--bg1));
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    color: var(--text);
+    margin:0;
+    min-height:100vh;
+    background:radial-gradient(circle at top,var(--bg2),var(--bg1));
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:system-ui,sans-serif;
+    color:var(--text);
 }
-
-.container {
-    transition: filter 0.4s ease;
-}
-
-.blur { filter: blur(8px); }
 
 .card {
-    width: min(92vw, 380px);
-    padding: 36px;
-    background: var(--card);
-    backdrop-filter: blur(16px);
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    animation: pop 0.6s ease;
-}
-
-@keyframes pop {
-    from { opacity: 0; transform: translateY(12px) scale(0.96); }
-    to { opacity: 1; transform: none; }
+    width:95vw;
+    max-width:400px;
+    padding:36px;
+    background:var(--card);
+    backdrop-filter:blur(16px);
+    border-radius:18px;
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
 }
 
 h2 {
-    margin: 0 0 20px;
-    font-weight: 600;
-    text-align: center;
+    margin:0 0 24px;
+    text-align:center;
+    font-size:1.6rem;
 }
 
 input {
-    width: 100%;
-    padding: 14px;
-    margin-bottom: 14px;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-    background: rgba(255,255,255,0.06);
-    color: var(--text);
-}
-
-input::placeholder {
-    color: rgba(255,255,255,0.5);
+    width:100%;
+    padding:16px;
+    margin-bottom:14px;
+    border-radius:12px;
+    border:none;
+    background:rgba(255,255,255,.08);
+    color:var(--text);
+    font-size:1rem;
 }
 
 button {
-    width: 100%;
-    padding: 14px;
-    border-radius: 10px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    width:100%;
+    padding:16px;
+    border-radius:12px;
+    border:none;
+    font-size:1rem;
+    font-weight:600;
+    cursor:pointer;
 }
 
 .primary {
-    background: var(--accent);
-    color: #000;
-}
-
-.primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(77,163,255,0.5);
+    background:var(--accent);
+    color:#000;
 }
 
 .alt {
-    background: rgba(255,255,255,0.08);
-    color: white;
+    background:rgba(255,255,255,.1);
+    color:white;
+    margin-top:10px;
 }
 
-.alt:hover {
-    box-shadow: 0 0 18px rgba(255,255,255,0.15);
-}
-
-.divider {
-    margin: 22px 0;
-    text-align: center;
-    opacity: 0.6;
-    font-size: 14px;
-}
-
-.socials {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.link {
-    margin-top: 18px;
-    text-align: center;
-    color: var(--accent);
-    cursor: pointer;
-}
-
-/* Signup popup */
-.popup {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: rgba(0,0,0,0.45);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.popup.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.popup-box {
-    width: min(92vw, 400px);
-    background: var(--card);
-    backdrop-filter: blur(18px);
-    padding: 32px;
-    border-radius: 18px;
-    position: relative;
-    transform: scale(0.92);
-    transition: transform 0.3s ease;
-}
-
-.popup.active .popup-box {
-    transform: scale(1);
-}
-
-.close {
-    position: absolute;
-    top: 14px;
-    right: 16px;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.small {
-    font-size: 13px;
-    opacity: 0.7;
-    text-align: center;
+.error {
+    color:#ff6b6b;
+    font-size:.9rem;
+    text-align:center;
+    min-height:1.2em;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container" id="main">
-    <div class="card">
-        <h2>Welcome back</h2>
+<div class="card">
+    <h2>Login</h2>
 
-        <input placeholder="Email">
-        <input type="password" placeholder="Password">
-        <button class="primary">Login</button>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <div class="error" id="error"></div>
 
-        <div class="divider">or</div>
+    <button class="primary" onclick="emailLogin()">Login</button>
 
-        <div class="socials">
-            <button class="alt" onclick="googleLogin()">Continue with Google</button>
-            <button class="alt" disabled style="opacity:0.4; cursor:not-allowed">
-                Continue with Apple (Coming Soon)
-            </button>
-        </div>
-
-        <div class="link" onclick="openPopup()">Create account</div>
-    </div>
+    <button class="alt" onclick="googleLogin()">Continue with Google</button>
 </div>
 
-<div class="popup" id="popup">
-    <div class="popup-box">
-        <div class="close" onclick="closePopup()">✕</div>
-        <h2>Sign Up</h2>
-        <input placeholder="Email">
-        <input placeholder="Username">
-        <input type="password" placeholder="Password (8+ chars)">
-        <button class="primary">Create Account</button>
-        <div class="small">Email & password signup coming soon</div>
-    </div>
-</div>
-
-<!-- Firebase Google Auth -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-    getAuth, 
-    GoogleAuthProvider, 
-    signInWithPopup,
-    onAuthStateChanged
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* YOUR FIREBASE CONFIG */
+/* LOADER CHECK */
+if (!sessionStorage.getItem("fromLoader")) {
+    window.location.href = "index.html";
+} else {
+    sessionStorage.removeItem("fromLoader");
+}
+
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
   projectId: "login-34954",
   storageBucket: "login-34954.firebasestorage.app",
   messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41",
-  measurementId: "G-1MMT3C4M7K"
+  appId: "1:422184727508:web:cef39fc913d526febe9c41"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -230,31 +131,19 @@ const provider = new GoogleAuthProvider();
 
 window.googleLogin = () => {
     signInWithPopup(auth, provider)
-        .then(result => {
-            alert("Logged in as " + result.user.displayName);
-            console.log(result.user);
-        })
-        .catch(error => {
-            alert(error.message);
-        });
+        .then(() => window.location.href = "dashboard.html")
+        .catch(e => error.textContent = e.message);
+};
+
+window.emailLogin = () => {
+    signInWithEmailAndPassword(auth, email.value, password.value)
+        .then(() => window.location.href = "dashboard.html")
+        .catch(() => error.textContent = "Incorrect email or password");
 };
 
 onAuthStateChanged(auth, user => {
-    if (user) {
-        console.log("Already logged in:", user.email);
-        // window.location.href = "dashboard.html";
-    }
+    if (user) window.location.href = "dashboard.html";
 });
-
-window.openPopup = () => {
-    popup.classList.add("active");
-    main.classList.add("blur");
-};
-
-window.closePopup = () => {
-    popup.classList.remove("active");
-    main.classList.remove("blur");
-};
 </script>
 
 </body>
