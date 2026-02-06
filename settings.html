@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Settings</title>
 <link rel="icon" href="favicon.ico">
-
 <style>
 body {
   margin:0;
@@ -13,30 +12,28 @@ body {
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   font-family:system-ui,sans-serif;
   color:#e6f0ff;
-  overflow-x:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
 }
-
-/* Card */
 .card {
-  width:90%;
-  max-width:400px;
-  padding:25px;
+  width:90vw;
+  max-width:500px;
+  padding:30px;
   background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
-  border-radius:16px;
-  box-shadow:0 15px 40px rgba(0,0,0,.4);
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
   text-align:center;
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
 }
+h2 { margin-bottom:20px; }
 
-/* Profile Picture top right */
+/* Profile pic top-right */
 #profilePic {
   position:fixed;
-  top:15px;
-  right:15px;
+  top:20px;
+  right:20px;
   width:50px;
   height:50px;
   border-radius:50%;
@@ -45,86 +42,48 @@ body {
   align-items:center;
   font-weight:bold;
   font-size:1.3rem;
-  cursor:pointer;
   color:white;
+  cursor:pointer;
   user-select:none;
   z-index:100;
+  background-size:cover;
+  background-position:center;
 }
 
-/* Profile Panel */
+/* Profile panel */
 #profilePanel {
   position:fixed;
-  top:75px;
-  right:15px;
+  top:80px;
+  right:20px;
   width:180px;
   background:rgba(12,25,55,.85);
-  backdrop-filter:blur(12px);
+  backdrop-filter:blur(8px);
   border-radius:14px;
   display:none;
   flex-direction:column;
   padding:10px;
   z-index:100;
 }
-#profilePanel .accountName { font-weight:bold; padding:5px 0; text-align:center; border-bottom:1px solid rgba(255,255,255,.2); margin-bottom:5px; }
+#profilePanel h4 {
+  margin:0 0 8px 0;
+  font-size:1rem;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+  padding-bottom:5px;
+}
 #profilePanel button {
+  width:100%;
   margin:5px 0;
-  padding:8px;
+  padding:10px;
   border:none;
   border-radius:10px;
-  font-weight:bold;
+  font-weight:600;
   cursor:pointer;
 }
-#profilePanel .primary { background:#4da3ff; color:black; }
-#profilePanel .settings { background:#888cff; color:black; }
-#profilePanel .dashboard { background:#4caf50; color:white; }
+.primary { background:#4da3ff; color:black; }
+.remove { background:#ff4c4c; color:white; }
 
-/* Section Cards */
-.section {
-  background:rgba(0,0,0,.25);
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:15px;
-  text-align:left;
-}
-.section h3 { margin-top:0; margin-bottom:10px; }
-
-/* Profile preview */
-#pfpPreview {
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  display:inline-flex;
-  justify-content:center;
-  align-items:center;
-  font-weight:bold;
-  font-size:1.2rem;
-  color:white;
-  cursor:pointer;
-  margin-left:10px;
-  background-size:cover;
-}
-
-/* Small panel for PFP buttons */
-#pfpPanel {
-  display:none;
-  position:absolute;
-  background:rgba(12,25,55,0.85);
-  backdrop-filter:blur(12px);
-  padding:8px;
-  border-radius:10px;
-  flex-direction:column;
-  top:80px;
-  right:80px;
-  width:120px;
-  z-index:15;
-}
-#pfpPanel button { margin:3px 0; padding:6px; }
-
-/* Input & buttons */
-input { width:100%; margin:5px 0; padding:8px; border-radius:8px; border:none; }
-button { cursor:pointer; border:none; border-radius:8px; padding:8px; margin-top:5px; }
-
-/* Popups */
+/* Overlay popups */
 .overlay {
   position:fixed;
   inset:0;
@@ -133,7 +92,7 @@ button { cursor:pointer; border:none; border-radius:8px; padding:8px; margin-top
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:20;
+  z-index:200;
 }
 .popup {
   width:90vw;
@@ -142,55 +101,56 @@ button { cursor:pointer; border:none; border-radius:8px; padding:8px; margin-top
   padding:30px;
   border-radius:20px;
   text-align:center;
+  position:relative;
 }
-.close { float:right; cursor:pointer; }
-.error { color:#ff4c4c; min-height:1.2em; margin-top:10px; }
-.success { color:#4caf50; min-height:1.2em; margin-top:10px; }
+.close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.2rem; }
+.error { color:#ff6b6b; margin-top:10px; min-height:1.2em; text-align:left; }
+.success { color:#4caf50; margin-top:10px; min-height:1.2em; text-align:left; }
+
+/* Settings form */
+.setting-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:15px 0;
+}
+.setting-row button { width:auto; padding:5px 10px; font-size:0.9rem; }
+.setting-row span { font-size:1rem; }
+
 </style>
 </head>
 <body>
 
-<!-- Profile Picture -->
-<div id="profilePic"></div>
-
-<!-- Profile Panel -->
-<div id="profilePanel">
-  <div class="accountName" id="panelUsername"></div>
-  <button class="dashboard" id="dashboardBtn">Dashboard</button>
-  <button class="primary" id="logoutBtn">Logout</button>
-</div>
-
-<!-- Settings Card -->
 <div class="card">
   <h2>Settings</h2>
-
-  <div class="section">
-    <h3>Account Settings</h3>
-    <div>
-      Profile Picture:
-      <div id="pfpPreview"></div>
-      <div id="pfpPanel">
-        <button id="changePfpBtn">Change</button>
-        <button id="removePfpBtn">Remove</button>
-        <button id="viewPfpBtn">View</button>
-      </div>
+  <div id="accountSettings">
+    <div class="setting-row">
+      <span>Profile Picture</span>
+      <div id="pfpPreview" style="width:40px;height:40px;border-radius:50%;background-color:#555;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-weight:bold;"></div>
     </div>
-
-    <div>
-      Username: <span id="usernameDisplay"></span>
-      <button id="changeUsernameBtn">Change</button>
+    <div class="setting-row">
+      <span>Username</span>
+      <span id="usernameText"></span>
+      <button onclick="openUsernameChange()">Change</button>
     </div>
-
-    <div>
-      Password: <span id="passwordDisplay">••••••••</span>
-      <button id="changePasswordBtn">Change</button>
+    <div class="setting-row">
+      <span>Password</span>
+      <span>••••••••</span>
+      <button onclick="openPasswordChange()">Change</button>
     </div>
-
-    <button id="removeAccountBtn" class="remove">Remove Account</button>
   </div>
 </div>
 
-<!-- REMOVE ACCOUNT POPUP -->
+<!-- Profile pic top-right -->
+<div id="profilePic"></div>
+<div id="profilePanel">
+  <h4 id="profileName">Username</h4>
+  <button class="primary" onclick="goDashboard()">Dashboard</button>
+  <button class="primary" onclick="confirmLogout()">Logout</button>
+</div>
+
+<!-- POPUPS -->
+<!-- Remove Account -->
 <div class="overlay" id="removeOverlay">
   <div class="popup">
     <span class="close" onclick="closeRemoveAccount()">✕</span>
@@ -198,42 +158,61 @@ button { cursor:pointer; border:none; border-radius:8px; padding:8px; margin-top
     <p>Enter your password to confirm:</p>
     <input type="password" id="removePassword" placeholder="Password">
     <div class="error" id="removeError"></div>
-    <button class="remove" id="confirmRemoveBtn">Yes, Remove</button>
+    <button class="remove" onclick="removeAccount()">Yes, Remove</button>
   </div>
 </div>
 
-<!-- CHANGE USERNAME POPUP -->
+<!-- Logout confirmation -->
+<div class="overlay" id="logoutOverlay">
+  <div class="popup">
+    <span class="close" onclick="closeLogout()">✕</span>
+    <h2>Confirm Logout</h2>
+    <button class="primary" onclick="logout()">Yes</button>
+    <button class="remove" onclick="closeLogout()">No</button>
+  </div>
+</div>
+
+<!-- Username change -->
 <div class="overlay" id="usernameOverlay">
   <div class="popup">
-    <span class="close" onclick="closeUsername()">✕</span>
+    <span class="close" onclick="closeUsernameChange()">✕</span>
     <h2>Change Username</h2>
     <input type="text" id="newUsername" placeholder="New Username">
     <div class="error" id="usernameError"></div>
-    <button id="saveUsername" class="primary">Save</button>
+    <button class="primary" onclick="saveUsername()">Save</button>
   </div>
 </div>
 
-<!-- CHANGE PASSWORD POPUP -->
+<!-- Password change -->
 <div class="overlay" id="passwordOverlay">
   <div class="popup">
-    <span class="close" onclick="closePassword()">✕</span>
+    <span class="close" onclick="closePasswordChange()">✕</span>
     <h2>Change Password</h2>
-    <input type="password" id="currentPassword" placeholder="Current Password">
-    <input type="password" id="newPassword" placeholder="New Password (8+ chars)">
-    <input type="password" id="confirmPassword" placeholder="Confirm New Password">
+    <input type="password" id="currentPass" placeholder="Current Password">
+    <input type="password" id="newPass" placeholder="New Password">
+    <input type="password" id="confirmPass" placeholder="Confirm Password">
     <div class="error" id="passwordError"></div>
-    <button id="savePassword" class="primary">Save</button>
+    <button class="primary" onclick="savePassword()">Save</button>
   </div>
 </div>
 
-<!-- File input for PFP -->
-<input type="file" id="pfpFile" accept="image/*" style="display:none">
+<!-- PFP change -->
+<div class="overlay" id="pfpOverlay">
+  <div class="popup">
+    <span class="close" onclick="closePfpChange()">✕</span>
+    <h2>Change Profile Picture</h2>
+    <input type="file" id="pfpFile" accept="image/*">
+    <div class="error" id="pfpError"></div>
+    <button class="primary" onclick="savePfp()">Save</button>
+    <button class="remove" onclick="removePfp()">Remove</button>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, query, collection, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -246,176 +225,165 @@ const firebaseConfig = {
   measurementId: "G-1MMT3C4M7K"
 };
 
-/* Init Firebase */
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* Elements */
-const profilePic = document.getElementById("profilePic");
-const profilePanel = document.getElementById("profilePanel");
-const panelUsername = document.getElementById("panelUsername");
-const dashboardBtn = document.getElementById("dashboardBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const removeOverlay = document.getElementById("removeOverlay");
-const removePassword = document.getElementById("removePassword");
-const removeError = document.getElementById("removeError");
-const confirmRemoveBtn = document.getElementById("confirmRemoveBtn");
-const pfpPreview = document.getElementById("pfpPreview");
-const pfpPanel = document.getElementById("pfpPanel");
-const changePfpBtn = document.getElementById("changePfpBtn");
-const removePfpBtn = document.getElementById("removePfpBtn");
-const viewPfpBtn = document.getElementById("viewPfpBtn");
-const usernameDisplay = document.getElementById("usernameDisplay");
-const changeUsernameBtn = document.getElementById("changeUsernameBtn");
-const passwordDisplay = document.getElementById("passwordDisplay");
-const changePasswordBtn = document.getElementById("changePasswordBtn");
-const removeAccountBtn = document.getElementById("removeAccountBtn");
-const usernameOverlay = document.getElementById("usernameOverlay");
-const passwordOverlay = document.getElementById("passwordOverlay");
-const newUsername = document.getElementById("newUsername");
-const usernameError = document.getElementById("usernameError");
-const saveUsername = document.getElementById("saveUsername");
-const currentPassword = document.getElementById("currentPassword");
-const newPassword = document.getElementById("newPassword");
-const confirmPassword = document.getElementById("confirmPassword");
-const passwordError = document.getElementById("passwordError");
-const savePassword = document.getElementById("savePassword");
-const pfpFile = document.getElementById("pfpFile");
+const profilePic=document.getElementById("profilePic");
+const profilePanel=document.getElementById("profilePanel");
+const profileName=document.getElementById("profileName");
+const pfpPreview=document.getElementById("pfpPreview");
+const usernameText=document.getElementById("usernameText");
 
-let currentUser;
-let username = "";
+/* Popups */
+const removeOverlay=document.getElementById("removeOverlay");
+const removePassword=document.getElementById("removePassword");
+const removeError=document.getElementById("removeError");
 
-// Consistent color
+const logoutOverlay=document.getElementById("logoutOverlay");
+
+const usernameOverlay=document.getElementById("usernameOverlay");
+const newUsername=document.getElementById("newUsername");
+const usernameError=document.getElementById("usernameError");
+
+const passwordOverlay=document.getElementById("passwordOverlay");
+const currentPass=document.getElementById("currentPass");
+const newPass=document.getElementById("newPass");
+const confirmPass=document.getElementById("confirmPass");
+const passwordError=document.getElementById("passwordError");
+
+const pfpOverlay=document.getElementById("pfpOverlay");
+const pfpFile=document.getElementById("pfpFile");
+const pfpError=document.getElementById("pfpError");
+
+let panelOpen=false;
+profilePic.addEventListener("click",()=>{ panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none"; });
+
 function stringToColor(str){
-  let hash = 0; for(let i=0;i<str.length;i++){ hash = str.charCodeAt(i) + ((hash<<5)-hash); }
-  let color = '#'; for(let i=0;i<3;i++){ color += ('00'+((hash >> (i*8)) & 0xFF).toString(16)).slice(-2);}
-  return color;
+  let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash); }
+  let color="#"; for(let i=0;i<3;i++){ const value=(hash>>(i*8))&0xFF;color+=("00"+value.toString(16)).slice(-2); } return color;
 }
 
-// Helper to close overlay
-function closeRemoveAccount(){ removeOverlay.style.display="none"; removePassword.value=""; removeError.textContent=""; }
-function closeUsername(){ usernameOverlay.style.display="none"; usernameError.textContent=""; newUsername.value=""; }
-function closePassword(){ passwordOverlay.style.display="none"; passwordError.textContent=""; currentPassword.value=""; newPassword.value=""; confirmPassword.value=""; }
-
-// Load user
-onAuthStateChanged(auth, async user=>{
+/* Auth check */
+let currentUser=null;
+onAuthStateChanged(auth, async(user)=>{
   if(!user) location.replace("login.html");
-  currentUser = user;
+  currentUser=user;
+  let username=user.displayName;
+  if(!username){
+    const q=query(collection(db,"usernames"),where("uid","==",user.uid));
+    const snap=await getDocs(q);
+    if(!snap.empty) username=snap.docs[0].id;
+    else username=user.email.split("@")[0];
+  }
+  profileName.textContent=username;
+  usernameText.textContent=username;
 
-  const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",user.uid)));
-  if(!snap.empty) username = snap.docs[0].id;
-  else username = user.displayName || user.email.split("@")[0];
-
-  panelUsername.textContent = username;
-  usernameDisplay.textContent = username;
-
-  // Profile pic
-  const firstLetter = username.charAt(0).toUpperCase();
-  profilePic.textContent = firstLetter;
-  profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
-  pfpPreview.textContent = firstLetter;
-  pfpPreview.style.backgroundColor = stringToColor(username.toLowerCase());
-
-  // Load saved PFP
-  const pfpDoc = await getDoc(doc(db,"userPFPs",currentUser.uid));
-  if(pfpDoc.exists()){
-    pfpPreview.style.backgroundImage = `url(${pfpDoc.data().data})`;
+  const pfpDoc=await getDoc(doc(db,"userPFPs",user.uid));
+  if(pfpDoc.exists() && pfpDoc.data().data){
+    profilePic.style.backgroundImage=`url(${pfpDoc.data().data})`;
+    profilePic.textContent="";
+    pfpPreview.style.backgroundImage=`url(${pfpDoc.data().data})`;
     pfpPreview.textContent="";
+  } else {
+    profilePic.style.backgroundImage="";
+    profilePic.textContent=username.charAt(0).toUpperCase();
+    profilePic.style.backgroundColor=stringToColor(username.toLowerCase());
+    pfpPreview.style.backgroundImage="";
+    pfpPreview.style.backgroundColor=stringToColor(username.toLowerCase());
+    pfpPreview.textContent=username.charAt(0).toUpperCase();
   }
 });
 
-// Toggle profile panel
-let panelOpen = false;
-profilePic.addEventListener("click", ()=>{ panelOpen = !panelOpen; profilePanel.style.display = panelOpen?"flex":"none"; });
-dashboardBtn.addEventListener("click", ()=>location.replace("dashboard.html"));
-logoutBtn.addEventListener("click", ()=>{ if(confirm("Logout?")){ signOut(auth); location.replace("login.html"); } });
+/* Open/close popups */
+function openUsernameChange(){ usernameOverlay.style.display="flex"; newUsername.value=""; usernameError.textContent=""; }
+function closeUsernameChange(){ usernameOverlay.style.display="none"; }
+function openPasswordChange(){ passwordOverlay.style.display="flex"; currentPass.value=""; newPass.value=""; confirmPass.value=""; passwordError.textContent=""; }
+function closePasswordChange(){ passwordOverlay.style.display="none"; }
+function closeRemoveAccount(){ removeOverlay.style.display="none"; }
+function closeLogout(){ logoutOverlay.style.display="none"; }
+function closePfpChange(){ pfpOverlay.style.display="none"; pfpFile.value=""; pfpError.textContent=""; }
 
-// PFP Panel
-pfpPreview.addEventListener("click", ()=>pfpPanel.style.display = pfpPanel.style.display==="flex"?"none":"flex");
-changePfpBtn.addEventListener("click", ()=>pfpFile.click());
-removePfpBtn.addEventListener("click", async ()=>{
-  pfpPreview.style.backgroundImage="";
-  pfpPreview.textContent = username.charAt(0).toUpperCase();
-  pfpPreview.style.backgroundColor = stringToColor(username.toLowerCase());
-  await setDoc(doc(db,"userPFPs",currentUser.uid),{data:""});
-});
-viewPfpBtn.addEventListener("click", ()=>{ 
-  const bg = pfpPreview.style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-  if(bg) window.open(bg,"_blank");
-});
+/* Logout */
+function confirmLogout(){ logoutOverlay.style.display="flex"; }
+async function logout(){ await signOut(auth); location.replace("login.html"); }
 
-// PFP file picker
-pfpFile.addEventListener("change", e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = async ev=>{
-    pfpPreview.style.backgroundImage = `url(${ev.target.result})`;
-    pfpPreview.textContent="";
-    await setDoc(doc(db,"userPFPs",currentUser.uid),{data:ev.target.result});
-  };
-  reader.readAsDataURL(file);
-});
-
-// Change Username
-changeUsernameBtn.addEventListener("click", ()=>usernameOverlay.style.display="flex");
-saveUsername.addEventListener("click", async ()=>{
-  const newName = newUsername.value.trim().toLowerCase();
-  if(!newName){ usernameError.textContent="Enter username"; return; }
-  if(newName===username.toLowerCase()){ usernameError.textContent="Same username"; return; }
-  const snap = await getDoc(doc(db,"usernames",newName));
-  if(snap.exists()){ usernameError.textContent="Username taken"; return; }
-
-  // Update Firestore
-  const oldSnap = await getDocs(query(collection(db,"usernames"), where("uid","==",currentUser.uid)));
-  oldSnap.forEach(async d=>await deleteDoc(doc(db,"usernames",d.id)));
-  await setDoc(doc(db,"usernames",newName),{uid:currentUser.uid,email:currentUser.email});
-
-  username = newName;
-  usernameDisplay.textContent = username;
-  panelUsername.textContent = username;
-  profilePic.textContent = username.charAt(0).toUpperCase();
-  profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
-  pfpPreview.textContent = username.charAt(0).toUpperCase();
-  pfpPreview.style.backgroundColor = stringToColor(username.toLowerCase());
-  closeUsername();
-});
-
-// Change Password
-changePasswordBtn.addEventListener("click", ()=>passwordOverlay.style.display="flex");
-savePassword.addEventListener("click", async ()=>{
-  const cur = currentPassword.value;
-  const np = newPassword.value;
-  const cp = confirmPassword.value;
-  if(!cur||!np||!cp){ passwordError.textContent="Fill all fields"; return; }
-  if(np.length<8){ passwordError.textContent="New password must be 8+ chars"; return; }
-  if(np!==cp){ passwordError.textContent="Passwords do not match"; return; }
-  try{
-    const cred = EmailAuthProvider.credential(currentUser.email,cur);
-    await reauthenticateWithCredential(currentUser,cred);
-    await updatePassword(currentUser,np);
-    closePassword();
-    alert("Password updated successfully");
-  }catch(e){ console.error(e); passwordError.textContent=e.message; }
-});
-
-// Remove Account
-removeAccountBtn.addEventListener("click", ()=>removeOverlay.style.display="flex");
-confirmRemoveBtn.addEventListener("click", async ()=>{
-  const pass = removePassword.value;
+/* Remove Account */
+async function removeAccount(){
   removeError.textContent="";
+  const pass=removePassword.value;
   if(!pass){ removeError.textContent="Enter password"; return; }
   try{
-    const cred = EmailAuthProvider.credential(currentUser.email,pass);
+    const cred=EmailAuthProvider.credential(currentUser.email,pass);
     await reauthenticateWithCredential(currentUser,cred);
-    const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",currentUser.uid)));
+    const q=query(collection(db,"usernames"),where("uid","==",currentUser.uid));
+    const snap=await getDocs(q);
     snap.forEach(async d=>await deleteDoc(doc(db,"usernames",d.id)));
     await deleteUser(currentUser);
     location.replace("login.html");
-  }catch(e){ console.error(e); removeError.textContent=e.message; }
-});
+  }catch(e){ removeError.textContent=e.message; }
+}
+
+/* Open dashboard */
+function goDashboard(){ location.replace("dashboard.html"); }
+
+/* Username change */
+async function saveUsername(){
+  usernameError.textContent="";
+  const val=newUsername.value.trim().toLowerCase();
+  if(!val){ usernameError.textContent="Enter username"; return; }
+  const snap=await getDoc(doc(db,"usernames",val));
+  if(snap.exists()){ usernameError.textContent="Username in use"; return; }
+  // Delete old username
+  const q=query(collection(db,"usernames"),where("uid","==",currentUser.uid));
+  const snapOld=await getDocs(q);
+  snapOld.forEach(async d=>await deleteDoc(doc(db,"usernames",d.id)));
+  await setDoc(doc(db,"usernames",val),{uid:currentUser.uid,email:currentUser.email});
+  profileName.textContent=newUsername.value.trim();
+  usernameText.textContent=newUsername.value.trim();
+  if(!profilePic.style.backgroundImage) profilePic.textContent=newUsername.value.charAt(0).toUpperCase();
+  closeUsernameChange();
+}
+
+/* Password change */
+async function savePassword(){
+  passwordError.textContent="";
+  if(!currentPass.value || !newPass.value || !confirmPass.value){ passwordError.textContent="Fill all fields"; return; }
+  if(newPass.value!==confirmPass.value){ passwordError.textContent="Passwords do not match"; return; }
+  try{
+    const cred=EmailAuthProvider.credential(currentUser.email,currentPass.value);
+    await reauthenticateWithCredential(currentUser,cred);
+    await updatePassword(currentUser,newPass.value);
+    closePasswordChange();
+  }catch(e){ passwordError.textContent=e.message; }
+}
+
+/* PFP change */
+let selectedPfp=null;
+pfpPreview.addEventListener("click",()=>{ pfpOverlay.style.display="flex"; });
+pfpFile.addEventListener("change",()=>{ selectedPfp=null; pfpError.textContent=""; const file=pfpFile.files[0]; if(file){ const reader=new FileReader(); reader.onload=()=>{ selectedPfp=reader.result; }; reader.readAsDataURL(file); } });
+async function savePfp(){
+  if(!selectedPfp){ pfpError.textContent="Select a file"; return; }
+  await setDoc(doc(db,"userPFPs",currentUser.uid),{data:selectedPfp});
+  profilePic.style.backgroundImage=`url(${selectedPfp})`;
+  profilePic.textContent="";
+  pfpPreview.style.backgroundImage=`url(${selectedPfp})`;
+  pfpPreview.textContent="";
+  closePfpChange();
+}
+async function removePfp(){
+  await setDoc(doc(db,"userPFPs",currentUser.uid),{data:""});
+  const username=usernameText.textContent;
+  profilePic.style.backgroundImage="";
+  profilePic.textContent=username.charAt(0).toUpperCase();
+  profilePic.style.backgroundColor=stringToColor(username.toLowerCase());
+  pfpPreview.style.backgroundImage="";
+  pfpPreview.textContent=username.charAt(0).toUpperCase();
+  pfpPreview.style.backgroundColor=stringToColor(username.toLowerCase());
+  closePfpChange();
+}
 
 </script>
 </body>
