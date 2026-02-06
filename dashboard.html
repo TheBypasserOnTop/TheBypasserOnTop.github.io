@@ -6,20 +6,27 @@
 <title>Dashboard</title>
 <link rel="icon" href="favicon.ico">
 <style>
-body {
+html, body {
   margin:0;
-  min-height:100vh;
-  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
+  padding:0;
+  min-height:100%;
   font-family:system-ui,sans-serif;
+  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   color:#e6f0ff;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  position:relative;
   overflow-x:hidden;
 }
 
-/* Card */
+/* Centered welcome card */
+#welcomeWrapper {
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  min-height:80vh;
+  position:relative;
+  z-index:1;
+}
 .card {
   width:90%;
   max-width:400px;
@@ -29,7 +36,7 @@ body {
   border-radius:20px;
   box-shadow:0 20px 60px rgba(0,0,0,.4);
   text-align:center;
-  margin-top:80px;
+  margin:20px auto;
   z-index:10;
 }
 h2 { margin-bottom:10px; }
@@ -41,16 +48,13 @@ h2 { margin-bottom:10px; }
   color:#cfd8f0;
 }
 
-/* Scroll down animation */
+/* Scroll text bottom */
 #scrollText {
-  position:fixed;
-  bottom:15px;
-  width:100%;
   text-align:center;
   font-weight:500;
   animation: upDown 2s ease-in-out infinite alternate;
-  z-index:10;
   color:#cfd8f0;
+  margin:20px 0;
 }
 @keyframes upDown{
   0%{ transform:translateY(0);}
@@ -207,7 +211,7 @@ body.menu-open .blur-layer {
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
 
-/* Overlay popups */
+/* Overlay popups (logout/remove) */
 .overlay {
   position:fixed;
   inset:0;
@@ -229,11 +233,12 @@ body.menu-open .blur-layer {
 }
 .close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.2rem; }
 .error { color:#ff6b6b; margin-top:10px; min-height:1.2em; text-align:left; }
+
 </style>
 </head>
 <body>
 
-<!-- Menu -->
+<!-- Hamburger menu -->
 <div id="menuBtn"><span></span><span></span><span></span></div>
 <div id="sidePanel">
   <div id="sidePanelHeader">
@@ -249,10 +254,19 @@ body.menu-open .blur-layer {
 </div>
 <div class="blur-layer"></div>
 
-<div class="card">
-  <h2 id="welcomeText">Welcome</h2>
-  <div class="subtext" id="welcomeSubtext">Use the menu to navigate</div>
+<!-- Centered welcome card -->
+<div id="welcomeWrapper">
+  <div class="card">
+    <h2 id="welcomeText">Welcome</h2>
+    <div class="subtext" id="welcomeSubtext">Use the menu to navigate</div>
+  </div>
 </div>
+
+<!-- Scroll cards -->
+<div class="scroll-card">🚀 Cool feature 1: Fast, responsive design</div>
+<div class="scroll-card">💡 Tip: Use the menu to quickly access sections</div>
+<div class="scroll-card">🎨 Design: Radial gradient background + smooth animations</div>
+<div id="scrollText">Scroll down for more info</div>
 
 <!-- Profile pic top-right -->
 <div id="profilePic"></div>
@@ -262,19 +276,10 @@ body.menu-open .blur-layer {
   <button class="primary" onclick="confirmLogout()">Logout</button>
 </div>
 
-<!-- Remove account & logout popups omitted for brevity; keep same as before -->
-
-<div id="scrollText">Scroll down for more info</div>
-
-<div class="scroll-card">🚀 Cool feature 1: Fast, responsive design</div>
-<div class="scroll-card">💡 Tip: Use the menu to quickly access sections</div>
-<div class="scroll-card">🎨 Design: Radial gradient background + smooth animations</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, signOut, EmailAuthProvider, reauthenticateWithCredential, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, query, collection, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -288,7 +293,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -317,7 +321,6 @@ onAuthStateChanged(auth, async user=>{
   }
   document.getElementById("welcomeText").textContent=`Welcome, ${username}`;
   profileName.textContent=username;
-
   welcomeSubtext.style.opacity=1;
 
   // Profile pic
@@ -361,7 +364,10 @@ const observer = new IntersectionObserver(entries=>{
   });
 },{threshold:0.1});
 scrollCards.forEach(c=>observer.observe(c));
-</script>
 
+/* Logout/settings buttons */
+window.openSettings = ()=>location.href="settings.html";
+window.confirmLogout = ()=>{ if(confirm("Are you sure you want to logout?")) signOut(auth).then(()=>location.href="login.html"); };
+</script>
 </body>
 </html>
