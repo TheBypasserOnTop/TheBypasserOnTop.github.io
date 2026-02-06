@@ -93,18 +93,48 @@ body.menu-open .blur-layer {
 #welcomeWrapper {
   min-height:80vh;
   display:flex;
+  flex-direction:column;
   justify-content:center;
   align-items:center;
+  z-index:10;
 }
 .card {
   background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
   padding:30px;
   border-radius:20px;
-  z-index:10;
+  margin-bottom:20px;
 }
 
-/* ✅ PROFILE PIC — FIXED */
+/* Scroll hint */
+#scrollHint {
+  font-weight:500;
+  color:#cfd8f0;
+  animation: float 2s ease-in-out infinite alternate;
+}
+@keyframes float {
+  from { transform:translateY(0); }
+  to { transform:translateY(-10px); }
+}
+
+/* Sliding cards */
+.scroll-card {
+  width:90%;
+  max-width:350px;
+  margin:60px auto;
+  padding:20px;
+  background:rgba(12,25,55,.7);
+  border-radius:16px;
+  opacity:0;
+  transform:translateY(40px);
+  transition:opacity 1s ease, transform 1s ease;
+}
+.scroll-card.show {
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ✅ PROFILE PIC */
 #profilePic {
   position:fixed;
   top:20px;
@@ -120,11 +150,9 @@ body.menu-open .blur-layer {
   color:white;
   cursor:pointer;
   z-index:100;
-
-  /* 🔥 CRITICAL FIXES */
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  background-size:contain;
+  background-repeat:no-repeat;
+  background-position:center;
 }
 
 /* Profile panel */
@@ -169,7 +197,6 @@ body.menu-open .blur-layer {
   </div>
   <div class="divider"></div>
   <div class="nav-tab active">Dashboard</div>
-  <div class="nav-tab" onclick="location.href='chat.html'">Communicate</div>
   <div class="nav-tab" onclick="location.href='settings.html'">Settings</div>
 </div>
 
@@ -179,7 +206,12 @@ body.menu-open .blur-layer {
   <div class="card">
     <h2 id="welcomeText">Welcome</h2>
   </div>
+  <div id="scrollHint">Scroll down for more info</div>
 </div>
+
+<div class="scroll-card">🚀 Fast & responsive UI</div>
+<div class="scroll-card">🔒 Secure Firebase authentication</div>
+<div class="scroll-card">🎨 Clean glassmorphism design</div>
 
 <div id="profilePic"></div>
 
@@ -199,7 +231,6 @@ const app = initializeApp({
   authDomain: "login-34954.firebaseapp.com",
   projectId: "login-34954"
 });
-
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -223,12 +254,10 @@ onAuthStateChanged(auth, async user=>{
   welcomeText.textContent = `Welcome, ${username}`;
   profileName.textContent = username;
 
-  /* ✅ ALWAYS paint fallback first */
   profilePic.textContent = username[0].toUpperCase();
   profilePic.style.backgroundColor = stringToColor(username);
   profilePic.style.backgroundImage = "";
 
-  /* ✅ THEN override with image */
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
     profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
@@ -248,6 +277,15 @@ window.logout = async () => {
   await signOut(auth);
   location.href="login.html";
 };
+
+/* Scroll animation */
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting) e.target.classList.add("show");
+  });
+},{threshold:0.15});
+
+document.querySelectorAll(".scroll-card").forEach(c=>observer.observe(c));
 </script>
 
 </body>
