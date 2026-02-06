@@ -7,7 +7,6 @@
 <link rel="icon" href="favicon.ico">
 
 <style>
-/* --- General --- */
 body {
   margin:0;
   min-height:100vh;
@@ -18,7 +17,7 @@ body {
   position:relative;
 }
 
-/* --- Hamburger menu --- */
+/* Hamburger menu */
 #menuBtn {
   position:fixed;
   top:20px;
@@ -57,16 +56,15 @@ body.menu-open #sidePanel { left:0; }
 
 .divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
 
-#navSearch { padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,.08); color:white; margin-bottom:15px; }
-
 .nav-tab { padding:12px; border-radius:10px; cursor:pointer; margin-bottom:8px; font-weight:600; }
 .nav-tab.active { background:#4da3ff; color:black; }
 .nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
 
+/* Blur layer */
 .blur-layer { position:absolute; inset:0; z-index:5; }
 body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 
-/* --- Top chat header --- */
+/* Chat Header */
 #chatHeader {
   width:100%;
   padding:15px 20px;
@@ -94,7 +92,7 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 
 #chatHeader .usernameLabel { font-weight:600; font-size:1rem; }
 
-/* --- Messages --- */
+/* Messages */
 #chatMessages {
   padding:20px;
   display:flex;
@@ -143,7 +141,6 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
   margin-top:2px;
 }
 
-/* Reply feature */
 .messageContent .replyBox {
   background:rgba(255,255,255,0.08);
   padding:5px 8px;
@@ -154,7 +151,7 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
   color:#cfd8f0;
 }
 
-/* Input area */
+/* Input */
 #chatInputWrapper {
   position:fixed;
   bottom:0; left:0;
@@ -202,25 +199,14 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 </div>
 <div class="blur-layer"></div>
 
-<!-- Top Chat Header -->
+<!-- Chat Header -->
 <div id="chatHeader">
   <div class="userProfilePic"></div>
   <span class="usernameLabel"></span>
 </div>
 
-<!-- Chat Messages -->
-<div id="chatMessages">
-  <!-- Example message -->
-  <div class="chatMessage">
-    <div class="userProfilePic"></div>
-    <div class="messageContent">
-      <span class="usernameLabel"></span>
-      <div class="replyBox">Replied to someone</div>
-      <p>Hello, this is a test message!</p>
-      <div class="editedTag"></div>
-    </div>
-  </div>
-</div>
+<!-- Messages -->
+<div id="chatMessages"></div>
 
 <!-- Input -->
 <div id="chatInputWrapper">
@@ -231,7 +217,7 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
@@ -247,21 +233,17 @@ function colorFrom(str){
   return `hsl(${h%360},70%,50%)`;
 }
 
-// Elements
 const chatHeaderPic = document.querySelector("#chatHeader .userProfilePic");
 const chatHeaderUsername = document.querySelector("#chatHeader .usernameLabel");
-const allUserPics = document.querySelectorAll(".userProfilePic");
-const allUsernames = document.querySelectorAll(".usernameLabel");
+const chatMessages = document.getElementById("chatMessages");
 
-// Auth check
-onAuthStateChanged(auth, async user => {
+// Auth + username/pfp
+onAuthStateChanged(auth, async user=>{
   if(!user) location.href="login.html";
 
-  // Username
   const snap = await getDocs(query(collection(db,"usernames"), where("uid","==", user.uid)));
   const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
 
-  // PFP
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
   let pfpURL = "";
   if(pfpDoc.exists() && pfpDoc.data().data) pfpURL = pfpDoc.data().data;
@@ -271,37 +253,33 @@ onAuthStateChanged(auth, async user => {
     chatHeaderPic.style.backgroundImage = `url(${pfpURL})`;
     chatHeaderPic.textContent="";
   } else {
-    chatHeaderPic.style.backgroundImage = "";
+    chatHeaderPic.style.backgroundImage="";
     chatHeaderPic.textContent = username[0].toUpperCase();
     chatHeaderPic.style.backgroundColor = colorFrom(username);
   }
-  chatHeaderUsername.textContent = username;
+  chatHeaderUsername.textContent=username;
 
-  // All messages
-  allUserPics.forEach(el=>{
-    if(pfpURL){
-      el.style.backgroundImage = `url(${pfpURL})`;
-      el.textContent="";
-    } else {
-      el.style.backgroundImage = "";
-      el.textContent = username[0].toUpperCase();
-      el.style.backgroundColor = colorFrom(username);
-    }
-  });
-
-  allUsernames.forEach(el=> el.textContent = username);
+  // Example: Add a message dynamically
+  const msgDiv = document.createElement("div");
+  msgDiv.classList.add("chatMessage");
+  msgDiv.innerHTML = `
+    <div class="userProfilePic" style="${pfpURL?`background-image:url(${pfpURL})`:`background-color:${colorFrom(username)};`}">
+      ${pfpURL?"":username[0].toUpperCase()}
+    </div>
+    <div class="messageContent">
+      <span class="usernameLabel">${username}</span>
+      <p>Welcome back to chat!</p>
+    </div>
+  `;
+  chatMessages.appendChild(msgDiv);
 });
 
-/* Menu logic */
-const menuBtn = document.getElementById("menuBtn");
-const closeMenu = document.getElementById("closeMenu");
+// Menu logic
+document.getElementById("menuBtn").onclick = ()=>document.body.classList.add("menu-open");
+document.getElementById("closeMenu").onclick = ()=>document.body.classList.remove("menu-open");
 
-menuBtn.onclick = () => document.body.classList.add("menu-open");
-closeMenu.onclick = () => document.body.classList.remove("menu-open");
-
-document.getElementById("tabDashboard").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="dashboard.html",350); };
-document.getElementById("tabSettings").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350); };
+document.getElementById("tabDashboard").onclick = ()=>{ document.body.classList.remove("menu-open"); setTimeout(()=>location.href="dashboard.html",350); };
+document.getElementById("tabSettings").onclick = ()=>{ document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350); };
 </script>
-
 </body>
 </html>
