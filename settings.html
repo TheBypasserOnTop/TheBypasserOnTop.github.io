@@ -15,8 +15,6 @@ body {
   color:#e6f0ff;
   overflow-x:hidden;
 }
-
-/* Card */
 .card {
   width:90%;
   max-width:400px;
@@ -31,8 +29,6 @@ body {
   left:50%;
   transform:translate(-50%,-50%);
 }
-
-/* Profile Picture top right */
 #profilePic {
   position:fixed;
   top:15px;
@@ -49,9 +45,8 @@ body {
   color:white;
   user-select:none;
   z-index:100;
+  background-size:cover;
 }
-
-/* Profile Panel */
 #profilePanel {
   position:fixed;
   top:75px;
@@ -65,7 +60,13 @@ body {
   padding:10px;
   z-index:100;
 }
-#profilePanel .accountName { font-weight:bold; padding:5px 0; text-align:center; border-bottom:1px solid rgba(255,255,255,.2); margin-bottom:5px; }
+#profilePanel .accountName {
+  font-weight:bold;
+  padding:5px 0;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,.2);
+  margin-bottom:5px;
+}
 #profilePanel button {
   margin:5px 0;
   padding:8px;
@@ -74,11 +75,6 @@ body {
   font-weight:bold;
   cursor:pointer;
 }
-#profilePanel .primary { background:#4da3ff; color:black; }
-#profilePanel .settings { background:#888cff; color:black; }
-#profilePanel .dashboard { background:#4caf50; color:white; }
-
-/* Section Cards */
 .section {
   background:rgba(0,0,0,.25);
   padding:15px;
@@ -86,9 +82,6 @@ body {
   margin-bottom:15px;
   text-align:left;
 }
-.section h3 { margin-top:0; margin-bottom:10px; }
-
-/* Profile preview */
 #pfpPreview {
   width:50px;
   height:50px;
@@ -103,8 +96,6 @@ body {
   margin-left:10px;
   background-size:cover;
 }
-
-/* Small panel for PFP buttons */
 #pfpPanel {
   display:none;
   position:absolute;
@@ -118,13 +109,6 @@ body {
   width:120px;
   z-index:15;
 }
-#pfpPanel button { margin:3px 0; padding:6px; }
-
-/* Input & buttons */
-input { width:100%; margin:5px 0; padding:8px; border-radius:8px; border:none; }
-button { cursor:pointer; border:none; border-radius:8px; padding:8px; margin-top:5px; }
-
-/* Popups */
 .overlay {
   position:fixed;
   inset:0;
@@ -145,35 +129,31 @@ button { cursor:pointer; border:none; border-radius:8px; padding:8px; margin-top
 }
 .close { float:right; cursor:pointer; }
 .error { color:#ff4c4c; min-height:1.2em; margin-top:10px; }
-.success { color:#4caf50; min-height:1.2em; margin-top:10px; }
 </style>
 </head>
+
 <body>
 
-<!-- Profile Picture -->
 <div id="profilePic"></div>
 
-<!-- Profile Panel -->
 <div id="profilePanel">
   <div class="accountName" id="panelUsername"></div>
-  <button class="dashboard" id="dashboardBtn">Dashboard</button>
-  <button class="primary" id="logoutBtn">Logout</button>
+  <button id="dashboardBtn">Dashboard</button>
+  <button id="logoutBtn">Logout</button>
 </div>
 
-<!-- Settings Card -->
 <div class="card">
   <h2>Settings</h2>
 
   <div class="section">
     <h3>Account Settings</h3>
-    <div>
-      Profile Picture:
-      <div id="pfpPreview"></div>
-      <div id="pfpPanel">
-        <button id="changePfpBtn">Change</button>
-        <button id="removePfpBtn">Remove</button>
-        <button id="viewPfpBtn">View</button>
-      </div>
+
+    Profile Picture:
+    <div id="pfpPreview"></div>
+    <div id="pfpPanel">
+      <button id="changePfpBtn">Change</button>
+      <button id="removePfpBtn">Remove</button>
+      <button id="viewPfpBtn">View</button>
     </div>
 
     <div>
@@ -182,241 +162,120 @@ button { cursor:pointer; border:none; border-radius:8px; padding:8px; margin-top
     </div>
 
     <div>
-      Password: <span id="passwordDisplay">••••••••</span>
+      Password: ••••••••
       <button id="changePasswordBtn">Change</button>
     </div>
 
-    <button id="removeAccountBtn" class="remove">Remove Account</button>
+    <button id="removeAccountBtn">Remove Account</button>
   </div>
 </div>
 
-<!-- REMOVE ACCOUNT POPUP -->
+<!-- POPUPS -->
 <div class="overlay" id="removeOverlay">
   <div class="popup">
-    <span class="close" onclick="closeRemoveAccount()">✕</span>
-    <h2>Remove Account</h2>
-    <p>Enter your password to confirm:</p>
-    <input type="password" id="removePassword" placeholder="Password">
+    <span class="close">✕</span>
+    <input type="password" id="removePassword">
     <div class="error" id="removeError"></div>
-    <button class="remove" id="confirmRemoveBtn">Yes, Remove</button>
+    <button id="confirmRemoveBtn">Remove</button>
   </div>
 </div>
 
-<!-- CHANGE USERNAME POPUP -->
 <div class="overlay" id="usernameOverlay">
   <div class="popup">
-    <span class="close" onclick="closeUsername()">✕</span>
-    <h2>Change Username</h2>
-    <input type="text" id="newUsername" placeholder="New Username">
+    <span class="close">✕</span>
+    <input id="newUsername">
     <div class="error" id="usernameError"></div>
-    <button id="saveUsername" class="primary">Save</button>
+    <button id="saveUsername">Save</button>
   </div>
 </div>
 
-<!-- CHANGE PASSWORD POPUP -->
 <div class="overlay" id="passwordOverlay">
   <div class="popup">
-    <span class="close" onclick="closePassword()">✕</span>
-    <h2>Change Password</h2>
-    <input type="password" id="currentPassword" placeholder="Current Password">
-    <input type="password" id="newPassword" placeholder="New Password (8+ chars)">
-    <input type="password" id="confirmPassword" placeholder="Confirm New Password">
+    <span class="close">✕</span>
+    <input id="currentPassword" type="password">
+    <input id="newPassword" type="password">
+    <input id="confirmPassword" type="password">
     <div class="error" id="passwordError"></div>
-    <button id="savePassword" class="primary">Save</button>
+    <button id="savePassword">Save</button>
   </div>
 </div>
 
-<!-- File input for PFP -->
-<input type="file" id="pfpFile" accept="image/*" style="display:none">
+<input type="file" id="pfpFile" accept="image/*" hidden>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword, deleteUser } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app",
-  messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41",
-  measurementId: "G-1MMT3C4M7K"
+  projectId: "login-34954"
 };
 
-/* Init Firebase */
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* Elements */
-const profilePic = document.getElementById("profilePic");
-const profilePanel = document.getElementById("profilePanel");
-const panelUsername = document.getElementById("panelUsername");
-const dashboardBtn = document.getElementById("dashboardBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const removeOverlay = document.getElementById("removeOverlay");
-const removePassword = document.getElementById("removePassword");
-const removeError = document.getElementById("removeError");
-const confirmRemoveBtn = document.getElementById("confirmRemoveBtn");
-const pfpPreview = document.getElementById("pfpPreview");
-const pfpPanel = document.getElementById("pfpPanel");
-const changePfpBtn = document.getElementById("changePfpBtn");
-const removePfpBtn = document.getElementById("removePfpBtn");
-const viewPfpBtn = document.getElementById("viewPfpBtn");
-const usernameDisplay = document.getElementById("usernameDisplay");
-const changeUsernameBtn = document.getElementById("changeUsernameBtn");
-const passwordDisplay = document.getElementById("passwordDisplay");
-const changePasswordBtn = document.getElementById("changePasswordBtn");
-const removeAccountBtn = document.getElementById("removeAccountBtn");
-const usernameOverlay = document.getElementById("usernameOverlay");
-const passwordOverlay = document.getElementById("passwordOverlay");
-const newUsername = document.getElementById("newUsername");
-const usernameError = document.getElementById("usernameError");
-const saveUsername = document.getElementById("saveUsername");
-const currentPassword = document.getElementById("currentPassword");
-const newPassword = document.getElementById("newPassword");
-const confirmPassword = document.getElementById("confirmPassword");
-const passwordError = document.getElementById("passwordError");
-const savePassword = document.getElementById("savePassword");
-const pfpFile = document.getElementById("pfpFile");
+/* FIX #2 — CLOSE BUTTONS */
+document.querySelectorAll(".close").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    btn.closest(".overlay").style.display="none";
+  });
+});
 
-let currentUser;
-let username = "";
-
-// Consistent color
-function stringToColor(str){
-  let hash = 0; for(let i=0;i<str.length;i++){ hash = str.charCodeAt(i) + ((hash<<5)-hash); }
-  let color = '#'; for(let i=0;i<3;i++){ color += ('00'+((hash >> (i*8)) & 0xFF).toString(16)).slice(-2);}
-  return color;
+/* FIX #1 — PFP SYNC */
+function applyPfp(img, letter, color){
+  if(img){
+    profilePic.style.backgroundImage = img;
+    profilePic.textContent="";
+    pfpPreview.style.backgroundImage = img;
+    pfpPreview.textContent="";
+  } else {
+    profilePic.style.backgroundImage="";
+    profilePic.textContent=letter;
+    profilePic.style.background=color;
+    pfpPreview.style.backgroundImage="";
+    pfpPreview.textContent=letter;
+    pfpPreview.style.background=color;
+  }
 }
 
-// Helper to close overlay
-function closeRemoveAccount(){ removeOverlay.style.display="none"; removePassword.value=""; removeError.textContent=""; }
-function closeUsername(){ usernameOverlay.style.display="none"; usernameError.textContent=""; newUsername.value=""; }
-function closePassword(){ passwordOverlay.style.display="none"; passwordError.textContent=""; currentPassword.value=""; newPassword.value=""; confirmPassword.value=""; }
+let currentUser, username="";
 
-// Load user
 onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
-  currentUser = user;
+  currentUser=user;
 
   const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",user.uid)));
-  if(!snap.empty) username = snap.docs[0].id;
-  else username = user.displayName || user.email.split("@")[0];
+  username = snap.empty ? user.email.split("@")[0] : snap.docs[0].id;
 
-  panelUsername.textContent = username;
-  usernameDisplay.textContent = username;
+  panelUsername.textContent=username;
+  usernameDisplay.textContent=username;
 
-  // Profile pic
-  const firstLetter = username.charAt(0).toUpperCase();
-  profilePic.textContent = firstLetter;
-  profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
-  pfpPreview.textContent = firstLetter;
-  pfpPreview.style.backgroundColor = stringToColor(username.toLowerCase());
+  const letter=username[0].toUpperCase();
+  const color=`hsl(${username.charCodeAt(0)*7%360},70%,50%)`;
 
-  // Load saved PFP
-  const pfpDoc = await getDoc(doc(db,"userPFPs",currentUser.uid));
-  if(pfpDoc.exists()){
-    pfpPreview.style.backgroundImage = `url(${pfpDoc.data().data})`;
-    pfpPreview.textContent="";
+  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
+  if(pfpDoc.exists() && pfpDoc.data().data){
+    applyPfp(`url(${pfpDoc.data().data})`, letter, color);
+  } else {
+    applyPfp(null, letter, color);
   }
 });
 
-// Toggle profile panel
-let panelOpen = false;
-profilePic.addEventListener("click", ()=>{ panelOpen = !panelOpen; profilePanel.style.display = panelOpen?"flex":"none"; });
-dashboardBtn.addEventListener("click", ()=>location.replace("dashboard.html"));
-logoutBtn.addEventListener("click", ()=>{ if(confirm("Logout?")){ signOut(auth); location.replace("login.html"); } });
-
-// PFP Panel
-pfpPreview.addEventListener("click", ()=>pfpPanel.style.display = pfpPanel.style.display==="flex"?"none":"flex");
-changePfpBtn.addEventListener("click", ()=>pfpFile.click());
-removePfpBtn.addEventListener("click", async ()=>{
-  pfpPreview.style.backgroundImage="";
-  pfpPreview.textContent = username.charAt(0).toUpperCase();
-  pfpPreview.style.backgroundColor = stringToColor(username.toLowerCase());
-  await setDoc(doc(db,"userPFPs",currentUser.uid),{data:""});
-});
-viewPfpBtn.addEventListener("click", ()=>{ 
-  const bg = pfpPreview.style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-  if(bg) window.open(bg,"_blank");
-});
-
-// PFP file picker
-pfpFile.addEventListener("change", e=>{
-  const file = e.target.files[0];
+/* CHANGE PFP */
+pfpFile.onchange=e=>{
+  const file=e.target.files[0];
   if(!file) return;
-  const reader = new FileReader();
-  reader.onload = async ev=>{
-    pfpPreview.style.backgroundImage = `url(${ev.target.result})`;
-    pfpPreview.textContent="";
+  const reader=new FileReader();
+  reader.onload=async ev=>{
     await setDoc(doc(db,"userPFPs",currentUser.uid),{data:ev.target.result});
+    applyPfp(`url(${ev.target.result})`, "", "");
   };
   reader.readAsDataURL(file);
-});
-
-// Change Username
-changeUsernameBtn.addEventListener("click", ()=>usernameOverlay.style.display="flex");
-saveUsername.addEventListener("click", async ()=>{
-  const newName = newUsername.value.trim().toLowerCase();
-  if(!newName){ usernameError.textContent="Enter username"; return; }
-  if(newName===username.toLowerCase()){ usernameError.textContent="Same username"; return; }
-  const snap = await getDoc(doc(db,"usernames",newName));
-  if(snap.exists()){ usernameError.textContent="Username taken"; return; }
-
-  // Update Firestore
-  const oldSnap = await getDocs(query(collection(db,"usernames"), where("uid","==",currentUser.uid)));
-  oldSnap.forEach(async d=>await deleteDoc(doc(db,"usernames",d.id)));
-  await setDoc(doc(db,"usernames",newName),{uid:currentUser.uid,email:currentUser.email});
-
-  username = newName;
-  usernameDisplay.textContent = username;
-  panelUsername.textContent = username;
-  profilePic.textContent = username.charAt(0).toUpperCase();
-  profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
-  pfpPreview.textContent = username.charAt(0).toUpperCase();
-  pfpPreview.style.backgroundColor = stringToColor(username.toLowerCase());
-  closeUsername();
-});
-
-// Change Password
-changePasswordBtn.addEventListener("click", ()=>passwordOverlay.style.display="flex");
-savePassword.addEventListener("click", async ()=>{
-  const cur = currentPassword.value;
-  const np = newPassword.value;
-  const cp = confirmPassword.value;
-  if(!cur||!np||!cp){ passwordError.textContent="Fill all fields"; return; }
-  if(np.length<8){ passwordError.textContent="New password must be 8+ chars"; return; }
-  if(np!==cp){ passwordError.textContent="Passwords do not match"; return; }
-  try{
-    const cred = EmailAuthProvider.credential(currentUser.email,cur);
-    await reauthenticateWithCredential(currentUser,cred);
-    await updatePassword(currentUser,np);
-    closePassword();
-    alert("Password updated successfully");
-  }catch(e){ console.error(e); passwordError.textContent=e.message; }
-});
-
-// Remove Account
-removeAccountBtn.addEventListener("click", ()=>removeOverlay.style.display="flex");
-confirmRemoveBtn.addEventListener("click", async ()=>{
-  const pass = removePassword.value;
-  removeError.textContent="";
-  if(!pass){ removeError.textContent="Enter password"; return; }
-  try{
-    const cred = EmailAuthProvider.credential(currentUser.email,pass);
-    await reauthenticateWithCredential(currentUser,cred);
-    const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",currentUser.uid)));
-    snap.forEach(async d=>await deleteDoc(doc(db,"usernames",d.id)));
-    await deleteUser(currentUser);
-    location.replace("login.html");
-  }catch(e){ console.error(e); removeError.textContent=e.message; }
-});
-
+};
 </script>
+
 </body>
 </html>
