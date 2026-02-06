@@ -5,79 +5,159 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 <link rel="icon" href="favicon.ico">
-
 <style>
-body {
+html, body {
   margin:0;
-  min-height:100vh;
+  padding:0;
+  min-height:100%;
   font-family:system-ui,sans-serif;
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   color:#e6f0ff;
   overflow-x:hidden;
-  position:relative;
 }
 
-/* Cards container */
-#mainContent {
-  width:90%;
-  max-width:500px;
-  margin:0 auto;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding-top:50vh; /* initial vertical center */
-  transform:translateY(-50%);
-}
-
-/* Welcome card */
-.card {
+/* Centered welcome card */
+#welcomeWrapper {
   width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  min-height:80vh;
+  position:relative;
+  z-index:1;
+}
+.card {
+  width:90%;
+  max-width:400px;
+  padding:30px;
   background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
   border-radius:20px;
-  padding:30px;
-  text-align:center;
   box-shadow:0 20px 60px rgba(0,0,0,.4);
-  margin-bottom:20px;
+  text-align:center;
+  margin:20px auto;
+  z-index:10;
 }
-
-/* Welcome subtext */
-#welcomeSub {
+h2 { margin-bottom:10px; }
+.subtext {
   font-size:0.9rem;
   opacity:0;
+  transition: opacity 2s;
   margin-top:10px;
-  transition:opacity 1.5s;
+  color:#cfd8f0;
 }
 
-/* Scroll down hint */
-#scrollHint {
-  position:fixed;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:0.9rem;
-  animation: float 2s ease-in-out infinite;
-  z-index:1;
+/* Scroll text bottom */
+#scrollText {
+  text-align:center;
+  font-weight:500;
+  animation: upDown 2s ease-in-out infinite alternate;
+  color:#cfd8f0;
+  margin:20px 0;
 }
-@keyframes float {
-  0%,100%{transform:translateX(-50%) translateY(0);}
-  50%{transform:translateX(-50%) translateY(-5px);}
+@keyframes upDown{
+  0%{ transform:translateY(0);}
+  100%{ transform:translateY(-10px);}
 }
 
-/* Info cards */
-.infoCard {
-  width:100%;
-  background:rgba(12,25,55,.55);
-  backdrop-filter:blur(10px);
-  border-radius:16px;
+/* Scroll cards */
+.scroll-card {
+  width:90%;
+  max-width:350px;
   padding:20px;
-  margin-bottom:20px;
+  background:rgba(12,25,55,.7);
+  border-radius:15px;
+  margin:30px auto;
   opacity:0;
-  transform:translateY(50px);
-  transition:opacity 0.8s ease, transform 0.8s ease;
+  transform:translateY(30px);
+  transition:all 1s ease;
 }
 
-/* Profile pic */
+/* Hamburger menu */
+#menuBtn {
+  position:fixed;
+  top:20px;
+  left:20px;
+  width:32px;
+  height:24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  cursor:pointer;
+  z-index:150;
+  transition:opacity .3s, transform .3s;
+}
+#menuBtn span {
+  height:4px;
+  background:white;
+  border-radius:4px;
+}
+body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
+
+/* Side panel */
+#sidePanel {
+  position:fixed;
+  top:0;
+  left:-300px;
+  width:260px;
+  height:100%;
+  background:rgba(12,25,55,.95);
+  backdrop-filter:blur(16px);
+  padding:20px;
+  box-sizing:border-box;
+  z-index:200;
+  transition:left .35s ease;
+  display:flex;
+  flex-direction:column;
+}
+body.menu-open #sidePanel { left:0; }
+
+/* Side panel header */
+#sidePanelHeader {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+#sidePanelHeader h3 { margin:0 auto; }
+#closeMenu { cursor:pointer; font-size:1.4rem; }
+
+/* Divider */
+.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
+
+/* Search */
+#navSearch {
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,.08);
+  color:white;
+  margin-bottom:15px;
+}
+
+/* Tabs */
+.nav-tab {
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  margin-bottom:8px;
+  font-weight:600;
+}
+.nav-tab.active { background:#4da3ff; color:black; }
+.nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
+
+/* Blur layer */
+.blur-layer {
+  position:absolute;
+  inset:0;
+  z-index:5;
+}
+body.menu-open .blur-layer {
+  backdrop-filter: blur(8px);
+  pointer-events:none;
+}
+
+/* Top-right PFP */
 #profilePic {
   position:fixed;
   top:20px;
@@ -86,17 +166,16 @@ body {
   height:50px;
   border-radius:50%;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
   font-weight:bold;
   font-size:1.3rem;
   color:white;
   cursor:pointer;
   user-select:none;
   z-index:100;
-  background-size:contain;
+  background-size:cover;
   background-position:center;
-  background-repeat:no-repeat;
 }
 
 /* Profile panel */
@@ -113,7 +192,13 @@ body {
   padding:10px;
   z-index:100;
 }
-#profilePanel h4 { margin:0 0 8px 0; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px; }
+#profilePanel h4 {
+  margin:0 0 8px 0;
+  font-size:1rem;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+  padding-bottom:5px;
+}
 #profilePanel button {
   width:100%;
   margin:5px 0;
@@ -126,241 +211,163 @@ body {
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
 
-/* Menu button */
-#menuBtn {
-  position:fixed;
-  top:20px;
-  left:20px;
-  width:40px;
-  height:40px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-around;
-  cursor:pointer;
-  z-index:120;
-}
-#menuBtn span {
-  height:4px;
-  background:white;
-  border-radius:2px;
-}
-
-/* Side menu panel */
-#sidePanel {
-  position:fixed;
-  top:0;
-  left:-250px;
-  width:250px;
-  height:100%;
-  background:rgba(12,25,55,.95);
-  backdrop-filter:blur(10px);
-  z-index:110;
-  display:flex;
-  flex-direction:column;
-  padding:20px;
-  transition:left 0.4s ease;
-}
-#sidePanel.active { left:0; }
-#sidePanel h3 { text-align:center; margin:0 0 15px 0; }
-#sidePanel hr { border:none; height:1px; background:#555; margin-bottom:15px; }
-#sidePanel input { padding:8px; border-radius:6px; border:none; margin-bottom:15px; }
-.sideTab {
-  padding:10px;
-  border-radius:8px;
-  cursor:pointer;
-  margin-bottom:10px;
-  text-align:center;
-}
-.sideTab.active { background:#4da3ff; color:black; font-weight:bold; }
-#sideClose {
-  position:absolute;
-  top:15px;
-  right:15px;
-  cursor:pointer;
-  font-weight:bold;
-  font-size:1.2rem;
-}
-
-/* Overlay blur behind side panel */
-#panelOverlay {
+/* Overlay popups (logout/remove) */
+.overlay {
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.3);
-  backdrop-filter:blur(3px);
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(6px);
   display:none;
-  z-index:100;
+  justify-content:center;
+  align-items:center;
+  z-index:200;
 }
+.popup {
+  width:90vw;
+  max-width:400px;
+  background:#0c1937;
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+  position:relative;
+}
+.close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.2rem; }
+.error { color:#ff6b6b; margin-top:10px; min-height:1.2em; text-align:left; }
 
 </style>
 </head>
 <body>
 
-<!-- Menu Button -->
+<!-- Hamburger menu -->
 <div id="menuBtn"><span></span><span></span><span></span></div>
-
-<!-- Panel Overlay -->
-<div id="panelOverlay"></div>
-
-<!-- Side Panel -->
 <div id="sidePanel">
-  <span id="sideClose">X</span>
-  <h3>Navigation</h3>
-  <hr>
-  <input type="text" placeholder="Search...">
-  <div class="sideTab active" data-target="dashboard">Dashboard</div>
-  <div class="sideTab" data-target="communicate">Communicate</div>
-  <div class="sideTab" data-target="settings">Settings</div>
+  <div id="sidePanelHeader">
+    <div></div>
+    <h3>Navigation</h3>
+    <div id="closeMenu">✕</div>
+  </div>
+  <div class="divider"></div>
+  <input id="navSearch" placeholder="Search...">
+  <div class="nav-tab active" id="tabDashboard">Dashboard</div>
+  <div class="nav-tab" id="tabCommunicate">Communicate</div>
+  <div class="nav-tab" id="tabSettings">Settings</div>
 </div>
+<div class="blur-layer"></div>
 
-<!-- Profile Pic & Panel -->
-<div id="profilePic"></div>
-<div id="profilePanel">
-  <h4 id="profileName"></h4>
-  <button class="primary" onclick="location.href='settings.html'">Settings</button>
-  <button class="primary" onclick="confirmLogout()">Logout</button>
-</div>
-
-<!-- Main content -->
-<div id="mainContent">
+<!-- Centered welcome card -->
+<div id="welcomeWrapper">
   <div class="card">
     <h2 id="welcomeText">Welcome</h2>
-    <div id="welcomeSub">Use the menu to navigate</div>
+    <div class="subtext" id="welcomeSubtext">Use the menu to navigate</div>
   </div>
-  <div class="infoCard">Our website is fast and responsive.</div>
-  <div class="infoCard">You can customize your profile picture and username.</div>
-  <div class="infoCard">Check out the communicate tab to chat with others.</div>
 </div>
 
-<div id="scrollHint">Scroll down for more info</div>
+<!-- Scroll cards -->
+<div class="scroll-card">🚀 Cool feature 1: Fast, responsive design</div>
+<div class="scroll-card">💡 Tip: Use the menu to quickly access sections</div>
+<div class="scroll-card">🎨 Design: Radial gradient background + smooth animations</div>
+<div id="scrollText">Scroll down for more info</div>
 
-<!-- Logout Confirm Overlay -->
-<div class="overlay" id="logoutOverlay">
-  <div class="popup">
-    <span class="close" onclick="closeLogout()">✕</span>
-    <h2>Confirm Logout</h2>
-    <p>Are you sure you want to logout?</p>
-    <button class="primary" onclick="logout()">Yes</button>
-    <button class="remove" onclick="closeLogout()">No</button>
-  </div>
+<!-- Profile pic top-right -->
+<div id="profilePic"></div>
+<div id="profilePanel">
+  <h4 id="profileName">Username</h4>
+  <button class="primary" onclick="openSettings()">Settings</button>
+  <button class="primary" onclick="confirmLogout()">Logout</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-/* Firebase init */
+/* Firebase config */
 const firebaseConfig = {
-  apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain:"login-34954.firebaseapp.com",
-  projectId:"login-34954"
+  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain: "login-34954.firebaseapp.com",
+  projectId: "login-34954",
+  storageBucket: "login-34954.firebasestorage.app",
+  messagingSenderId: "422184727508",
+  appId: "1:422184727508:web:cef39fc913d526febe9c41",
+  measurementId: "G-1MMT3C4M7K"
 };
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* Elements */
+const welcomeSubtext = document.getElementById("welcomeSubtext");
+const scrollCards = document.querySelectorAll(".scroll-card");
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
-const mainContent = document.getElementById("mainContent");
-const infoCards = document.querySelectorAll(".infoCard");
-const welcomeSub = document.getElementById("welcomeSub");
-const menuBtn = document.getElementById("menuBtn");
-const sidePanel = document.getElementById("sidePanel");
-const panelOverlay = document.getElementById("panelOverlay");
-const sideClose = document.getElementById("sideClose");
-const sideTabs = document.querySelectorAll(".sideTab");
-const logoutOverlay = document.getElementById("logoutOverlay");
 
-/* Utility */
+/* Profile pic letter color */
 function stringToColor(str){
-  let hash=0;
-  for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash); }
-  let color='#';
-  for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2); }
+  let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
+  let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
   return color;
 }
 
-/* Auth */
+/* Auth check */
 onAuthStateChanged(auth, async user=>{
-  if(!user) location.href="login.html";
+  if(!user) location.replace("login.html");
+  let username = user.displayName;
+  if(!username){
+    const q=query(collection(db,"usernames"),where("uid","==",user.uid));
+    const snap=await getDocs(q);
+    username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+  }
+  document.getElementById("welcomeText").textContent=`Welcome, ${username}`;
+  profileName.textContent=username;
+  welcomeSubtext.style.opacity=1;
 
-  // Username
-  const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
-  const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
-
-  profileName.textContent = username;
-  profilePic.textContent = username[0].toUpperCase();
-  profilePic.style.backgroundColor = stringToColor(username);
-
-  // Load PFP
+  // Profile pic
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
     profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
     profilePic.textContent = "";
-    profilePic.style.backgroundSize = "contain";
-    profilePic.style.backgroundPosition = "center";
+  } else {
+    profilePic.style.backgroundImage = "";
+    profilePic.textContent = username.charAt(0).toUpperCase();
+    profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
   }
 });
 
 /* Profile panel toggle */
-let panelOpen = false;
+let panelOpen=false;
 profilePic.addEventListener("click", ()=>{
-  panelOpen = !panelOpen;
-  profilePanel.style.display = panelOpen ? "flex":"none";
+  panelOpen=!panelOpen;
+  profilePanel.style.display=panelOpen?"flex":"none";
 });
 
-/* Menu panel logic */
-menuBtn.addEventListener("click", ()=>{
-  sidePanel.classList.add("active");
-  panelOverlay.style.display="block";
-  menuBtn.style.display="none";
-});
-sideClose.addEventListener("click", closeSidePanel);
-panelOverlay.addEventListener("click", closeSidePanel);
-function closeSidePanel(){
-  sidePanel.classList.remove("active");
-  panelOverlay.style.display="none";
-  menuBtn.style.display="flex";
-}
+/* Menu logic */
+const menuBtn = document.getElementById("menuBtn");
+const closeMenu = document.getElementById("closeMenu");
+const sidePanel = document.getElementById("sidePanel");
+menuBtn.onclick = () => document.body.classList.add("menu-open");
+closeMenu.onclick = () => document.body.classList.remove("menu-open");
 
-/* Side tabs */
-sideTabs.forEach(tab=>{
-  tab.addEventListener("click", ()=>{
-    const target = tab.dataset.target;
-    // animate panel close then redirect
-    closeSidePanel();
-    setTimeout(()=>{
-      if(target==="dashboard") location.href="dashboard.html";
-      if(target==="settings") location.href="settings.html";
-      if(target==="communicate") location.href="chat.html";
-    },400);
-  });
-});
+/* Tabs */
+document.getElementById("tabDashboard").onclick = () => document.body.classList.remove("menu-open");
+document.getElementById("tabSettings").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350);}
+document.getElementById("tabCommunicate").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="chat.html",350);}
 
-/* Logout overlay */
-window.confirmLogout = ()=>logoutOverlay.style.display="flex";
-window.closeLogout = ()=>logoutOverlay.style.display="none";
-window.logout = async ()=>{
-  await signOut(auth);
-  location.href="login.html";
-};
-
-/* Animate welcome subtext */
-setTimeout(()=>{ welcomeSub.style.opacity=1; },500);
-
-/* Scroll reveal cards */
-window.addEventListener("scroll", ()=>{
-  infoCards.forEach(card=>{
-    const rect = card.getBoundingClientRect();
-    if(rect.top < window.innerHeight-100){
-      card.style.opacity=1;
-      card.style.transform="translateY(0)";
+/* Scroll fade-in */
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.style.opacity=1;
+      e.target.style.transform="translateY(0)";
     }
   });
-});
-</script>
+},{threshold:0.1});
+scrollCards.forEach(c=>observer.observe(c));
 
+/* Logout/settings buttons */
+window.openSettings = ()=>location.href="settings.html";
+window.confirmLogout = ()=>{ if(confirm("Are you sure you want to logout?")) signOut(auth).then(()=>location.href="login.html"); };
+</script>
 </body>
 </html>
