@@ -6,49 +6,36 @@
 <title>Chat</title>
 <link rel="icon" href="favicon.ico">
 <style>
-html, body {
-  margin:0; padding:0; font-family:system-ui,sans-serif;
-  background:#050b1a; color:#e6f0ff; overflow-x:hidden;
-}
-
+html, body { margin:0; padding:0; font-family:system-ui,sans-serif; background:#050b1a; color:#e6f0ff; overflow-x:hidden; }
 /* Hamburger menu */
 #menuBtn { position:fixed; top:20px; left:20px; width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; z-index:150; transition:opacity .3s, transform .3s; }
 #menuBtn span { height:4px; background:white; border-radius:4px; }
 body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
-
 /* Side panel */
 #sidePanel { position:fixed; top:0; left:-300px; width:260px; height:100%; background:#0c1937; padding:20px; box-sizing:border-box; z-index:200; transition:left .35s ease; display:flex; flex-direction:column; }
 body.menu-open #sidePanel { left:0; }
-
 /* Side panel header */
 #sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
 #sidePanelHeader h3 { margin:0 auto; }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
-
 /* Divider */
 .divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
-
 /* Tabs */
 .nav-tab { padding:12px; border-radius:10px; cursor:pointer; margin-bottom:8px; font-weight:600; }
 .nav-tab.active { background:#4da3ff; color:black; }
 .nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
-
 /* Top-right PFP */
 #profilePic { position:fixed; top:20px; right:20px; width:50px; height:50px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:1.3rem; color:white; cursor:pointer; user-select:none; z-index:100; background-size:cover; background-position:center; }
-
 /* Profile panel */
 #profilePanel { position:fixed; top:80px; right:20px; width:180px; background:#0c1937; border-radius:14px; display:none; flex-direction:column; padding:10px; z-index:100; }
 #profilePanel h4 { margin:0 0 8px 0; font-size:1rem; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px; }
 #profilePanel button { width:100%; margin:5px 0; padding:10px; border:none; border-radius:10px; font-weight:600; cursor:pointer; }
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
-
 /* Chat header island */
 #chatHeader { width:90%; max-width:600px; margin:100px auto 0 auto; background:#0c1937; padding:12px 20px; border-radius:15px; font-weight:bold; font-size:1.2rem; text-align:center; }
-
 /* Chat wrapper */
 #chatWrapper { max-width:600px; width:90%; margin:10px auto 80px auto; display:flex; flex-direction:column; gap:12px; }
-
 /* Messages */
 .message { display:flex; gap:10px; align-items:flex-start; background:#0c1937; padding:10px; border-radius:15px; max-width:100%; word-wrap:break-word; position:relative; }
 .message .pfp { width:40px; height:40px; border-radius:50%; flex-shrink:0; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; }
@@ -56,15 +43,12 @@ body.menu-open #sidePanel { left:0; }
 .message .username { font-weight:600; }
 .message .time { font-size:0.7rem; color:#cfd8f0; }
 .message .edited { font-size:0.7rem; color:#ffb74d; }
-
 /* Replies */
 .reply { margin-left:50px; background:rgba(255,255,255,0.05); padding:6px 10px; border-radius:12px; font-size:0.9rem; }
-
 /* Chat input fixed bottom */
 #chatInputWrapper { position:fixed; bottom:0; left:0; width:100%; display:flex; gap:10px; padding:10px; box-sizing:border-box; background:#0c1937; z-index:100; }
 #chatInput { flex:1; padding:12px; border-radius:12px; border:none; font-size:1rem; outline:none; }
 #sendBtn { padding:12px 16px; border:none; border-radius:12px; background:#4da3ff; color:black; cursor:pointer; font-size:1.2rem; font-weight:bold; }
-
 /* Message buttons */
 .msg-btn { font-size:0.7rem; cursor:pointer; background:rgba(255,255,255,.2); padding:2px 5px; border-radius:5px; color:white; margin-left:5px; display:inline-block; }
 .msg-btn-container { margin-top:5px; display:flex; gap:5px; }
@@ -81,8 +65,8 @@ body.menu-open #sidePanel { left:0; }
     <div id="closeMenu">✕</div>
   </div>
   <div class="divider"></div>
-  <div class="nav-tab active" id="tabDashboard">Dashboard</div>
-  <div class="nav-tab" id="tabCommunicate">Communicate</div>
+  <div class="nav-tab" id="tabDashboard">Dashboard</div>
+  <div class="nav-tab active" id="tabCommunicate">Communicate</div>
   <div class="nav-tab" id="tabSettings">Settings</div>
 </div>
 <div class="blur-layer"></div>
@@ -136,21 +120,19 @@ const profileName = document.getElementById("profileName");
 let username = "";
 let userPfp = "";
 
-/* Color helper */
 function stringToColor(str){
   let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
   let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
   return color;
 }
 
-/* Auth check */
 onAuthStateChanged(auth, async user=>{
   if(user){
     username = user.displayName || user.email.split("@")[0];
+    userPfp = user.photoURL || "";
     profileName.textContent=username;
 
-    if(user.photoURL){
-      userPfp=user.photoURL;
+    if(userPfp){
       profilePic.style.backgroundImage=`url(${userPfp})`;
       profilePic.textContent="";
     } else {
@@ -158,15 +140,13 @@ onAuthStateChanged(auth, async user=>{
       profilePic.style.backgroundColor=stringToColor(username.toLowerCase());
     }
   } else {
-    console.log("Not logged in");
+    location.href="login.html";
   }
 });
 
-/* Profile toggle */
 let panelOpen=false;
 profilePic.addEventListener("click", ()=>{ panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none"; });
 
-/* Menu */
 document.getElementById("menuBtn").onclick = ()=>document.body.classList.add("menu-open");
 document.getElementById("closeMenu").onclick = ()=>document.body.classList.remove("menu-open");
 document.getElementById("tabSettings").onclick = ()=>location.href="settings.html";
@@ -196,13 +176,11 @@ onSnapshot(q,snap=>{
     const msgDiv=document.createElement("div");
     msgDiv.className="message";
 
-    // PFP
     const pfpDiv=document.createElement("div");
     pfpDiv.className="pfp";
     if(data.pfp) pfpDiv.style.backgroundImage=`url(${data.pfp})`;
     else { pfpDiv.textContent=data.user.charAt(0).toUpperCase(); pfpDiv.style.backgroundColor=stringToColor(data.user.toLowerCase()); }
 
-    // Content
     const contentDiv=document.createElement("div");
     contentDiv.className="content";
     const userDiv=document.createElement("div"); userDiv.className="username"; userDiv.textContent=data.user;
@@ -214,11 +192,8 @@ onSnapshot(q,snap=>{
 
     contentDiv.append(userDiv,textDiv,timeDiv,editedDiv);
 
-    // Buttons container
-    const btnContainer=document.createElement("div");
-    btnContainer.className="msg-btn-container";
+    const btnContainer=document.createElement("div"); btnContainer.className="msg-btn-container";
 
-    // Edit/Delete for own messages
     if(data.user===username){
       const editBtn=document.createElement("span"); editBtn.className="msg-btn"; editBtn.textContent="Edit";
       editBtn.onclick=async ()=>{
@@ -231,7 +206,6 @@ onSnapshot(q,snap=>{
       };
       btnContainer.append(editBtn,delBtn);
     } else {
-      // Reply button
       const replyBtn=document.createElement("span"); replyBtn.className="msg-btn"; replyBtn.textContent="Reply";
       replyBtn.onclick=async ()=>{
         const replyText=prompt("Reply to "+data.user+":");
@@ -244,7 +218,6 @@ onSnapshot(q,snap=>{
       btnContainer.append(replyBtn);
     }
 
-    // Append replies
     if(data.replies){
       data.replies.forEach(r=>{
         const replyDiv=document.createElement("div");
@@ -261,7 +234,6 @@ onSnapshot(q,snap=>{
   chatWrapper.scrollTop=chatWrapper.scrollHeight;
 });
 
-/* Profile/settings */
 window.openSettings=()=>location.href="settings.html";
 window.confirmLogout=()=>{ if(confirm("Logout?")) signOut(auth).then(()=>location.href="login.html"); };
 </script>
