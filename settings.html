@@ -42,11 +42,12 @@ body{
   justify-content:center;
   font-weight:bold;
   font-size:1.3rem;
-  color:white;
   cursor:pointer;
-  background-size:cover;
+  color:white;
+  background-size:contain;
   background-position:center;
   background-repeat:no-repeat;
+  z-index:100;
 }
 
 /* Profile panel */
@@ -61,6 +62,7 @@ body{
   display:none;
   flex-direction:column;
   padding:12px;
+  z-index:100;
 }
 #panelUsername{
   font-weight:600;
@@ -88,15 +90,19 @@ body{
   width:55px;
   height:55px;
   border-radius:50%;
-  display:flex;
+  display:inline-flex;
   align-items:center;
   justify-content:center;
   font-weight:bold;
   color:white;
   cursor:pointer;
-  background-size:cover;
+  background-size:contain;
   background-position:center;
+  background-repeat:no-repeat;
 }
+
+/* Panels */
+#pfpPanel{ display:none; margin-top:8px; }
 
 /* Overlay */
 .overlay{
@@ -107,6 +113,7 @@ body{
   display:none;
   justify-content:center;
   align-items:center;
+  z-index:200;
 }
 .overlay.show{ display:flex; }
 
@@ -118,17 +125,36 @@ body{
   border-radius:18px;
 }
 
-.close{ float:right; cursor:pointer; }
-input{ width:100%; padding:10px; margin-top:10px; border-radius:10px; border:none; }
-button{ margin-top:10px; padding:10px; border-radius:12px; border:none; font-weight:600; cursor:pointer; }
+.close{
+  float:right;
+  cursor:pointer;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+  border:none;
+}
+
+button{
+  margin-top:10px;
+  padding:10px;
+  border-radius:12px;
+  border:none;
+  font-weight:600;
+  cursor:pointer;
+}
+
 .error{ color:#ff4c4c; margin-top:8px; }
 </style>
 </head>
 
 <body>
 
-<!-- Profile -->
 <div id="profilePic"></div>
+
 <div id="profilePanel">
   <div id="panelUsername"></div>
   <button onclick="location.href='dashboard.html'">Dashboard</button>
@@ -140,9 +166,12 @@ button{ margin-top:10px; padding:10px; border-radius:12px; border:none; font-wei
 
   <div class="section">
     <strong>Profile Picture</strong><br><br>
-    <div id="pfpPreview"></div><br>
-    <button id="changePfpBtn">Change</button>
-    <button id="removePfpBtn">Remove</button>
+    <div id="pfpPreview"></div>
+
+    <div id="pfpPanel">
+      <button id="changePfpBtn">Change</button>
+      <button id="removePfpBtn">Remove</button>
+    </div>
   </div>
 
   <div class="section">
@@ -161,18 +190,18 @@ button{ margin-top:10px; padding:10px; border-radius:12px; border:none; font-wei
   </div>
 </div>
 
-<!-- Username -->
+<!-- USERNAME -->
 <div class="overlay" id="usernameOverlay">
   <div class="popup">
     <span class="close">✕</span>
     <h3>Change Username</h3>
-    <input id="newUsername">
+    <input id="newUsername" placeholder="New username">
     <div class="error" id="usernameError"></div>
     <button id="saveUsernameBtn">Save</button>
   </div>
 </div>
 
-<!-- Password -->
+<!-- PASSWORD -->
 <div class="overlay" id="passwordOverlay">
   <div class="popup">
     <span class="close">✕</span>
@@ -185,12 +214,12 @@ button{ margin-top:10px; padding:10px; border-radius:12px; border:none; font-wei
   </div>
 </div>
 
-<!-- Remove -->
+<!-- REMOVE ACCOUNT -->
 <div class="overlay" id="removeOverlay">
   <div class="popup">
     <span class="close">✕</span>
     <h3>Remove Account</h3>
-    <input type="password" id="removePassword">
+    <input type="password" id="removePassword" placeholder="Password">
     <div class="error" id="removeError"></div>
     <button id="confirmRemoveBtn">Remove</button>
   </div>
@@ -208,53 +237,61 @@ const app = initializeApp({
   authDomain:"login-34954.firebaseapp.com",
   projectId:"login-34954"
 });
+
 const auth=getAuth(app);
 const db=getFirestore(app);
 
-const profilePic=document.getElementById("profilePic");
-const pfpPreview=document.getElementById("pfpPreview");
-const panelUsername=document.getElementById("panelUsername");
-const usernameDisplay=document.getElementById("usernameDisplay");
-
-function fallbackPFP(name){
-  profilePic.textContent=name[0].toUpperCase();
-  profilePic.style.backgroundImage="";
-  profilePic.style.backgroundColor="#4da3ff";
-  pfpPreview.textContent=name[0].toUpperCase();
-  pfpPreview.style.backgroundImage="";
-  pfpPreview.style.backgroundColor="#4da3ff";
+function colorFrom(str){
+  let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
+  return `hsl(${h%360},70%,50%)`;
 }
+
+document.querySelectorAll(".close").forEach(x=>{
+  x.onclick=()=>x.closest(".overlay").classList.remove("show");
+});
+
+let username="";
 
 onAuthStateChanged(auth, async user=>{
   if(!user) location.href="login.html";
 
   const snap=await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
-  const username=!snap.empty?snap.docs[0].id:user.email.split("@")[0];
+  username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
 
-  panelUsername.textContent=username;
   usernameDisplay.textContent=username;
-  fallbackPFP(username);
+  panelUsername.textContent=username;
 
-  const pfpDoc=await getDoc(doc(db,"userPFPs",user.uid));
-  if(pfpDoc.exists() && pfpDoc.data().data){
-    profilePic.style.backgroundImage=`url(${pfpDoc.data().data})`;
-    pfpPreview.style.backgroundImage=`url(${pfpDoc.data().data})`;
+  profilePic.textContent=username[0].toUpperCase();
+  profilePic.style.background=colorFrom(username);
+  pfpPreview.textContent=username[0].toUpperCase();
+  pfpPreview.style.background=colorFrom(username);
+
+  const pfp=await getDoc(doc(db,"userPFPs",user.uid));
+  if(pfp.exists() && pfp.data().data){
+    profilePic.style.backgroundImage=`url(${pfp.data().data})`;
+    pfpPreview.style.backgroundImage=`url(${pfp.data().data})`;
     profilePic.textContent="";
     pfpPreview.textContent="";
   }
 });
 
-/* UI */
-profilePic.onclick=()=>profilePanel.style.display=
+/* Menus */
+profilePic.onclick=()=>profilePanel.style.display =
   profilePanel.style.display==="flex"?"none":"flex";
+
+pfpPreview.onclick=()=>pfpPanel.style.display =
+  pfpPanel.style.display==="block"?"none":"block";
 
 /* PFP */
 changePfpBtn.onclick=()=>pfpFile.click();
 pfpFile.onchange=e=>{
   const r=new FileReader();
   r.onload=async ev=>{
+    profilePic.textContent="";
+    pfpPreview.textContent="";
+    profilePic.style.backgroundImage=`url(${ev.target.result})`;
+    pfpPreview.style.backgroundImage=`url(${ev.target.result})`;
     await setDoc(doc(db,"userPFPs",auth.currentUser.uid),{data:ev.target.result});
-    location.reload();
   };
   r.readAsDataURL(e.target.files[0]);
 };
@@ -268,18 +305,24 @@ removePfpBtn.onclick=async()=>{
 changeUsernameBtn.onclick=()=>usernameOverlay.classList.add("show");
 saveUsernameBtn.onclick=async()=>{
   const name=newUsername.value.trim().toLowerCase();
-  if(!name) return usernameError.textContent="Enter username";
-  if((await getDoc(doc(db,"usernames",name))).exists()) return usernameError.textContent="Taken";
+  if(!name){ usernameError.textContent="Enter username"; return; }
+
+  const taken=await getDoc(doc(db,"usernames",name));
+  if(taken.exists()){ usernameError.textContent="Username taken"; return; }
 
   const old=await getDocs(query(collection(db,"usernames"),where("uid","==",auth.currentUser.uid)));
   old.forEach(d=>deleteDoc(doc(db,"usernames",d.id)));
   await setDoc(doc(db,"usernames",name),{uid:auth.currentUser.uid});
+
   location.reload();
 };
 
 /* Password */
 changePasswordBtn.onclick=()=>passwordOverlay.classList.add("show");
 savePasswordBtn.onclick=async()=>{
+  if(newPassword.value!==repeatPassword.value){
+    passwordError.textContent="Passwords do not match"; return;
+  }
   try{
     const cred=EmailAuthProvider.credential(auth.currentUser.email,currentPassword.value);
     await reauthenticateWithCredential(auth.currentUser,cred);
@@ -288,18 +331,21 @@ savePasswordBtn.onclick=async()=>{
   }catch(e){ passwordError.textContent=e.message; }
 };
 
-/* Remove */
+/* Remove account */
 removeAccountBtn.onclick=()=>removeOverlay.classList.add("show");
 confirmRemoveBtn.onclick=async()=>{
   try{
     const cred=EmailAuthProvider.credential(auth.currentUser.email,removePassword.value);
     await reauthenticateWithCredential(auth.currentUser,cred);
+    const snap=await getDocs(query(collection(db,"usernames"),where("uid","==",auth.currentUser.uid)));
+    snap.forEach(d=>deleteDoc(doc(db,"usernames",d.id)));
     await deleteUser(auth.currentUser);
     location.href="login.html";
   }catch(e){ removeError.textContent=e.message; }
 };
 
-logoutBtn.onclick=()=>signOut(auth).then(()=>location.href="login.html");
+/* Logout */
+logoutBtn.onclick=()=>{ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); };
 </script>
 
 </body>
