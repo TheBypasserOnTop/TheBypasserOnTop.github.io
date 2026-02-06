@@ -7,59 +7,22 @@
 <link rel="icon" href="favicon.ico">
 <style>
 html, body {
-  margin:0;
-  padding:0;
-  min-height:100%;
-  font-family:system-ui,sans-serif;
+  margin:0; padding:0; font-family:system-ui,sans-serif;
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
-  color:#e6f0ff;
-  overflow-x:hidden;
+  color:#e6f0ff; overflow-x:hidden;
 }
 
 /* Hamburger menu */
-#menuBtn {
-  position:fixed;
-  top:20px;
-  left:20px;
-  width:32px;
-  height:24px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  cursor:pointer;
-  z-index:150;
-}
-#menuBtn span {
-  height:4px;
-  background:white;
-  border-radius:4px;
-}
+#menuBtn { position:fixed; top:20px; left:20px; width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; z-index:150; transition:opacity .3s, transform .3s; }
+#menuBtn span { height:4px; background:white; border-radius:4px; }
 body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
 
 /* Side panel */
-#sidePanel {
-  position:fixed;
-  top:0;
-  left:-300px;
-  width:260px;
-  height:100%;
-  background:rgba(12,25,55,.95);
-  backdrop-filter:blur(16px);
-  padding:20px;
-  box-sizing:border-box;
-  z-index:200;
-  transition:left .35s ease;
-  display:flex;
-  flex-direction:column;
-}
+#sidePanel { position:fixed; top:0; left:-300px; width:260px; height:100%; background:rgba(12,25,55,.95); backdrop-filter:blur(16px); padding:20px; box-sizing:border-box; z-index:200; transition:left .35s ease; display:flex; flex-direction:column; }
 body.menu-open #sidePanel { left:0; }
 
 /* Side panel header */
-#sidePanelHeader {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+#sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
 #sidePanelHeader h3 { margin:0 auto; }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
 
@@ -67,169 +30,36 @@ body.menu-open #sidePanel { left:0; }
 .divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
 
 /* Tabs */
-.nav-tab {
-  padding:12px;
-  border-radius:10px;
-  cursor:pointer;
-  margin-bottom:8px;
-  font-weight:600;
-}
+.nav-tab { padding:12px; border-radius:10px; cursor:pointer; margin-bottom:8px; font-weight:600; }
 .nav-tab.active { background:#4da3ff; color:black; }
 .nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
 
-/* Blur layer */
-.blur-layer {
-  position:absolute;
-  inset:0;
-  z-index:5;
-}
-body.menu-open .blur-layer {
-  backdrop-filter: blur(8px);
-  pointer-events:none;
-}
-
 /* Top-right PFP */
-#profilePic {
-  position:fixed;
-  top:20px;
-  right:20px;
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-weight:bold;
-  font-size:1.3rem;
-  color:white;
-  cursor:pointer;
-  user-select:none;
-  z-index:100;
-  background-size:cover;
-  background-position:center;
-}
+#profilePic { position:fixed; top:20px; right:20px; width:50px; height:50px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:1.3rem; color:white; cursor:pointer; user-select:none; z-index:100; background-size:cover; background-position:center; }
 
 /* Profile panel */
-#profilePanel {
-  position:fixed;
-  top:80px;
-  right:20px;
-  width:180px;
-  background:rgba(12,25,55,.85);
-  backdrop-filter:blur(8px);
-  border-radius:14px;
-  display:none;
-  flex-direction:column;
-  padding:10px;
-  z-index:100;
-}
-#profilePanel h4 {
-  margin:0 0 8px 0;
-  font-size:1rem;
-  text-align:center;
-  border-bottom:1px solid rgba(255,255,255,0.2);
-  padding-bottom:5px;
-}
-#profilePanel button {
-  width:100%;
-  margin:5px 0;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  font-weight:600;
-  cursor:pointer;
-}
+#profilePanel { position:fixed; top:80px; right:20px; width:180px; background:rgba(12,25,55,.85); backdrop-filter:blur(8px); border-radius:14px; display:none; flex-direction:column; padding:10px; z-index:100; }
+#profilePanel h4 { margin:0 0 8px 0; font-size:1rem; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px; }
+#profilePanel button { width:100%; margin:5px 0; padding:10px; border:none; border-radius:10px; font-weight:600; cursor:pointer; }
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
 
 /* Chat container */
-#chatWrapper {
-  max-width:600px;
-  width:90%;
-  margin:100px auto 80px auto;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.message {
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-  background:rgba(12,25,55,.7);
-  padding:10px;
-  border-radius:15px;
-  max-width:100%;
-  word-wrap:break-word;
-  position:relative;
-}
-.message .pfp {
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  flex-shrink:0;
-  background-size:cover;
-  background-position:center;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  color:white;
-}
-.message .content {
-  display:flex;
-  flex-direction:column;
-  gap:3px;
-}
+#chatWrapper { max-width:600px; width:90%; margin:100px auto 80px auto; display:flex; flex-direction:column; gap:12px; }
+.message { display:flex; gap:10px; align-items:flex-start; background:rgba(12,25,55,.7); padding:10px; border-radius:15px; max-width:100%; word-wrap:break-word; position:relative; }
+.message .pfp { width:40px; height:40px; border-radius:50%; flex-shrink:0; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; }
+.message .content { display:flex; flex-direction:column; gap:3px; }
 .message .username { font-weight:600; }
 .message .time { font-size:0.7rem; color:#cfd8f0; }
-.message .edited { font-size:0.7rem; color:#ffeb3b; font-style:italic; }
+.message .edited { font-size:0.7rem; color:#ffb74d; }
 
 /* Chat input fixed bottom */
-#chatInputWrapper {
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  display:flex;
-  gap:10px;
-  padding:10px;
-  box-sizing:border-box;
-  background:rgba(12,25,55,.85);
-  backdrop-filter:blur(8px);
-  z-index:100;
-}
-#chatInput {
-  flex:1;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  font-size:1rem;
-  outline:none;
-}
-#sendBtn {
-  padding:12px 16px;
-  border:none;
-  border-radius:12px;
-  background:#4da3ff;
-  color:black;
-  cursor:pointer;
-  font-size:1.2rem;
-  font-weight:bold;
-}
-.message-actions {
-  display:flex;
-  gap:5px;
-  position:absolute;
-  right:10px;
-  top:5px;
-}
-.message-actions button {
-  background:transparent;
-  border:none;
-  color:#cfd8f0;
-  cursor:pointer;
-  font-size:0.8rem;
-}
+#chatInputWrapper { position:fixed; bottom:0; left:0; width:100%; display:flex; gap:10px; padding:10px; box-sizing:border-box; background:rgba(12,25,55,.85); backdrop-filter:blur(8px); z-index:100; }
+#chatInput { flex:1; padding:12px; border-radius:12px; border:none; font-size:1rem; outline:none; }
+#sendBtn { padding:12px 16px; border:none; border-radius:12px; background:#4da3ff; color:black; cursor:pointer; font-size:1.2rem; font-weight:bold; }
+
+/* Message buttons */
+.msg-btn { position:absolute; top:5px; right:5px; font-size:0.7rem; cursor:pointer; background:rgba(255,255,255,.2); padding:2px 5px; border-radius:5px; color:white; margin-left:3px; }
 </style>
 </head>
 <body>
@@ -261,14 +91,14 @@ body.menu-open .blur-layer {
 <div id="profilePic"></div>
 <div id="profilePanel">
   <h4 id="profileName">Username</h4>
-  <button class="primary" onclick="location.href='settings.html'">Settings</button>
-  <button class="primary" onclick="logout()">Logout</button>
+  <button class="primary" onclick="openSettings()">Settings</button>
+  <button class="primary" onclick="confirmLogout()">Logout</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -285,7 +115,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* Elements */
 const chatWrapper = document.getElementById("chatWrapper");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -293,125 +122,108 @@ const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
 
-/* Profile letter color */
+let username = "";
+let userPfp = "";
+
+/* Color helper */
 function stringToColor(str){
   let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
   let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
   return color;
 }
 
-/* Logout */
-window.logout = ()=> signOut(auth);
-
-/* Auth check and auto-fill name/pfp */
-let username = "", userPfp = "";
+/* Auth check without forcing redirect */
 onAuthStateChanged(auth, async user=>{
   if(user){
     username = user.displayName || user.email.split("@")[0];
-    profileName.textContent = username;
-    profilePic.textContent = username.charAt(0).toUpperCase();
-    profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
+    profileName.textContent=username;
+
     if(user.photoURL){
-      userPfp = user.photoURL;
-      profilePic.style.backgroundImage = `url(${userPfp})`;
+      userPfp=user.photoURL;
+      profilePic.style.backgroundImage=`url(${userPfp})`;
       profilePic.textContent="";
+    } else {
+      profilePic.textContent=username.charAt(0).toUpperCase();
+      profilePic.style.backgroundColor=stringToColor(username.toLowerCase());
     }
   } else {
-    console.log("Not logged in, stay here or redirect manually.");
+    console.log("Not logged in, staying on page for testing.");
   }
 });
 
 /* Profile panel toggle */
 let panelOpen=false;
-profilePic.addEventListener("click", ()=>{
-  panelOpen=!panelOpen;
-  profilePanel.style.display=panelOpen?"flex":"none";
-});
+profilePic.addEventListener("click", ()=>{ panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none"; });
 
-/* Menu logic */
-const menuBtn = document.getElementById("menuBtn");
-const closeMenu = document.getElementById("closeMenu");
-menuBtn.onclick = ()=>document.body.classList.add("menu-open");
-closeMenu.onclick = ()=>document.body.classList.remove("menu-open");
+/* Menu */
+document.getElementById("menuBtn").onclick = ()=>document.body.classList.add("menu-open");
+document.getElementById("closeMenu").onclick = ()=>document.body.classList.remove("menu-open");
+document.getElementById("tabSettings").onclick = ()=>location.href="settings.html";
 
 /* Send message */
 sendBtn.onclick = async ()=>{
-  const text = chatInput.value.trim();
+  const text=chatInput.value.trim();
   if(!text) return;
   chatInput.value="";
   await addDoc(collection(db,"messages"),{
-    user: username,
-    message: text,
-    pfp: userPfp || "",
-    timestamp: serverTimestamp(),
-    edited: false,
-    deleted: false
+    user:username,
+    message:text,
+    pfp:userPfp,
+    edited:false,
+    timestamp:serverTimestamp()
   });
 };
 
-/* Real-time messages */
-const q = query(collection(db,"messages"), orderBy("timestamp"));
-onSnapshot(q, snap=>{
+/* Render messages */
+const q=query(collection(db,"messages"), orderBy("timestamp"));
+onSnapshot(q,snap=>{
   chatWrapper.innerHTML="";
-  snap.docs.forEach(d=>{
-    const data = d.data();
-    const id = d.id;
-
-    const msgDiv = document.createElement("div");
+  snap.docs.forEach(docSnap=>{
+    const data=docSnap.data();
+    const msgDiv=document.createElement("div");
     msgDiv.className="message";
 
-    const pfpDiv = document.createElement("div");
+    // PFP
+    const pfpDiv=document.createElement("div");
     pfpDiv.className="pfp";
-    if(data.pfp) pfpDiv.style.backgroundImage = `url(${data.pfp})`;
-    else { pfpDiv.textContent = data.user.charAt(0).toUpperCase(); pfpDiv.style.backgroundColor = stringToColor(data.user.toLowerCase()); }
+    if(data.pfp) pfpDiv.style.backgroundImage=`url(${data.pfp})`;
+    else { pfpDiv.textContent=data.user.charAt(0).toUpperCase(); pfpDiv.style.backgroundColor=stringToColor(data.user.toLowerCase()); }
 
-    const contentDiv = document.createElement("div");
+    // Content
+    const contentDiv=document.createElement("div");
     contentDiv.className="content";
-
-    const userDiv = document.createElement("div");
-    userDiv.className="username";
-    userDiv.textContent = data.user;
-
-    const textDiv = document.createElement("div");
-    textDiv.textContent = data.deleted ? "[Message deleted]" : data.message;
-
-    const timeDiv = document.createElement("div");
-    timeDiv.className="time";
-    if(data.timestamp) timeDiv.textContent = new Date(data.timestamp.seconds*1000).toLocaleString("en-US",{hour12:true,hour:"2-digit",minute:"2-digit"});
-
-    const editedDiv = document.createElement("div");
-    editedDiv.className="edited";
-    if(data.edited && !data.deleted) editedDiv.textContent = "edited";
-
-    /* Actions: Edit/Delete */
-    const actionsDiv = document.createElement("div");
-    actionsDiv.className="message-actions";
-
-    if(data.user === username && !data.deleted){
-      const editBtn = document.createElement("button");
-      editBtn.textContent="Edit";
-      editBtn.onclick = async ()=>{
-        const newText = prompt("Edit message:", data.message);
-        if(newText!==null){
-          await updateDoc(doc(db,"messages",id),{message:newText, edited:true});
-        }
-      };
-      const delBtn = document.createElement("button");
-      delBtn.textContent="Delete";
-      delBtn.onclick = async ()=>{
-        if(confirm("Delete this message?")){
-          await updateDoc(doc(db,"messages",id),{deleted:true});
-        }
-      };
-      actionsDiv.append(editBtn, delBtn);
-    }
+    const userDiv=document.createElement("div"); userDiv.className="username"; userDiv.textContent=data.user;
+    const textDiv=document.createElement("div"); textDiv.textContent=data.message;
+    const timeDiv=document.createElement("div"); timeDiv.className="time"; 
+    if(data.timestamp) timeDiv.textContent=new Date(data.timestamp.seconds*1000).toLocaleString("en-US",{hour12:true,hour:"2-digit",minute:"2-digit"});
+    const editedDiv=document.createElement("div"); editedDiv.className="edited"; if(data.edited) editedDiv.textContent="(edited)";
 
     contentDiv.append(userDiv,textDiv,timeDiv,editedDiv);
-    msgDiv.append(pfpDiv,contentDiv,actionsDiv);
+    msgDiv.append(pfpDiv,contentDiv);
+
+    // Buttons if message belongs to user
+    if(data.user===username){
+      const editBtn=document.createElement("span"); editBtn.className="msg-btn"; editBtn.textContent="Edit";
+      editBtn.onclick=async ()=>{
+        const newMsg=prompt("Edit message:",data.message);
+        if(newMsg) await updateDoc(doc(db,"messages",docSnap.id),{message:newMsg,edited:true});
+      };
+      const delBtn=document.createElement("span"); delBtn.className="msg-btn"; delBtn.textContent="Delete";
+      delBtn.onclick=async ()=>{
+        if(confirm("Delete this message?")) await updateDoc(doc(db,"messages",docSnap.id),{message:"[deleted]",edited:true});
+      };
+      msgDiv.append(editBtn,delBtn);
+    }
+
     chatWrapper.appendChild(msgDiv);
   });
-  chatWrapper.scrollTop = chatWrapper.scrollHeight;
+  chatWrapper.scrollTop=chatWrapper.scrollHeight;
 });
+
+/* Profile/settings */
+window.openSettings=()=>location.href="settings.html";
+window.confirmLogout=()=>{ if(confirm("Logout?")) signOut(auth).then(()=>location.href="login.html"); };
 </script>
+
 </body>
 </html>
