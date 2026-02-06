@@ -13,7 +13,8 @@ html, body {
   font-family:system-ui,sans-serif;
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   color:#e6f0ff;
-  overflow-x:hidden;
+  overflow:hidden;
+  position:relative;
 }
 
 /* Hamburger menu */
@@ -153,113 +154,94 @@ body.menu-open .blur-layer {
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
 
-/* Overlay popups (logout/remove) */
-.overlay {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.4);
-  backdrop-filter:blur(6px);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:200;
-}
-.popup {
-  width:90vw;
-  max-width:400px;
-  background:#0c1937;
-  padding:30px;
-  border-radius:20px;
-  text-align:center;
-  position:relative;
-}
-.close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.2rem; }
-.error { color:#ff6b6b; margin-top:10px; min-height:1.2em; text-align:left; }
-
 /* Chat container */
 #chatWrapper {
-  max-width:600px;
-  width:90%;
-  margin:100px auto 80px auto; /* leave space for input */
-  display:flex;
-  flex-direction:column;
-  gap:12px;
+  position:absolute;
+  top:0;
+  bottom:60px;
+  left:0;
+  right:0;
+  overflow-y:auto;
+  padding:80px 15px 0 15px;
+  box-sizing:border-box;
 }
-.message {
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-  background:rgba(12,25,55,.7);
-  padding:10px;
-  border-radius:15px;
-  max-width:100%;
-  word-wrap:break-word;
-}
-.message .pfp {
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  flex-shrink:0;
-  background-size:cover;
-  background-position:center;
+.chat-header {
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  background:rgba(12,25,55,.85);
+  backdrop-filter:blur(10px);
+  height:60px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-weight:bold;
-  color:white;
+  font-weight:600;
+  font-size:1.2rem;
+  z-index:120;
+  border-bottom:1px solid rgba(255,255,255,0.2);
 }
-.message .content {
-  display:flex;
-  flex-direction:column;
-  gap:3px;
-}
-.message .username { font-weight:600; }
-.message .time { font-size:0.7rem; color:#cfd8f0; }
 
-/* Chat input fixed bottom */
+/* Messages */
+.message {
+  display:flex;
+  align-items:flex-start;
+  margin-bottom:15px;
+}
+.message.owner { flex-direction:row-reverse; }
+.message .msgContent {
+  max-width:70%;
+  background:rgba(12,25,55,.7);
+  padding:12px;
+  border-radius:12px;
+  position:relative;
+}
+.message.owner .msgContent { background:#4da3ff; color:black; }
+.msgContent .username { font-weight:600; font-size:0.85rem; margin-bottom:3px; }
+.msgContent .time { font-size:0.7rem; color:#ccc; margin-top:5px; }
+.msgContent .edited { font-size:0.65rem; color:#ffda6b; }
+.message .pfp { width:35px; height:35px; border-radius:50%; margin-right:8px; background-size:cover; background-position:center; flex-shrink:0; }
+.message.owner .pfp { margin-left:8px; margin-right:0; }
+.message .actions { display:flex; gap:5px; margin-top:5px; font-size:0.7rem; }
+.message .actions button { cursor:pointer; border:none; padding:2px 6px; border-radius:5px; font-size:0.7rem; }
+.message .replyPreview { font-size:0.75rem; color:#cfd8f0; background:rgba(255,255,255,0.1); padding:4px 6px; border-radius:6px; margin-bottom:3px; }
+
+/* Input bar */
 #chatInputWrapper {
   position:fixed;
   bottom:0;
   left:0;
-  width:100%;
+  right:0;
   display:flex;
-  gap:10px;
-  padding:10px;
-  box-sizing:border-box;
+  padding:5px 10px;
   background:rgba(12,25,55,.85);
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(10px);
+  gap:5px;
   z-index:100;
 }
-#chatInput {
-  flex:1;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  font-size:1rem;
-  outline:none;
+#replyPreview {
+  flex:1 1 100%;
+  background:rgba(255,255,255,0.1);
+  padding:5px 10px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:0.8rem;
+  margin-bottom:5px;
 }
-#sendBtn {
-  padding:12px 16px;
-  border:none;
-  border-radius:12px;
-  background:#4da3ff;
-  color:black;
-  cursor:pointer;
-  font-size:1.2rem;
-  font-weight:bold;
-}
+#replyPreview span { font-size:0.8rem; }
+#cancelReply { cursor:pointer; font-weight:600; }
+#chatInput { flex:1; padding:10px; border-radius:10px; border:none; }
+#sendBtn { padding:0 12px; border-radius:10px; border:none; cursor:pointer; font-size:1.1rem; }
 </style>
 </head>
 <body>
 
-<!-- Hamburger menu -->
+<!-- Menu -->
 <div id="menuBtn"><span></span><span></span><span></span></div>
 <div id="sidePanel">
-  <div id="sidePanelHeader">
-    <div></div>
-    <h3>Navigation</h3>
-    <div id="closeMenu">✕</div>
-  </div>
+  <div id="sidePanelHeader"><div></div><h3>Navigation</h3><div id="closeMenu">✕</div></div>
   <div class="divider"></div>
   <input id="navSearch" placeholder="Search...">
   <div class="nav-tab" id="tabDashboard">Dashboard</div>
@@ -268,48 +250,37 @@ body.menu-open .blur-layer {
 </div>
 <div class="blur-layer"></div>
 
-<!-- Chat messages -->
+<!-- Profile pic -->
+<div id="profilePic"></div>
+<div id="profilePanel">
+  <h4 id="profileName">Username</h4>
+  <button class="primary" onclick="location.href='settings.html'">Settings</button>
+  <button class="primary" onclick="confirmLogout()">Logout</button>
+</div>
+
+<!-- Chat header -->
+<div class="chat-header">Chat</div>
+
+<!-- Messages -->
 <div id="chatWrapper"></div>
 
-<!-- Chat input -->
+<!-- Reply preview -->
 <div id="chatInputWrapper">
+  <div id="replyPreview" style="display:none;"><span id="replyText"></span><span id="cancelReply">✕</span></div>
   <input type="text" id="chatInput" placeholder="Type here..">
   <button id="sendBtn">➤</button>
 </div>
 
-<!-- Profile pic top-right -->
-<div id="profilePic"></div>
-<div id="profilePanel">
-  <h4 id="profileName">Username</h4>
-  <button class="primary" onclick="openSettings()">Settings</button>
-  <button class="primary" onclick="confirmLogout()">Logout</button>
-</div>
-
-<!-- Logout confirm -->
-<div class="overlay" id="logoutOverlay">
-  <div class="popup">
-    <span class="close" onclick="closeLogout()">✕</span>
-    <h2>Confirm Logout</h2>
-    <p>Are you sure you want to logout?</p>
-    <button class="primary" onclick="logout()">Yes</button>
-    <button class="remove" onclick="closeLogout()">No</button>
-  </div>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app",
-  messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41",
-  measurementId: "G-1MMT3C4M7K"
+  projectId: "login-34954"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -320,108 +291,175 @@ const db = getFirestore(app);
 const chatWrapper = document.getElementById("chatWrapper");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
-const profilePic = document.getElementById("profilePic");
-const profilePanel = document.getElementById("profilePanel");
-const profileName = document.getElementById("profileName");
+const replyPreview = document.getElementById("replyPreview");
+const replyText = document.getElementById("replyText");
+const cancelReply = document.getElementById("cancelReply");
+let replyingTo = null;
+let canSend = true;
 
-/* Profile pic letter color */
+/* User info */
+let username="", pfp="";
+const profileNameEl = document.getElementById("profileName");
+const profilePicEl = document.getElementById("profilePic");
+
 function stringToColor(str){
   let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
   let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
   return color;
 }
 
-/* Auth */
-let username="", pfp="";
+/* Auth & Firestore sync */
 onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
 
-  profileName.textContent = user.displayName || user.email.split("@")[0];
-  username = profileName.textContent;
+  // Username
+  const userSnap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
+  username = !userSnap.empty ? userSnap.docs[0].id : user.email.split("@")[0];
+  profileNameEl.textContent = username;
 
+  // PFP
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
     pfp = pfpDoc.data().data;
-    profilePic.style.backgroundImage = `url(${pfp})`;
+    profilePicEl.style.backgroundImage = `url(${pfp})`;
+    profilePicEl.textContent="";
   } else {
-    pfp = "";
-    profilePic.textContent = username.charAt(0).toUpperCase();
-    profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
+    profilePicEl.style.backgroundImage="";
+    profilePicEl.textContent = username.charAt(0).toUpperCase();
+    profilePicEl.style.backgroundColor = stringToColor(username.toLowerCase());
   }
-});
 
-/* Profile panel toggle */
-let panelOpen=false;
-profilePic.addEventListener("click", ()=>{
-  panelOpen=!panelOpen;
-  profilePanel.style.display=panelOpen?"flex":"none";
+  loadMessages();
 });
 
 /* Menu logic */
 const menuBtn = document.getElementById("menuBtn");
 const closeMenu = document.getElementById("closeMenu");
-const sidePanel = document.getElementById("sidePanel");
 menuBtn.onclick = () => document.body.classList.add("menu-open");
 closeMenu.onclick = () => document.body.classList.remove("menu-open");
+document.getElementById("tabDashboard").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=> location.href="dashboard.html",350);}
+document.getElementById("tabSettings").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=> location.href="settings.html",350);}
 
-/* Tabs */
-document.getElementById("tabDashboard").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="dashboard.html",350);}
-document.getElementById("tabSettings").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350);}
-document.getElementById("tabCommunicate").onclick = () => document.body.classList.remove("menu-open");
+/* Profile panel */
+let panelOpen=false;
+profilePicEl.addEventListener("click", ()=>{
+  panelOpen=!panelOpen;
+  document.getElementById("profilePanel").style.display=panelOpen?"flex":"none";
+});
+window.confirmLogout = ()=>{ if(confirm("Logout?")) auth.signOut().then(()=>location.href="login.html"); };
 
-/* Logout/settings buttons */
-window.openSettings = ()=>location.href="settings.html";
-window.confirmLogout = ()=>{ logoutOverlay.style.display="flex"; };
-window.closeLogout = ()=>{ logoutOverlay.style.display="none"; };
-window.logout = ()=> signOut(auth).then(()=>location.href="login.html");
-
-/* Chat sending */
-let cooldown=false;
+/* Send message */
 sendBtn.onclick = async ()=>{
-  if(cooldown) return;
   const text = chatInput.value.trim();
-  if(!text) return;
-  cooldown=true;
+  if(!text || !canSend) return;
+  canSend=false;
+  setTimeout(()=>canSend=true,2000);
+
+  const msgData = {
+    text,
+    uid:auth.currentUser.uid,
+    username,
+    pfp,
+    timestamp:new Date(),
+    replyTo: replyingTo ? replyingTo.id : null,
+    edited:false,
+    deleted:false
+  };
+  await addDoc(collection(db,"messages"), msgData);
   chatInput.value="";
-  try{
-    await addDoc(collection(db,"messages"),{
-      user: username,
-      message: text,
-      pfp: pfp,
-      timestamp: serverTimestamp()
-    });
-    setTimeout(()=>{ cooldown=false; },2000);
-  }catch(e){ console.error(e); cooldown=false; }
+  replyingTo=null;
+  replyPreview.style.display="none";
 };
 
-/* Real-time messages */
-const q = query(collection(db,"messages"), orderBy("timestamp"));
-onSnapshot(q,snap=>{
-  chatWrapper.innerHTML="";
-  snap.docs.forEach(d=>{
-    const data = d.data();
-    const msgDiv = document.createElement("div");
-    msgDiv.className="message";
-    const pfpDiv = document.createElement("div");
-    pfpDiv.className="pfp";
-    if(data.pfp) pfpDiv.style.backgroundImage=`url(${data.pfp})`;
-    else { pfpDiv.textContent = data.user.charAt(0).toUpperCase(); pfpDiv.style.backgroundColor = stringToColor(data.user.toLowerCase()); }
-    const contentDiv = document.createElement("div");
-    contentDiv.className="content";
-    const userDiv = document.createElement("div");
-    userDiv.className="username";
-    userDiv.textContent = data.user;
-    const textDiv = document.createElement("div");
-    textDiv.textContent = data.message;
-    const timeDiv = document.createElement("div");
-    timeDiv.className="time";
-    if(data.timestamp) timeDiv.textContent = new Date(data.timestamp.seconds*1000).toLocaleString("en-US",{timeZone:"America/New_York", hour12:true, hour:"2-digit", minute:"2-digit"});
-    contentDiv.append(userDiv,textDiv,timeDiv);
-    msgDiv.append(pfpDiv,contentDiv);
-    chatWrapper.appendChild(msgDiv);
+/* Cancel reply */
+cancelReply.onclick = ()=>{ replyingTo=null; replyPreview.style.display="none"; };
+
+/* Load & render messages */
+function loadMessages(){
+  const q = query(collection(db,"messages"), orderBy("timestamp"));
+  onSnapshot(q, snapshot=>{
+    chatWrapper.innerHTML="";
+    snapshot.forEach(docSnap=>{
+      const data = docSnap.data();
+      const owner = data.uid === auth.currentUser.uid;
+      const msgEl = document.createElement("div");
+      msgEl.className="message"+(owner?" owner":"");
+      msgEl.dataset.id = docSnap.id;
+
+      const pfpEl = document.createElement("div");
+      pfpEl.className="pfp";
+      if(data.pfp) pfpEl.style.backgroundImage=`url(${data.pfp})`;
+      else { pfpEl.style.backgroundColor = stringToColor(data.username.toLowerCase()); pfpEl.textContent=data.username.charAt(0).toUpperCase();}
+      
+      const contentEl = document.createElement("div");
+      contentEl.className="msgContent";
+
+      if(data.replyTo){
+        const replyData = snapshot.docs.find(d=>d.id===data.replyTo)?.data();
+        if(replyData){
+          const replyEl = document.createElement("div");
+          replyEl.className="replyPreview";
+          replyEl.textContent=`Replying to ${replyData.username}: ${replyData.text}`;
+          contentEl.appendChild(replyEl);
+        }
+      }
+
+      const unameEl = document.createElement("div");
+      unameEl.className="username";
+      unameEl.textContent=data.username;
+      contentEl.appendChild(unameEl);
+
+      const textEl = document.createElement("div");
+      textEl.textContent = data.deleted ? `${data.username} deleted a message` : data.text;
+      contentEl.appendChild(textEl);
+
+      const timeEl = document.createElement("div");
+      timeEl.className="time";
+      timeEl.textContent = new Date(data.timestamp.seconds*1000).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit'});
+      contentEl.appendChild(timeEl);
+
+      if(data.edited) {
+        const editedEl = document.createElement("div");
+        editedEl.className="edited";
+        editedEl.textContent="Edited";
+        contentEl.appendChild(editedEl);
+      }
+
+      const actionsEl = document.createElement("div");
+      actionsEl.className="actions";
+      if(owner && !data.deleted){
+        const editBtn = document.createElement("button");
+        editBtn.textContent="Edit";
+        editBtn.onclick = async ()=>{
+          const newText = prompt("Edit message:", data.text);
+          if(newText!==null) await updateDoc(doc(db,"messages",docSnap.id), {text:newText, edited:true});
+        };
+        const delBtn = document.createElement("button");
+        delBtn.textContent="Delete";
+        delBtn.onclick = async ()=>{
+          await updateDoc(doc(db,"messages",docSnap.id), {deleted:true});
+        };
+        actionsEl.appendChild(editBtn);
+        actionsEl.appendChild(delBtn);
+      } else if(!owner && !data.deleted){
+        const replyBtn = document.createElement("button");
+        replyBtn.textContent="Reply";
+        replyBtn.onclick = ()=>{
+          replyingTo={id:docSnap.id,text:data.text,username:data.username};
+          replyText.textContent=`Replying to ${data.username}: ${data.text}`;
+          replyPreview.style.display="flex";
+        };
+        actionsEl.appendChild(replyBtn);
+      }
+      contentEl.appendChild(actionsEl);
+
+      msgEl.appendChild(pfpEl);
+      msgEl.appendChild(contentEl);
+      chatWrapper.appendChild(msgEl);
+      chatWrapper.scrollTop = chatWrapper.scrollHeight;
+    });
   });
-  chatWrapper.scrollTop = chatWrapper.scrollHeight;
-});
+}
 </script>
 
 </body>
