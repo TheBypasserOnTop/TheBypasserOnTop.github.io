@@ -44,7 +44,7 @@ body{
   font-size:1.3rem;
   cursor:pointer;
   color:white;
-  background-size:85%; /* 👈 zoomed OUT */
+  background-size:contain;
   background-position:center;
   background-repeat:no-repeat;
   z-index:100;
@@ -64,19 +64,17 @@ body{
   padding:12px;
   z-index:100;
 }
+#panelUsername{
+  font-weight:600;
+  text-align:center;
+  margin-bottom:8px;
+}
 #profilePanel button{
   margin-top:6px;
   padding:9px;
   border:none;
   border-radius:10px;
-  font-weight:600;
   cursor:pointer;
-}
-#panelUsername{
-  font-weight:600;
-  margin-bottom:8px;
-  opacity:.85;
-  text-align:center;
 }
 
 /* Sections */
@@ -98,16 +96,13 @@ body{
   font-weight:bold;
   color:white;
   cursor:pointer;
-  background-size:85%;
+  background-size:contain;
   background-position:center;
   background-repeat:no-repeat;
 }
 
-/* PFP controls */
-#pfpPanel{
-  display:none;
-  margin-top:8px;
-}
+/* Panels */
+#pfpPanel{ display:none; margin-top:8px; }
 
 /* Overlay */
 .overlay{
@@ -133,7 +128,6 @@ body{
 .close{
   float:right;
   cursor:pointer;
-  font-size:1.2rem;
 }
 
 input{
@@ -159,7 +153,6 @@ button{
 
 <body>
 
-<!-- Top right -->
 <div id="profilePic"></div>
 
 <div id="profilePanel">
@@ -197,7 +190,7 @@ button{
   </div>
 </div>
 
-<!-- Popups -->
+<!-- USERNAME -->
 <div class="overlay" id="usernameOverlay">
   <div class="popup">
     <span class="close">✕</span>
@@ -208,11 +201,27 @@ button{
   </div>
 </div>
 
-<div class="overlay" id="logoutOverlay">
+<!-- PASSWORD -->
+<div class="overlay" id="passwordOverlay">
   <div class="popup">
     <span class="close">✕</span>
-    <h3>Log out?</h3>
-    <button id="confirmLogoutBtn">Yes, log out</button>
+    <h3>Change Password</h3>
+    <input type="password" id="currentPassword" placeholder="Current password">
+    <input type="password" id="newPassword" placeholder="New password">
+    <input type="password" id="repeatPassword" placeholder="Repeat new password">
+    <div class="error" id="passwordError"></div>
+    <button id="savePasswordBtn">Save</button>
+  </div>
+</div>
+
+<!-- REMOVE ACCOUNT -->
+<div class="overlay" id="removeOverlay">
+  <div class="popup">
+    <span class="close">✕</span>
+    <h3>Remove Account</h3>
+    <input type="password" id="removePassword" placeholder="Password">
+    <div class="error" id="removeError"></div>
+    <button id="confirmRemoveBtn">Remove</button>
   </div>
 </div>
 
@@ -220,7 +229,7 @@ button{
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -232,7 +241,6 @@ const app = initializeApp({
 const auth=getAuth(app);
 const db=getFirestore(app);
 
-/* helpers */
 function colorFrom(str){
   let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
   return `hsl(${h%360},70%,50%)`;
@@ -242,25 +250,24 @@ document.querySelectorAll(".close").forEach(x=>{
   x.onclick=()=>x.closest(".overlay").classList.remove("show");
 });
 
-/* auth */
-let currentUsername="";
+let username="";
 
 onAuthStateChanged(auth, async user=>{
   if(!user) location.href="login.html";
 
   const snap=await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
-  currentUsername = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+  username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
 
-  usernameDisplay.textContent=currentUsername;
-  panelUsername.textContent=currentUsername;
+  usernameDisplay.textContent=username;
+  panelUsername.textContent=username;
 
-  profilePic.textContent=currentUsername[0].toUpperCase();
-  profilePic.style.background=colorFrom(currentUsername);
-  pfpPreview.textContent=currentUsername[0].toUpperCase();
-  pfpPreview.style.background=colorFrom(currentUsername);
+  profilePic.textContent=username[0].toUpperCase();
+  profilePic.style.background=colorFrom(username);
+  pfpPreview.textContent=username[0].toUpperCase();
+  pfpPreview.style.background=colorFrom(username);
 
   const pfp=await getDoc(doc(db,"userPFPs",user.uid));
-  if(pfp.exists()){
+  if(pfp.exists() && pfp.data().data){
     profilePic.style.backgroundImage=`url(${pfp.data().data})`;
     pfpPreview.style.backgroundImage=`url(${pfp.data().data})`;
     profilePic.textContent="";
@@ -268,20 +275,20 @@ onAuthStateChanged(auth, async user=>{
   }
 });
 
-/* menus */
-profilePic.onclick=()=>{
-  profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex";
-};
+/* Menus */
+profilePic.onclick=()=>profilePanel.style.display =
+  profilePanel.style.display==="flex"?"none":"flex";
 
-pfpPreview.onclick=()=>{
-  pfpPanel.style.display = pfpPanel.style.display==="block"?"none":"block";
-};
+pfpPreview.onclick=()=>pfpPanel.style.display =
+  pfpPanel.style.display==="block"?"none":"block";
 
-/* pfp */
+/* PFP */
 changePfpBtn.onclick=()=>pfpFile.click();
 pfpFile.onchange=e=>{
   const r=new FileReader();
   r.onload=async ev=>{
+    profilePic.textContent="";
+    pfpPreview.textContent="";
     profilePic.style.backgroundImage=`url(${ev.target.result})`;
     pfpPreview.style.backgroundImage=`url(${ev.target.result})`;
     await setDoc(doc(db,"userPFPs",auth.currentUser.uid),{data:ev.target.result});
@@ -294,29 +301,51 @@ removePfpBtn.onclick=async()=>{
   location.reload();
 };
 
-/* username */
+/* Username */
 changeUsernameBtn.onclick=()=>usernameOverlay.classList.add("show");
-
 saveUsernameBtn.onclick=async()=>{
   const name=newUsername.value.trim().toLowerCase();
-  if(!name){ usernameError.textContent="Enter a username"; return; }
+  if(!name){ usernameError.textContent="Enter username"; return; }
 
-  const exists=await getDoc(doc(db,"usernames",name));
-  if(exists.exists()){ usernameError.textContent="Username taken"; return; }
+  const taken=await getDoc(doc(db,"usernames",name));
+  if(taken.exists()){ usernameError.textContent="Username taken"; return; }
 
-  const oldSnap=await getDocs(query(collection(db,"usernames"),where("uid","==",auth.currentUser.uid)));
-  oldSnap.forEach(d=>deleteDoc(doc(db,"usernames",d.id)));
-
+  const old=await getDocs(query(collection(db,"usernames"),where("uid","==",auth.currentUser.uid)));
+  old.forEach(d=>deleteDoc(doc(db,"usernames",d.id)));
   await setDoc(doc(db,"usernames",name),{uid:auth.currentUser.uid});
+
   location.reload();
 };
 
-/* logout */
-logoutBtn.onclick=()=>logoutOverlay.classList.add("show");
-confirmLogoutBtn.onclick=async()=>{
-  await signOut(auth);
-  location.href="login.html";
+/* Password */
+changePasswordBtn.onclick=()=>passwordOverlay.classList.add("show");
+savePasswordBtn.onclick=async()=>{
+  if(newPassword.value!==repeatPassword.value){
+    passwordError.textContent="Passwords do not match"; return;
+  }
+  try{
+    const cred=EmailAuthProvider.credential(auth.currentUser.email,currentPassword.value);
+    await reauthenticateWithCredential(auth.currentUser,cred);
+    await updatePassword(auth.currentUser,newPassword.value);
+    passwordOverlay.classList.remove("show");
+  }catch(e){ passwordError.textContent=e.message; }
 };
+
+/* Remove account */
+removeAccountBtn.onclick=()=>removeOverlay.classList.add("show");
+confirmRemoveBtn.onclick=async()=>{
+  try{
+    const cred=EmailAuthProvider.credential(auth.currentUser.email,removePassword.value);
+    await reauthenticateWithCredential(auth.currentUser,cred);
+    const snap=await getDocs(query(collection(db,"usernames"),where("uid","==",auth.currentUser.uid)));
+    snap.forEach(d=>deleteDoc(doc(db,"usernames",d.id)));
+    await deleteUser(auth.currentUser);
+    location.href="login.html";
+  }catch(e){ removeError.textContent=e.message; }
+};
+
+/* Logout */
+logoutBtn.onclick=()=>{ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); };
 </script>
 
 </body>
