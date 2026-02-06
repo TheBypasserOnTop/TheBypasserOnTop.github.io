@@ -7,49 +7,21 @@
 <link rel="icon" href="favicon.ico">
 <style>
 html, body {
-  margin:0;
-  padding:0;
-  min-height:100%;
-  font-family:system-ui,sans-serif;
+  margin:0; padding:0; min-height:100%; font-family:system-ui,sans-serif;
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
-  color:#e6f0ff;
-  overflow-x:hidden;
+  color:#e6f0ff; overflow-x:hidden;
 }
 
 /* Hamburger menu */
-#menuBtn {
-  position:fixed;
-  top:20px;
-  left:20px;
-  width:32px;
-  height:24px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  cursor:pointer;
-  z-index:150;
-}
+#menuBtn { position:fixed; top:20px; left:20px; width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; z-index:150; transition:opacity .3s, transform .3s;}
 #menuBtn span { height:4px; background:white; border-radius:4px; }
 body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
 
 /* Side panel */
-#sidePanel {
-  position:fixed;
-  top:0;
-  left:-300px;
-  width:260px;
-  height:100%;
-  background:rgba(12,25,55,.95);
-  backdrop-filter:blur(16px);
-  padding:20px;
-  box-sizing:border-box;
-  z-index:200;
-  transition:left .35s ease;
-  display:flex;
-  flex-direction:column;
-}
+#sidePanel { position:fixed; top:0; left:-300px; width:260px; height:100%; background:rgba(12,25,55,.95); backdrop-filter:blur(16px); padding:20px; box-sizing:border-box; z-index:200; transition:left .35s ease; display:flex; flex-direction:column;}
 body.menu-open #sidePanel { left:0; }
 
+/* Side panel header */
 #sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
 #sidePanelHeader h3 { margin:0 auto; }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
@@ -64,106 +36,37 @@ body.menu-open #sidePanel { left:0; }
 body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 
 /* Top-right PFP */
-#profilePic {
-  position:fixed;
-  top:20px;
-  right:20px;
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-weight:bold;
-  font-size:1.3rem;
-  cursor:pointer;
-  user-select:none;
-  z-index:100;
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-}
+#profilePic { position:fixed; top:20px; right:20px; width:50px; height:50px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:1.3rem; color:white; cursor:pointer; user-select:none; z-index:100; background-size:cover; background-position:center; }
 
 /* Profile panel */
-#profilePanel {
-  position:fixed;
-  top:80px;
-  right:20px;
-  width:180px;
-  background:rgba(12,25,55,.85);
-  backdrop-filter:blur(8px);
-  border-radius:14px;
-  display:none;
-  flex-direction:column;
-  padding:10px;
-  z-index:100;
-}
+#profilePanel { position:fixed; top:80px; right:20px; width:180px; background:rgba(12,25,55,.85); backdrop-filter:blur(8px); border-radius:14px; display:none; flex-direction:column; padding:10px; z-index:100; }
 #profilePanel h4 { margin:0 0 8px 0; font-size:1rem; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px; }
 #profilePanel button { width:100%; margin:5px 0; padding:10px; border:none; border-radius:10px; font-weight:600; cursor:pointer; }
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
 
-/* Chat container */
-#chatHeader { text-align:center; padding:15px; font-size:1.2rem; font-weight:600; }
-#chatContainer {
-  margin-top:0;
-  padding:10px;
-  height:calc(100vh - 90px); /* header + input height */
-  overflow-y:auto;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.message {
-  display:flex;
-  align-items:flex-start;
-  gap:8px;
-  max-width:80%;
-  background:rgba(12,25,55,.7);
-  padding:8px 12px;
-  border-radius:12px;
-  position:relative;
-  word-break:break-word;
-}
-.message.me { margin-left:auto; flex-direction:row-reverse; background:#4da3ff; color:black; }
-.message .msg-pfp { width:35px; height:35px; border-radius:50%; flex-shrink:0; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; }
-.message .msg-text { display:flex; flex-direction:column; gap:4px; }
-.message .msg-time { font-size:0.7rem; opacity:0.7; }
-.message .msg-edited { font-size:0.6rem; opacity:0.6; }
+/* Chat wrapper */
+#chatHeader { text-align:center; font-size:1.3rem; font-weight:600; padding-top:70px; }
+#chatWrapper { max-width:600px; width:90%; margin:10px auto 80px auto; display:flex; flex-direction:column; gap:12px; overflow-y:auto; max-height:calc(100vh - 160px); }
+
+/* Message styling */
+.message { display:flex; gap:10px; align-items:flex-start; background:rgba(12,25,55,.7); padding:10px; border-radius:15px; max-width:100%; word-wrap:break-word; position:relative;}
+.message.me { flex-direction:row-reverse; background:#4da3ff; color:black; }
+.message .pfp { width:40px; height:40px; border-radius:50%; flex-shrink:0; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; }
+.message .content { display:flex; flex-direction:column; gap:3px; }
+.message .username { font-weight:600; }
+.message .time { font-size:0.7rem; color:#cfd8f0; }
+.message .edited { font-size:0.6rem; color:#a0a0a0; }
 .message button { background:none; border:none; color:#cfd8f0; cursor:pointer; font-size:0.7rem; margin-left:5px; }
 
-/* Input container */
-#inputContainer {
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  padding:6px 10px;
-  background:rgba(12,25,55,.95);
-  backdrop-filter:blur(16px);
-  z-index:200;
-}
-#replyPreview {
-  display:none;
-  justify-content:space-between;
-  align-items:center;
-  background:rgba(255,255,255,.05);
-  padding:4px 8px;
-  border-radius:6px;
-  color:white;
-  font-size:0.85rem;
-}
+/* Reply preview */
+#replyPreview { display:none; justify-content:space-between; align-items:center; background:rgba(255,255,255,.05); padding:4px 8px; border-radius:6px; color:white; font-size:0.85rem; margin-bottom:5px; }
 #replyPreview button { background:#ff4c4c; border:none; padding:2px 6px; border-radius:4px; cursor:pointer; font-size:0.7rem; color:white; }
-#inputWrapper { display:flex; gap:6px; }
-#messageInput { flex:1; padding:10px; border-radius:12px; border:none; background:rgba(255,255,255,.08); color:white; }
-#sendBtn { padding:10px 12px; border-radius:12px; border:none; background:#4da3ff; color:black; cursor:pointer; font-weight:600; }
 
-/* Scrollbar fix */
-#chatContainer::-webkit-scrollbar { width:8px; }
-#chatContainer::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); border-radius:4px; }
+/* Chat input fixed bottom */
+#chatInputWrapper { position:fixed; bottom:0; left:0; width:100%; display:flex; gap:10px; padding:10px; box-sizing:border-box; background:rgba(12,25,55,.85); backdrop-filter:blur(8px); z-index:100; flex-direction:column; }
+#chatInput { flex:1; padding:12px; border-radius:12px; border:none; font-size:1rem; outline:none; }
+#sendBtn { padding:12px 16px; border:none; border-radius:12px; background:#4da3ff; color:black; cursor:pointer; font-size:1.2rem; font-weight:bold; }
 </style>
 </head>
 <body>
@@ -171,7 +74,11 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 <!-- Hamburger menu -->
 <div id="menuBtn"><span></span><span></span><span></span></div>
 <div id="sidePanel">
-  <div id="sidePanelHeader"><div></div><h3>Navigation</h3><div id="closeMenu">✕</div></div>
+  <div id="sidePanelHeader">
+    <div></div>
+    <h3>Navigation</h3>
+    <div id="closeMenu">✕</div>
+  </div>
   <div class="divider"></div>
   <input id="navSearch" placeholder="Search...">
   <div class="nav-tab" id="tabDashboard">Dashboard</div>
@@ -180,80 +87,66 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 </div>
 <div class="blur-layer"></div>
 
-<!-- Profile pic top-right -->
-<div id="profilePic"></div>
-<div id="profilePanel"><h4 id="profileName"></h4><button class="primary" onclick="openSettings()">Settings</button><button class="primary" onclick="confirmLogout()">Logout</button></div>
-
 <!-- Chat header -->
 <div id="chatHeader">Chat Room</div>
 
 <!-- Messages -->
-<div id="chatContainer"></div>
+<div id="chatWrapper"></div>
 
-<!-- Input -->
-<div id="inputContainer">
-  <div id="replyPreview">
-    <span id="replyText"></span>
-    <button id="cancelReply">Cancel</button>
-  </div>
-  <div id="inputWrapper">
-    <input id="messageInput" placeholder="Type here..">
-    <button id="sendBtn">➤</button>
+<!-- Reply preview -->
+<div id="replyPreview">
+  <span id="replyText"></span>
+  <button id="cancelReply">Cancel</button>
+</div>
+
+<!-- Chat input -->
+<div id="chatInputWrapper">
+  <input type="text" id="chatInput" placeholder="Type here..">
+  <button id="sendBtn">➤</button>
+</div>
+
+<!-- Profile pic top-right -->
+<div id="profilePic"></div>
+<div id="profilePanel">
+  <h4 id="profileName">Username</h4>
+  <button class="primary" onclick="openSettings()">Settings</button>
+  <button class="primary" onclick="confirmLogout()">Logout</button>
+</div>
+
+<!-- Logout confirm -->
+<div class="overlay" id="logoutOverlay">
+  <div class="popup">
+    <span class="close" onclick="closeLogout()">✕</span>
+    <h2>Confirm Logout</h2>
+    <p>Are you sure you want to logout?</p>
+    <button class="primary" onclick="logout()">Yes</button>
+    <button class="remove" onclick="closeLogout()">No</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, onSnapshot, doc, updateDoc, deleteDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
-const firebaseConfig = {
-  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954"
-};
+const firebaseConfig = { apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain:"login-34954.firebaseapp.com", projectId:"login-34954" };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* Elements */
-const chatContainer = document.getElementById("chatContainer");
-const messageInput = document.getElementById("messageInput");
+const chatWrapper = document.getElementById("chatWrapper");
+const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
+const profilePic = document.getElementById("profilePic");
+const profilePanel = document.getElementById("profilePanel");
+const profileName = document.getElementById("profileName");
 const replyPreview = document.getElementById("replyPreview");
 const replyText = document.getElementById("replyText");
 const cancelReply = document.getElementById("cancelReply");
-const profilePicEl = document.getElementById("profilePic");
 
-let currentUser = null;
-let username = "";
-let userPFP = null;
-let replyingTo = null;
-let sendCooldown = false;
-
-/* Auth */
-onAuthStateChanged(auth, async user=>{
-  if(!user) location.replace("login.html");
-  currentUser = user;
-
-  const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
-  username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
-
-  // PFP
-  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
-  if(pfpDoc.exists() && pfpDoc.data().data) {
-    userPFP = pfpDoc.data().data;
-    profilePicEl.style.backgroundImage = `url(${userPFP})`;
-    profilePicEl.textContent="";
-  } else {
-    profilePicEl.style.backgroundImage="";
-    profilePicEl.style.backgroundColor = stringToColor(username);
-    profilePicEl.textContent = username.charAt(0).toUpperCase();
-  }
-
-  loadMessages();
-});
+let username="", pfp="", user=null, replyingTo=null, cooldown=false;
 
 /* Utility */
 function stringToColor(str){
@@ -262,122 +155,128 @@ function stringToColor(str){
   return color;
 }
 
+/* Auth */
+onAuthStateChanged(auth, async u=>{
+  if(!u) location.replace("login.html");
+  user=u;
+  username = u.displayName || u.email.split("@")[0];
+  profileName.textContent = username;
+
+  // PFP from Firestore
+  const docSnap = await doc(db,"userPFPs",u.uid).get?.() || {};
+  if(docSnap.exists?.() && docSnap.data().data){
+    pfp = docSnap.data().data;
+    profilePic.style.backgroundImage=`url(${pfp})`;
+    profilePic.textContent="";
+  } else {
+    pfp="";
+    profilePic.textContent=username.charAt(0).toUpperCase();
+    profilePic.style.backgroundColor=stringToColor(username.toLowerCase());
+  }
+
+  loadMessages();
+});
+
+/* Profile toggle */
+let panelOpen=false;
+profilePic.addEventListener("click", ()=>{panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none";});
+
 /* Menu */
-const menuBtn = document.getElementById("menuBtn");
-const closeMenu = document.getElementById("closeMenu");
-menuBtn.onclick = ()=>document.body.classList.add("menu-open");
-closeMenu.onclick = ()=>document.body.classList.remove("menu-open");
+document.getElementById("menuBtn").onclick = ()=>document.body.classList.add("menu-open");
+document.getElementById("closeMenu").onclick = ()=>document.body.classList.remove("menu-open");
 document.getElementById("tabDashboard").onclick = ()=>{document.body.classList.remove("menu-open"); setTimeout(()=>location.href="dashboard.html",350);}
 document.getElementById("tabSettings").onclick = ()=>{document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350);}
+document.getElementById("tabCommunicate").onclick = ()=>document.body.classList.remove("menu-open");
 
-/* Reply logic */
-cancelReply.onclick = ()=>{replyingTo=null; replyPreview.style.display="none";};
+/* Logout/settings */
+window.openSettings = ()=>location.href="settings.html";
+window.confirmLogout = ()=>{ document.getElementById("logoutOverlay").style.display="flex"; };
+window.closeLogout = ()=>{ document.getElementById("logoutOverlay").style.display="none"; };
+window.logout = ()=>signOut(auth).then(()=>location.href="login.html");
 
-/* Sending message */
+/* Reply cancel */
+cancelReply.onclick=()=>{replyingTo=null; replyPreview.style.display="none";};
+
+/* Send message */
 sendBtn.onclick = async ()=>{
-  if(sendCooldown) return;
-  const text = messageInput.value.trim();
+  if(cooldown) return;
+  const text = chatInput.value.trim();
   if(!text) return;
-  sendCooldown=true;
-  setTimeout(()=>sendCooldown=false,2000);
-
-  const msgData = {
-    uid: currentUser.uid,
-    username,
-    pfp: userPFP || "",
-    text,
-    timestamp: serverTimestamp(),
-    replyTo: replyingTo?{id:replyingTo.id, text:replyingTo.text, username:replyingTo.username}:null,
-    edited:false,
-    deleted:false
-  };
-  await addDoc(collection(db,"messages"), msgData);
-  messageInput.value="";
-  replyingTo=null;
-  replyPreview.style.display="none";
+  cooldown=true;
+  chatInput.value="";
+  try{
+    await addDoc(collection(db,"messages"),{
+      uid: user.uid,
+      username,
+      pfp,
+      message: text,
+      replyTo: replyingTo?{id:replyingTo.id, text:replyingTo.text, username:replyingTo.username}:null,
+      edited:false,
+      deleted:false,
+      timestamp: serverTimestamp()
+    });
+    replyingTo=null;
+    replyPreview.style.display="none";
+    setTimeout(()=>{cooldown=false;},2000);
+  }catch(e){console.error(e); cooldown=false;}
 };
 
-/* Real-time messages */
+/* Load messages */
 function loadMessages(){
   const q = query(collection(db,"messages"), orderBy("timestamp"));
-  onSnapshot(q, snap=>{
-    chatContainer.innerHTML="";
-    snap.forEach(docSnap=>{
-      const data = docSnap.data();
-      const msgEl = document.createElement("div");
-      msgEl.classList.add("message");
-      if(data.uid===currentUser.uid) msgEl.classList.add("me");
+  onSnapshot(q,snap=>{
+    chatWrapper.innerHTML="";
+    snap.docs.forEach(d=>{
+      const data=d.data();
+      const msgDiv=document.createElement("div");
+      msgDiv.className="message";
+      if(data.uid===user.uid) msgDiv.classList.add("me");
 
-      const pfpEl = document.createElement("div");
-      pfpEl.className="msg-pfp";
-      if(data.pfp) pfpEl.style.backgroundImage=`url(${data.pfp})`; 
-      else { pfpEl.style.backgroundColor=stringToColor(data.username); pfpEl.textContent=data.username.charAt(0).toUpperCase(); }
+      const pfpDiv=document.createElement("div"); pfpDiv.className="pfp";
+      if(data.pfp) pfpDiv.style.backgroundImage=`url(${data.pfp})`;
+      else { pfpDiv.textContent=data.username.charAt(0).toUpperCase(); pfpDiv.style.backgroundColor=stringToColor(data.username.toLowerCase()); }
 
-      const textEl = document.createElement("div");
-      textEl.className="msg-text";
+      const contentDiv=document.createElement("div"); contentDiv.className="content";
+      const userDiv=document.createElement("div"); userDiv.className="username"; userDiv.textContent=data.username;
+      const textDiv=document.createElement("div"); textDiv.textContent=data.deleted ? `${data.username} deleted a message` : data.message;
+      const timeDiv=document.createElement("div"); timeDiv.className="time";
+      if(data.timestamp) timeDiv.textContent=new Date(data.timestamp.seconds*1000).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",timeZone:"America/New_York"});
+      const editedDiv=document.createElement("div"); editedDiv.className="edited"; editedDiv.textContent=data.edited?"Edited":"";
 
-      let mainText = data.deleted ? `${data.username} deleted a message` : data.text;
-      const spanText = document.createElement("span");
-      spanText.textContent = mainText;
-
-      const timeEl = document.createElement("span");
-      timeEl.className="msg-time";
-      if(data.timestamp && data.timestamp.toDate) timeEl.textContent = data.timestamp.toDate().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'});
-
-      const editedEl = document.createElement("span");
-      editedEl.className="msg-edited";
-      editedEl.textContent = data.edited ? "Edited" : "";
-
-      textEl.appendChild(spanText);
-      textEl.appendChild(timeEl);
-      if(data.edited) textEl.appendChild(editedEl);
-
-      // Buttons
-      if(data.uid===currentUser.uid && !data.deleted){
-        const editBtn = document.createElement("button"); editBtn.textContent="Edit";
-        editBtn.onclick=()=>editMessage(docSnap.id,data.text);
-        const delBtn = document.createElement("button"); delBtn.textContent="Delete";
-        delBtn.onclick=()=>deleteMessage(docSnap.id);
-        textEl.appendChild(editBtn); textEl.appendChild(delBtn);
-      } else if(!data.deleted){
-        const replyBtn = document.createElement("button"); replyBtn.textContent="Reply";
-        replyBtn.onclick=()=>{replyingTo={id:docSnap.id,text:data.text,username:data.username}; replyText.textContent=`Replying to ${data.username}: ${data.text}`; replyPreview.style.display="flex";};
-        textEl.appendChild(replyBtn);
-      }
+      contentDiv.append(userDiv,textDiv,timeDiv,editedDiv);
 
       // Reply preview above message
       if(data.replyTo){
         const rep = document.createElement("div");
         rep.style.fontSize="0.7rem";
-        rep.style.opacity="0.6";
+        rep.style.opacity=0.7;
         rep.style.borderLeft="2px solid #4da3ff";
         rep.style.paddingLeft="6px";
-        rep.textContent = `${data.replyTo.username}: ${data.replyTo.text}`;
-        textEl.insertBefore(rep,textEl.firstChild);
+        rep.textContent=`${data.replyTo.username}: ${data.replyTo.text}`;
+        contentDiv.insertBefore(rep, contentDiv.firstChild);
       }
 
-      msgEl.appendChild(pfpEl);
-      msgEl.appendChild(textEl);
-      chatContainer.appendChild(msgEl);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+      // Buttons
+      if(!data.deleted){
+        if(data.uid===user.uid){
+          const editBtn=document.createElement("button"); editBtn.textContent="Edit";
+          editBtn.onclick=async()=>{const newMsg=prompt("Edit message:",data.message); if(newMsg!==null){await updateDoc(doc(db,"messages",d.id),{message:newMsg,edited:true});}};
+          const delBtn=document.createElement("button"); delBtn.textContent="Delete";
+          delBtn.onclick=async()=>{await updateDoc(doc(db,"messages",d.id),{message:"",deleted:true});};
+          contentDiv.append(editBtn,delBtn);
+        } else {
+          const replyBtn=document.createElement("button"); replyBtn.textContent="Reply";
+          replyBtn.onclick=()=>{replyingTo={id:d.id,text:data.message,username:data.username}; replyText.textContent=`Replying to ${data.username}: ${data.message}`; replyPreview.style.display="flex";};
+          contentDiv.appendChild(replyBtn);
+        }
+      }
+
+      msgDiv.append(pfpDiv,contentDiv);
+      chatWrapper.appendChild(msgDiv);
+      chatWrapper.scrollTop=chatWrapper.scrollHeight;
     });
   });
 }
-
-/* Edit/Delete functions */
-async function editMessage(id, oldText){
-  const newText = prompt("Edit your message:", oldText);
-  if(newText!==null){
-    await updateDoc(doc(db,"messages",id), {text:newText, edited:true});
-  }
-}
-async function deleteMessage(id){
-  await updateDoc(doc(db,"messages",id), {text:"", deleted:true});
-}
-
-/* Logout/settings buttons */
-window.openSettings = ()=>location.href="settings.html";
-window.confirmLogout = ()=>{ if(confirm("Are you sure you want to logout?")) signOut(auth).then(()=>location.href="login.html"); };
 </script>
 </body>
 </html>
