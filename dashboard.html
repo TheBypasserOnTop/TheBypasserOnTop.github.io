@@ -14,15 +14,12 @@ body {
   font-family:system-ui,sans-serif;
   color:#e6f0ff;
   overflow-x:hidden;
-  display:flex;
-  justify-content:center;
-  align-items:center;
 }
 
 /* CARD */
 .card {
   width:90%;
-  max-width:500px;
+  max-width:400px;
   padding:25px;
   background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
@@ -65,6 +62,7 @@ body {
   padding:10px;
   width:180px;
   box-shadow:0 10px 30px rgba(0,0,0,.3);
+  z-index:10;
 }
 #profilePanel .accountName { font-weight:bold; padding:5px 0; text-align:center; border-bottom:1px solid rgba(255,255,255,.2); margin-bottom:5px; }
 #profilePanel button {
@@ -78,7 +76,7 @@ body {
 #profilePanel .primary { background:#4da3ff; color:black; }
 #profilePanel .settings { background:#888cff; color:black; }
 
-/* POPUPS */
+/* LOGOUT POPUP */
 .overlay {
   position:fixed;
   inset:0;
@@ -87,7 +85,7 @@ body {
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:10;
+  z-index:20;
 }
 .popup {
   width:90vw;
@@ -98,14 +96,17 @@ body {
   text-align:center;
 }
 .close { float:right; cursor:pointer; }
-.error { color:#ff6b6b; margin-top:10px; min-height:1.2em; }
+button { cursor:pointer; font-weight:bold; border:none; border-radius:10px; padding:10px; margin-top:10px; }
+button.primary { background:#4da3ff; color:black; }
+button.remove { background:#ff4c4c; color:white; }
 </style>
 </head>
 <body>
 
-<!-- Profile Picture Top Right -->
+<!-- Profile Picture -->
 <div id="profilePic"></div>
 
+<!-- Card -->
 <div class="card">
   <h2 id="welcomeText">Welcome</h2>
 </div>
@@ -117,7 +118,7 @@ body {
   <button class="settings" id="settingsBtn">Settings</button>
 </div>
 
-<!-- LOGOUT POPUP -->
+<!-- Logout Popup -->
 <div class="overlay" id="logoutOverlay">
   <div class="popup">
     <span class="close" onclick="closeLogout()">✕</span>
@@ -131,7 +132,7 @@ body {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -154,42 +155,43 @@ const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const panelUsername = document.getElementById("panelUsername");
 const welcomeText = document.getElementById("welcomeText");
-
 const logoutOverlay = document.getElementById("logoutOverlay");
+const logoutBtn = document.getElementById("logoutBtn");
+const settingsBtn = document.getElementById("settingsBtn");
 
 let currentUser;
 let username = "";
 
-/* Auth state */
-auth.onAuthStateChanged(async (user)=>{
+/* Load user */
+onAuthStateChanged(auth, async (user)=>{
   if(!user) location.replace("login.html");
   currentUser = user;
-  username = user.displayName || await getUsernameFromDB(user.uid);
+
+  // Get username from Firestore if not displayName
+  const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",user.uid)));
+  if(!snap.empty) username = snap.docs[0].id;
+  else username = user.displayName || user.email.split("@")[0];
+
   welcomeText.textContent = `Welcome, ${username}`;
   panelUsername.textContent = username;
+
+  // PFP: first letter + color
   const firstLetter = username.charAt(0).toUpperCase();
   profilePic.textContent = firstLetter;
   const hash = username.split("").reduce((a,c)=>a+c.charCodeAt(0)+(a<<5),0);
   profilePic.style.background = `hsl(${hash%360},65%,50%)`;
 });
 
-async function getUsernameFromDB(uid){
-  const q = query(collection(db,"usernames"), where("uid","==",uid));
-  const snap = await getDocs(q);
-  if(!snap.empty) return snap.docs[0].id;
-  return currentUser.email.split("@")[0];
-}
-
-/* Profile panel toggle */
+/* Toggle profile panel */
 profilePic.addEventListener("click", ()=>profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex");
 
-/* Logout */
-document.getElementById("logoutBtn").onclick = ()=>logoutOverlay.style.display="flex";
+/* Logout popup */
+logoutBtn.addEventListener("click", ()=>logoutOverlay.style.display="flex");
 function closeLogout(){ logoutOverlay.style.display="none"; }
 async function confirmLogout(){ await signOut(auth); location.replace("login.html"); }
 
 /* Settings button */
-document.getElementById("settingsBtn").onclick = ()=>location.replace("settings.html");
+settingsBtn.addEventListener("click", ()=>location.replace("settings.html"));
 </script>
 
 </body>
