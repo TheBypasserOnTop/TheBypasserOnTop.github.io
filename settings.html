@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Settings</title>
 <link rel="icon" href="favicon.ico">
+
 <style>
 body {
   margin:0;
@@ -14,55 +15,49 @@ body {
   color:#e6f0ff;
   display:flex;
   justify-content:center;
-  align-items:flex-start;
-  padding-top:100px;
-  position:relative;
+  padding-top:120px;
 }
 
-/* Card */
 .card {
-  width:90vw;
+  width:95vw;
   max-width:500px;
-  padding:30px;
   background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
+  padding:30px;
   border-radius:20px;
-  box-shadow:0 20px 60px rgba(0,0,0,.4);
 }
 
-/* Headings */
-h2,h3 { margin-bottom:15px; }
+h2 { margin-bottom:20px; }
+
 .section { margin-bottom:30px; }
 
-/* Inputs & Buttons */
-input {
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  border-radius:12px;
-  border:2px solid transparent;
-  background:rgba(255,255,255,.08);
-  color:white;
-  font-size:1rem;
-}
 button {
   width:100%;
   padding:12px;
-  margin:8px 0;
-  border:none;
   border-radius:12px;
-  cursor:pointer;
+  border:none;
   font-weight:600;
+  cursor:pointer;
+  margin-top:10px;
 }
+
 .primary { background:#4da3ff; color:black; }
+.alt { background:rgba(255,255,255,.15); color:white; }
 .remove { background:#ff4c4c; color:white; }
-.alt { background:rgba(255,255,255,.12); color:white; }
 
-/* Error / Success */
-.error { color:#ff6b6b; margin:5px 0; min-height:1.2em; }
-.success { color:#4caf50; margin:5px 0; min-height:1.2em; }
+input {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:12px;
+  border:2px solid transparent;
+  background:rgba(255,255,255,.1);
+  color:white;
+}
 
-/* Profile Picture */
+.error { color:#ff6b6b; min-height:1.2em; margin-top:5px; }
+
+/* PFP */
 #profilePic {
   position:fixed;
   top:20px;
@@ -71,31 +66,29 @@ button {
   height:50px;
   border-radius:50%;
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
   font-weight:bold;
-  font-size:1.3rem;
-  color:white;
   cursor:pointer;
   user-select:none;
   z-index:100;
 }
 
-/* Profile Panel */
 #profilePanel {
   position:fixed;
   top:80px;
   right:20px;
-  width:160px;
-  background:rgba(12,25,55,.85);
-  backdrop-filter:blur(8px);
+  width:180px;
+  background:rgba(12,25,55,.9);
+  backdrop-filter:blur(10px);
   border-radius:14px;
+  padding:10px;
   display:none;
   flex-direction:column;
-  padding:10px;
   z-index:100;
 }
-#profilePanel button { width:100%; margin:5px 0; }
+
+#profilePanel button { margin:5px 0; }
 
 /* Popups */
 .overlay {
@@ -108,287 +101,165 @@ button {
   align-items:center;
   z-index:200;
 }
+
 .popup {
   width:90vw;
   max-width:400px;
   background:#0c1937;
   padding:30px;
   border-radius:20px;
-  text-align:center;
   position:relative;
 }
-.popup .close {
+
+.close {
   position:absolute;
   top:10px;
   right:15px;
   cursor:pointer;
-  font-size:1.2rem;
 }
 </style>
 </head>
 <body>
 
+<div id="profilePic"></div>
+
+<div id="profilePanel">
+  <div id="panelUsername" style="text-align:center;font-weight:bold;margin-bottom:8px;"></div>
+  <button class="primary" id="logoutBtn">Logout</button>
+  <button class="remove" id="openRemoveBtn">Remove Account</button>
+</div>
+
 <div class="card">
-  <h2 id="welcomeText">Welcome</h2>
+  <h2 id="welcomeText">Settings</h2>
 
   <div class="section">
-    <h3>Profile Picture</h3>
-    <div style="display:flex; align-items:center; gap:10px;">
-      <div id="pfpPreview" style="width:50px;height:50px;border-radius:50%;background:#555;display:flex;justify-content:center;align-items:center;font-weight:bold;color:white;cursor:pointer;"></div>
-      <button class="alt" id="changePfpBtn">Change</button>
-    </div>
+    <strong>Username</strong>
+    <div id="usernameDisplay"></div>
+    <button class="alt" id="openUsernameBtn">Change Username</button>
+  </div>
+
+  <div class="section">
+    <strong>Password</strong>
+    <button class="alt" id="openPasswordBtn">Change Password</button>
+  </div>
+
+  <div class="section">
+    <strong>Profile Picture</strong>
+    <input type="file" id="pfpFile" accept="image/*">
+    <button class="alt" id="savePfpBtn">Save Profile Picture</button>
     <div class="error" id="pfpError"></div>
   </div>
-
-  <div class="section">
-    <h3>Username</h3>
-    <div style="display:flex; align-items:center; gap:10px;">
-      <span id="usernameDisplay"></span>
-      <button class="alt" id="changeUsernameBtn">Change</button>
-    </div>
-    <div class="error" id="usernameError"></div>
-  </div>
-
-  <div class="section">
-    <h3>Password</h3>
-    <button class="alt" id="changePasswordBtn">Change Password</button>
-    <div class="error" id="passwordError"></div>
-  </div>
 </div>
 
-<!-- Profile panel -->
-<div id="profilePanel">
-  <div id="panelName" style="text-align:center;font-weight:bold;margin-bottom:10px;"></div>
-  <hr style="border:0.5px solid #555; margin:5px 0;">
-  <button class="primary" id="panelLogoutBtn">Logout</button>
-</div>
-
-<!-- Remove Account Popup -->
+<!-- REMOVE ACCOUNT -->
 <div class="overlay" id="removeOverlay">
   <div class="popup">
-    <span class="close" id="closeRemoveOverlay">✕</span>
+    <span class="close" id="closeRemove">✕</span>
     <h2>Remove Account</h2>
-    <p>Enter your password to confirm:</p>
     <input type="password" id="removePassword" placeholder="Password">
     <div class="error" id="removeError"></div>
-    <button class="remove" id="confirmRemoveBtn">Yes, Remove</button>
+    <button class="remove" id="confirmRemove">Yes, Remove</button>
   </div>
 </div>
 
-<!-- Change Username Popup -->
+<!-- CHANGE USERNAME -->
 <div class="overlay" id="usernameOverlay">
   <div class="popup">
-    <span class="close" id="closeUsernameOverlay">✕</span>
+    <span class="close" id="closeUsername">✕</span>
     <h2>Change Username</h2>
-    <input id="newUsername" placeholder="New Username">
-    <div class="error" id="newUsernameError"></div>
-    <button class="primary" id="saveUsernameBtn">Save</button>
+    <input id="newUsername">
+    <div class="error" id="usernameError"></div>
+    <button class="primary" id="saveUsername">Save</button>
   </div>
 </div>
 
-<!-- Change Password Popup -->
+<!-- CHANGE PASSWORD -->
 <div class="overlay" id="passwordOverlay">
   <div class="popup">
-    <span class="close" id="closePasswordOverlay">✕</span>
-    <h2>Change Password</h2>
-    <input type="password" id="currentPassword" placeholder="Current Password">
-    <input type="password" id="newPassword" placeholder="New Password">
-    <input type="password" id="confirmPassword" placeholder="Confirm Password">
-    <div class="error" id="changePasswordError"></div>
-    <button class="primary" id="savePasswordBtn">Save</button>
-  </div>
-</div>
-
-<!-- Change PFP Popup -->
-<div class="overlay" id="pfpOverlay">
-  <div class="popup">
-    <span class="close" id="closePfpOverlay">✕</span>
-    <h2>Change Profile Picture</h2>
-    <input type="file" id="pfpFile" accept="image/*">
-    <div class="error" id="pfpChangeError"></div>
-    <button class="primary" id="savePfpBtn">Save</button>
+    <span class="close" id="closePassword">✕</span>
+    <input type="password" id="currentPass" placeholder="Current Password">
+    <input type="password" id="newPass" placeholder="New Password">
+    <input type="password" id="confirmPass" placeholder="Confirm Password">
+    <div class="error" id="passwordError"></div>
+    <button class="primary" id="savePassword">Save</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, query, collection, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser, updateProfile } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-storage.js";
 
-/* Firebase config */
-const firebaseConfig = {
+const app = initializeApp({
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
   projectId: "login-34954",
   storageBucket: "login-34954.appspot.com",
   messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41",
-};
-const app = initializeApp(firebaseConfig);
+  appId: "1:422184727508:web:cef39fc913d526febe9c41"
+});
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-/* Elements */
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
-const panelName = document.getElementById("panelName");
-const pfpPreview = document.getElementById("pfpPreview");
 
-const removeOverlay = document.getElementById("removeOverlay");
-const usernameOverlay = document.getElementById("usernameOverlay");
-const passwordOverlay = document.getElementById("passwordOverlay");
-const pfpOverlay = document.getElementById("pfpOverlay");
-
-/* Close buttons */
-document.getElementById("closeRemoveOverlay").addEventListener("click",()=>removeOverlay.style.display="none");
-document.getElementById("closeUsernameOverlay").addEventListener("click",()=>usernameOverlay.style.display="none");
-document.getElementById("closePasswordOverlay").addEventListener("click",()=>passwordOverlay.style.display="none");
-document.getElementById("closePfpOverlay").addEventListener("click",()=>pfpOverlay.style.display="none");
-
-/* Profile panel toggle */
-let panelOpen=false;
-profilePic.addEventListener("click", ()=>{
-  panelOpen = !panelOpen;
-  profilePanel.style.display = panelOpen ? "flex":"none";
-});
-
-/* Helper: consistent color per user */
-function stringToColor(str){
-  let hash = 0;
-  for(let i=0;i<str.length;i++){ hash = str.charCodeAt(i) + ((hash<<5)-hash); }
-  let color="#";
-  for(let i=0;i<3;i++){ const value=(hash>>(i*8))&0xFF; color+=('00'+value.toString(16)).slice(-2); }
-  return color;
+function colorFromString(str){
+  let hash=0;
+  for(let c of str) hash=c.charCodeAt(0)+((hash<<5)-hash);
+  return `hsl(${hash%360},70%,50%)`;
 }
 
-/* Current user info */
-let currentUser=null;
-let currentUsername="";
-
-/* Auth check */
 onAuthStateChanged(auth, async user=>{
-  if(!user) location.replace("login.html");
-  currentUser=user;
+  if(!user) return location.replace("login.html");
 
-  /* Username */
-  let username=user.displayName;
+  let username = user.displayName;
   if(!username){
     const q=query(collection(db,"usernames"), where("uid","==",user.uid));
-    const snap=await getDocs(q);
-    if(!snap.empty) username = snap.docs[0].id;
-    else username = user.email.split("@")[0];
+    const s=await getDocs(q);
+    username = s.empty ? user.email.split("@")[0] : s.docs[0].id;
   }
-  currentUsername=username;
-  document.getElementById("welcomeText").textContent=`Welcome, ${username}`;
+
   document.getElementById("usernameDisplay").textContent=username;
-  panelName.textContent=username;
+  document.getElementById("panelUsername").textContent=username;
 
-  /* Profile pic */
-  let pfpUrl=user.photoURL;
-  if(!pfpUrl){
-    profilePic.textContent=username[0].toUpperCase();
-    profilePic.style.backgroundColor=stringToColor(username.toLowerCase());
-    pfpPreview.textContent=username[0].toUpperCase();
-    pfpPreview.style.backgroundColor=stringToColor(username.toLowerCase());
-  } else {
-    profilePic.style.backgroundImage=`url(${pfpUrl})`;
+  if(user.photoURL){
+    profilePic.style.backgroundImage=`url(${user.photoURL})`;
     profilePic.style.backgroundSize="cover";
-    profilePic.style.color="transparent";
-    pfpPreview.style.backgroundImage=`url(${pfpUrl})`;
-    pfpPreview.style.backgroundSize="cover";
-    pfpPreview.textContent="";
+    profilePic.textContent="";
+  }else{
+    profilePic.textContent=username[0].toUpperCase();
+    profilePic.style.background=colorFromString(username);
   }
 });
 
-/* Open popups */
-document.getElementById("changeUsernameBtn").addEventListener("click",()=>usernameOverlay.style.display="flex");
-document.getElementById("changePasswordBtn").addEventListener("click",()=>passwordOverlay.style.display="flex");
-document.getElementById("changePfpBtn").addEventListener("click",()=>pfpOverlay.style.display="flex");
+profilePic.onclick=()=>profilePanel.style.display=
+  profilePanel.style.display==="flex"?"none":"flex";
 
-/* Logout */
-document.getElementById("panelLogoutBtn").addEventListener("click",async ()=>{
-  if(confirm("Are you sure you want to logout?")){ await signOut(auth); location.replace("login.html"); }
-});
+document.getElementById("logoutBtn").onclick=async()=>{
+  await signOut(auth);
+  location.replace("login.html");
+};
 
-/* Remove account */
-document.getElementById("confirmRemoveBtn").addEventListener("click",async ()=>{
-  const pass=document.getElementById("removePassword").value;
-  document.getElementById("removeError").textContent="";
-  if(!pass){ document.getElementById("removeError").textContent="Enter password"; return; }
-  try{
-    const cred=EmailAuthProvider.credential(currentUser.email,pass);
-    await reauthenticateWithCredential(currentUser,cred);
+document.getElementById("openRemoveBtn").onclick=()=>removeOverlay.style.display="flex";
+document.getElementById("closeRemove").onclick=()=>removeOverlay.style.display="none";
 
-    const q=query(collection(db,"usernames"), where("uid","==",currentUser.uid));
-    const snap=await getDocs(q);
-    snap.forEach(async d=>await deleteDoc(doc(db,"usernames",d.id)));
+document.getElementById("confirmRemove").onclick=async()=>{
+  const p=removePassword.value;
+  const u=auth.currentUser;
+  const cred=EmailAuthProvider.credential(u.email,p);
+  await reauthenticateWithCredential(u,cred);
 
-    await deleteUser(currentUser);
-    location.replace("login.html");
-  }catch(e){ document.getElementById("removeError").textContent=e.message; }
-});
+  const q=query(collection(db,"usernames"), where("uid","==",u.uid));
+  const s=await getDocs(q);
+  s.forEach(d=>deleteDoc(doc(db,"usernames",d.id)));
 
-/* Change username */
-document.getElementById("saveUsernameBtn").addEventListener("click",async ()=>{
-  const newU=document.getElementById("newUsername").value.trim().toLowerCase();
-  const err=document.getElementById("newUsernameError");
-  err.textContent="";
-  if(!newU){ err.textContent="Enter username"; return; }
-  const snap=await getDoc(doc(db,"usernames",newU));
-  if(snap.exists()){ err.textContent="Username taken"; return; }
-
-  const oldU=currentUsername.toLowerCase();
-  await setDoc(doc(db,"usernames",newU),{uid:currentUser.uid,email:currentUser.email});
-  await deleteDoc(doc(db,"usernames",oldU));
-
-  currentUsername=newU;
-  document.getElementById("usernameDisplay").textContent=newU;
-  panelName.textContent=newU;
-  usernameOverlay.style.display="none";
-});
-
-/* Change password */
-document.getElementById("savePasswordBtn").addEventListener("click",async ()=>{
-  const current=document.getElementById("currentPassword").value;
-  const newP=document.getElementById("newPassword").value;
-  const confirm=document.getElementById("confirmPassword").value;
-  const err=document.getElementById("changePasswordError");
-  err.textContent="";
-  if(!current||!newP||!confirm){ err.textContent="Fill all fields"; return; }
-  if(newP.length<8){ err.textContent="Password must be 8+ chars"; return; }
-  if(newP!==confirm){ err.textContent="Passwords do not match"; return; }
-
-  try{
-    const cred=EmailAuthProvider.credential(currentUser.email,current);
-    await reauthenticateWithCredential(currentUser,cred);
-    await updatePassword(currentUser,newP);
-    passwordOverlay.style.display="none";
-    alert("Password updated successfully");
-  }catch(e){ err.textContent=e.message; }
-});
-
-/* Change PFP */
-document.getElementById("savePfpBtn").addEventListener("click",async ()=>{
-  const file=document.getElementById("pfpFile").files[0];
-  const err=document.getElementById("pfpChangeError");
-  err.textContent="";
-  if(!file){ err.textContent="Select an image"; return; }
-  try{
-    const storageRef=ref(storage, `pfps/${currentUser.uid}`);
-    await uploadBytes(storageRef,file);
-    const url=await getDownloadURL(storageRef);
-    await updateProfile(currentUser,{photoURL:url});
-    profilePic.style.backgroundImage=`url(${url})`;
-    profilePic.style.color="transparent";
-    profilePic.style.backgroundSize="cover";
-    pfpPreview.style.backgroundImage=`url(${url})`;
-    pfpPreview.style.backgroundSize="cover";
-    pfpPreview.textContent="";
-    pfpOverlay.style.display="none";
-  }catch(e){ err.textContent=e.message; }
-});
+  await deleteUser(u);
+  location.replace("login.html");
+};
 </script>
 </body>
 </html>
