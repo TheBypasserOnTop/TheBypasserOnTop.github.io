@@ -7,15 +7,16 @@
 <link rel="icon" href="favicon.ico">
 
 <style>
-body {
+body{
   margin:0;
   min-height:100vh;
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   font-family:system-ui,sans-serif;
   color:#e6f0ff;
-  overflow-x:hidden;
 }
-.card {
+
+/* Card */
+.card{
   width:90%;
   max-width:400px;
   padding:25px;
@@ -23,13 +24,14 @@ body {
   backdrop-filter:blur(16px);
   border-radius:16px;
   box-shadow:0 15px 40px rgba(0,0,0,.4);
-  text-align:center;
   position:absolute;
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
 }
-#profilePic {
+
+/* Profile Pic */
+#profilePic{
   position:fixed;
   top:15px;
   right:15px;
@@ -37,17 +39,17 @@ body {
   height:50px;
   border-radius:50%;
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
   font-weight:bold;
   font-size:1.3rem;
   cursor:pointer;
   color:white;
-  user-select:none;
   z-index:100;
-  background-size:cover;
 }
-#profilePanel {
+
+/* Profile Panel */
+#profilePanel{
   position:fixed;
   top:75px;
   right:15px;
@@ -60,14 +62,7 @@ body {
   padding:10px;
   z-index:100;
 }
-#profilePanel .accountName {
-  font-weight:bold;
-  padding:5px 0;
-  text-align:center;
-  border-bottom:1px solid rgba(255,255,255,.2);
-  margin-bottom:5px;
-}
-#profilePanel button {
+#profilePanel button{
   margin:5px 0;
   padding:8px;
   border:none;
@@ -75,14 +70,17 @@ body {
   font-weight:bold;
   cursor:pointer;
 }
-.section {
+
+/* Section */
+.section{
   background:rgba(0,0,0,.25);
   padding:15px;
   border-radius:12px;
   margin-bottom:15px;
-  text-align:left;
 }
-#pfpPreview {
+
+/* PFP preview */
+#pfpPreview{
   width:50px;
   height:50px;
   border-radius:50%;
@@ -90,26 +88,24 @@ body {
   justify-content:center;
   align-items:center;
   font-weight:bold;
-  font-size:1.2rem;
   color:white;
   cursor:pointer;
-  margin-left:10px;
   background-size:cover;
 }
-#pfpPanel {
+
+/* PFP panel */
+#pfpPanel{
   display:none;
   position:absolute;
-  background:rgba(12,25,55,0.85);
+  background:rgba(12,25,55,.85);
   backdrop-filter:blur(12px);
   padding:8px;
   border-radius:10px;
   flex-direction:column;
-  top:80px;
-  right:80px;
-  width:120px;
-  z-index:15;
 }
-.overlay {
+
+/* Overlay FIX */
+.overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.4);
@@ -118,17 +114,25 @@ body {
   justify-content:center;
   align-items:center;
   z-index:20;
+  pointer-events:none;
 }
-.popup {
+.overlay.show{
+  display:flex;
+  pointer-events:auto;
+}
+
+.popup{
   width:90vw;
   max-width:400px;
   background:#0c1937;
   padding:30px;
   border-radius:20px;
-  text-align:center;
 }
-.close { float:right; cursor:pointer; }
-.error { color:#ff4c4c; min-height:1.2em; margin-top:10px; }
+.close{
+  float:right;
+  cursor:pointer;
+}
+.error{ color:#ff4c4c; }
 </style>
 </head>
 
@@ -137,8 +141,7 @@ body {
 <div id="profilePic"></div>
 
 <div id="profilePanel">
-  <div class="accountName" id="panelUsername"></div>
-  <button id="dashboardBtn">Dashboard</button>
+  <button onclick="location.replace('dashboard.html')">Dashboard</button>
   <button id="logoutBtn">Logout</button>
 </div>
 
@@ -146,8 +149,6 @@ body {
   <h2>Settings</h2>
 
   <div class="section">
-    <h3>Account Settings</h3>
-
     Profile Picture:
     <div id="pfpPreview"></div>
     <div id="pfpPanel">
@@ -156,16 +157,15 @@ body {
       <button id="viewPfpBtn">View</button>
     </div>
 
-    <div>
-      Username: <span id="usernameDisplay"></span>
-      <button id="changeUsernameBtn">Change</button>
-    </div>
+    <br><br>
+    Username: <span id="usernameDisplay"></span>
+    <button id="changeUsernameBtn">Change</button>
 
-    <div>
-      Password: ••••••••
-      <button id="changePasswordBtn">Change</button>
-    </div>
+    <br><br>
+    Password: ••••••••
+    <button id="changePasswordBtn">Change</button>
 
+    <br><br>
     <button id="removeAccountBtn">Remove Account</button>
   </div>
 </div>
@@ -174,29 +174,9 @@ body {
 <div class="overlay" id="removeOverlay">
   <div class="popup">
     <span class="close">✕</span>
-    <input type="password" id="removePassword">
+    <input id="removePassword" type="password" placeholder="Password">
     <div class="error" id="removeError"></div>
     <button id="confirmRemoveBtn">Remove</button>
-  </div>
-</div>
-
-<div class="overlay" id="usernameOverlay">
-  <div class="popup">
-    <span class="close">✕</span>
-    <input id="newUsername">
-    <div class="error" id="usernameError"></div>
-    <button id="saveUsername">Save</button>
-  </div>
-</div>
-
-<div class="overlay" id="passwordOverlay">
-  <div class="popup">
-    <span class="close">✕</span>
-    <input id="currentPassword" type="password">
-    <input id="newPassword" type="password">
-    <input id="confirmPassword" type="password">
-    <div class="error" id="passwordError"></div>
-    <button id="savePassword">Save</button>
   </div>
 </div>
 
@@ -204,78 +184,97 @@ body {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword, deleteUser } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getAuth, signOut, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954"
+  apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain:"login-34954.firebaseapp.com",
+  projectId:"login-34954"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* FIX #2 — CLOSE BUTTONS */
-document.querySelectorAll(".close").forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    btn.closest(".overlay").style.display="none";
-  });
+const profilePic = document.getElementById("profilePic");
+const pfpPreview = document.getElementById("pfpPreview");
+const pfpFile = document.getElementById("pfpFile");
+const pfpPanel = document.getElementById("pfpPanel");
+const removeOverlay = document.getElementById("removeOverlay");
+
+function openOverlay(o){ o.classList.add("show"); }
+function closeOverlay(o){ o.classList.remove("show"); }
+
+document.querySelectorAll(".close").forEach(x=>{
+  x.onclick=()=>closeOverlay(x.closest(".overlay"));
 });
 
-/* FIX #1 — PFP SYNC */
-function applyPfp(img, letter, color){
-  if(img){
-    profilePic.style.backgroundImage = img;
-    profilePic.textContent="";
-    pfpPreview.style.backgroundImage = img;
-    pfpPreview.textContent="";
-  } else {
-    profilePic.style.backgroundImage="";
-    profilePic.textContent=letter;
-    profilePic.style.background=color;
-    pfpPreview.style.backgroundImage="";
-    pfpPreview.textContent=letter;
-    pfpPreview.style.background=color;
-  }
+function colorFrom(str){
+  let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
+  return `hsl(${h%360},70%,50%)`;
 }
-
-let currentUser, username="";
 
 onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
-  currentUser=user;
 
-  const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",user.uid)));
-  username = snap.empty ? user.email.split("@")[0] : snap.docs[0].id;
+  let name=user.email.split("@")[0];
+  const snap=await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
+  if(!snap.empty) name=snap.docs[0].id;
 
-  panelUsername.textContent=username;
-  usernameDisplay.textContent=username;
+  profilePic.textContent=name[0].toUpperCase();
+  profilePic.style.background=colorFrom(name);
+  pfpPreview.textContent=name[0].toUpperCase();
+  pfpPreview.style.background=colorFrom(name);
 
-  const letter=username[0].toUpperCase();
-  const color=`hsl(${username.charCodeAt(0)*7%360},70%,50%)`;
-
-  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
+  const pfpDoc=await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
-    applyPfp(`url(${pfpDoc.data().data})`, letter, color);
-  } else {
-    applyPfp(null, letter, color);
+    profilePic.style.backgroundImage=`url(${pfpDoc.data().data})`;
+    profilePic.textContent="";
+    pfpPreview.style.backgroundImage=`url(${pfpDoc.data().data})`;
+    pfpPreview.textContent="";
   }
 });
 
-/* CHANGE PFP */
+profilePic.onclick=()=>{
+  profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex";
+};
+
+pfpPreview.onclick=()=>{
+  pfpPanel.style.display = pfpPanel.style.display==="flex"?"none":"flex";
+};
+
+changePfpBtn.onclick=()=>pfpFile.click();
+
 pfpFile.onchange=e=>{
   const file=e.target.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=async ev=>{
-    await setDoc(doc(db,"userPFPs",currentUser.uid),{data:ev.target.result});
-    applyPfp(`url(${ev.target.result})`, "", "");
+  const r=new FileReader();
+  r.onload=async ev=>{
+    pfpPreview.style.backgroundImage=`url(${ev.target.result})`;
+    profilePic.style.backgroundImage=`url(${ev.target.result})`;
+    pfpPreview.textContent="";
+    profilePic.textContent="";
+    await setDoc(doc(db,"userPFPs",auth.currentUser.uid),{data:ev.target.result});
   };
-  reader.readAsDataURL(file);
+  r.readAsDataURL(file);
+};
+
+logoutBtn.onclick=async()=>{
+  await signOut(auth);
+  location.replace("login.html");
+};
+
+removeAccountBtn.onclick=()=>openOverlay(removeOverlay);
+
+confirmRemoveBtn.onclick=async()=>{
+  const pass=removePassword.value;
+  const cred=EmailAuthProvider.credential(auth.currentUser.email,pass);
+  await reauthenticateWithCredential(auth.currentUser,cred);
+  const snap=await getDocs(query(collection(db,"usernames"),where("uid","==",auth.currentUser.uid)));
+  snap.forEach(d=>deleteDoc(d.ref));
+  await deleteUser(auth.currentUser);
+  location.replace("login.html");
 };
 </script>
-
 </body>
 </html>
