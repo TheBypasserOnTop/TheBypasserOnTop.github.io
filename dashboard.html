@@ -176,6 +176,7 @@ body.menu-open .blur-layer {
   z-index:100;
   background-size:cover;
   background-position:center;
+  background-repeat:no-repeat;
 }
 
 /* Profile panel */
@@ -257,6 +258,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebas
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
+/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
@@ -278,35 +280,38 @@ const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
 
-/* Profile pic letter color */
+/* Generate consistent color from username */
 function stringToColor(str){
   let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
   let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
   return color;
 }
 
-/* Auth check */
+/* Auth check and fetch username/PFP */
 onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
-  let username = user.displayName;
-  if(!username){
-    const q=query(collection(db,"usernames"),where("uid","==",user.uid));
-    const snap=await getDocs(q);
-    username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
-  }
-  document.getElementById("welcomeText").textContent=`Welcome, ${username}`;
-  profileName.textContent=username;
+
+  // Get username from Firestore
+  let username;
+  const q=query(collection(db,"usernames"),where("uid","==",user.uid));
+  const snap=await getDocs(q);
+  username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+
+  profileName.textContent = username;
+  document.getElementById("welcomeText").textContent = `Welcome, ${username}`;
   welcomeSubtext.style.opacity=1;
 
-  // Profile pic
+  // Profile picture logic
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
-  if(pfpDoc.exists() && pfpDoc.data().data){
+  if(pfpDoc.exists() && pfpDoc.data().data && pfpDoc.data().data.trim() !== ""){
     profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
+    profilePic.style.backgroundColor = "transparent";
     profilePic.textContent = "";
   } else {
-    profilePic.style.backgroundImage = "";
+    profilePic.style.backgroundImage = "none";
     profilePic.textContent = username.charAt(0).toUpperCase();
     profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
+    profilePic.style.color = "#ffffff";
   }
 });
 
@@ -320,7 +325,6 @@ profilePic.addEventListener("click", ()=>{
 /* Menu logic */
 const menuBtn = document.getElementById("menuBtn");
 const closeMenu = document.getElementById("closeMenu");
-const sidePanel = document.getElementById("sidePanel");
 menuBtn.onclick = () => document.body.classList.add("menu-open");
 closeMenu.onclick = () => document.body.classList.remove("menu-open");
 
@@ -340,7 +344,7 @@ const observer = new IntersectionObserver(entries=>{
 },{threshold:0.1});
 scrollCards.forEach(c=>observer.observe(c));
 
-/* Logout/settings buttons */
+/* Buttons */
 window.openSettings = ()=>location.href="settings.html";
 window.confirmLogout = ()=>{ if(confirm("Are you sure you want to logout?")) signOut(auth).then(()=>location.href="login.html"); };
 </script>
