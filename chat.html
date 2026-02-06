@@ -17,36 +17,30 @@ html, body {
   overflow-y:auto;
 }
 
-/* Centered chat wrapper */
+/* Centered chat card */
 #chatWrapper {
   width:100%;
   display:flex;
-  flex-direction:column;
+  justify-content:center;
   align-items:center;
+  flex-direction:column;
   min-height:80vh;
-  padding-top:100px;
-  box-sizing:border-box;
+  position:relative;
   z-index:1;
 }
-
-/* Chat container */
-#chatContainer {
+.card {
   width:90%;
-  max-width:600px;
-  display:flex;
-  flex-direction:column;
-  gap:15px;
-  margin-bottom:80px;
+  max-width:400px;
+  padding:30px;
+  background:rgba(12,25,55,.65);
+  backdrop-filter:blur(16px);
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  text-align:center;
+  margin:20px auto;
+  z-index:10;
 }
-
-/* Chat message */
-.chat-message {
-  padding:10px 15px;
-  background:rgba(12,25,55,.7);
-  border-radius:15px;
-  max-width:75%;
-  word-wrap:break-word;
-}
+h2 { margin-bottom:10px; }
 
 /* Hamburger menu */
 #menuBtn {
@@ -184,6 +178,29 @@ body.menu-open .blur-layer {
 }
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
+
+/* Overlay popups (logout/remove) */
+.overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(6px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:200;
+}
+.popup {
+  width:90vw;
+  max-width:400px;
+  background:#0c1937;
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+  position:relative;
+}
+.close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.2rem; }
+.error { color:#ff6b6b; margin-top:10px; min-height:1.2em; text-align:left; }
 </style>
 </head>
 <body>
@@ -204,10 +221,10 @@ body.menu-open .blur-layer {
 </div>
 <div class="blur-layer"></div>
 
-<!-- Chat content -->
+<!-- Centered chat card -->
 <div id="chatWrapper">
-  <div id="chatContainer">
-    <div class="chat-message">Welcome to the chat!</div>
+  <div class="card">
+    <h2 id="welcomeText">Chat</h2>
   </div>
 </div>
 
