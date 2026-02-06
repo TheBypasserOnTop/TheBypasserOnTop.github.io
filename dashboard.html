@@ -75,7 +75,7 @@ body {
 #profilePanel .primary { background:#4da3ff; color:black; }
 #profilePanel .settings { background:#888cff; color:black; }
 
-/* REMOVE ACCOUNT POPUP */
+/* LOGOUT POPUP */
 .overlay {
   position:fixed;
   inset:0;
@@ -111,18 +111,6 @@ body {
   <button class="settings" id="settingsBtn">Settings</button>
 </div>
 
-<!-- REMOVE ACCOUNT POPUP -->
-<div class="overlay" id="removeOverlay">
-  <div class="popup">
-    <span class="close" onclick="closeRemoveAccount()">✕</span>
-    <h2>Remove Account</h2>
-    <p>Enter your password to confirm:</p>
-    <input type="password" id="removePassword" placeholder="Password">
-    <div class="error" id="removeError"></div>
-    <button class="remove" onclick="removeAccount()">Yes, Remove</button>
-  </div>
-</div>
-
 <!-- LOGOUT CONFIRM POPUP -->
 <div class="overlay" id="logoutOverlay">
   <div class="popup">
@@ -137,8 +125,8 @@ body {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, deleteDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -164,9 +152,6 @@ const profilePanel = document.getElementById("profilePanel");
 const panelUsername = document.getElementById("panelUsername");
 
 const logoutOverlay = document.getElementById("logoutOverlay");
-const removeOverlay = document.getElementById("removeOverlay");
-const removePassword = document.getElementById("removePassword");
-const removeError = document.getElementById("removeError");
 
 let currentUser;
 
@@ -189,7 +174,6 @@ auth.onAuthStateChanged(async (user)=>{
   const firstLetter = username.charAt(0).toUpperCase();
   profilePic.textContent = firstLetter;
 
-  // Color based on username
   let hash = 0;
   for(let i=0;i<username.length;i++) hash = username.charCodeAt(i) + ((hash<<5)-hash);
   const color = `hsl(${hash%360},65%,50%)`;
@@ -208,40 +192,6 @@ async function confirmLogout(){ await signOut(auth); location.replace("login.htm
 
 /* SETTINGS NAV */
 document.getElementById("settingsBtn").onclick = ()=>{ location.replace("settings.html"); };
-
-/* REMOVE ACCOUNT POPUP */
-window.openRemoveAccount = ()=>{
-  removeOverlay.style.display="flex";
-  removePassword.value="";
-  removeError.textContent="";
-};
-window.closeRemoveAccount = ()=> removeOverlay.style.display="none";
-
-window.removeAccount = async ()=>{
-  const pass = removePassword.value;
-  removeError.textContent="";
-  if(!pass){ removeError.textContent="Enter password"; return; }
-
-  const user = auth.currentUser;
-  if(!user){ removeError.textContent="No user logged in"; return; }
-
-  try {
-    if(user.email){
-      const cred = EmailAuthProvider.credential(user.email, pass);
-      await reauthenticateWithCredential(user,cred);
-    }
-
-    const q = query(collection(db,"usernames"), where("uid","==",user.uid));
-    const snap = await getDocs(q);
-    snap.forEach(async d => await deleteDoc(doc(db,"usernames",d.id)));
-
-    await deleteUser(user);
-    location.replace("login.html");
-  } catch(e){
-    console.error(e);
-    removeError.textContent = e.message;
-  }
-};
 </script>
 </body>
 </html>
