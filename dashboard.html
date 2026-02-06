@@ -29,23 +29,22 @@ body {
   text-align:center;
 }
 
-h2 { margin-bottom:30px; }
+h2 { margin-bottom:20px; }
 
 button {
-  width:80%;
+  width:100%;
   padding:15px;
-  margin:12px 0;
+  margin-bottom:12px;
   border-radius:14px;
   border:none;
-  font-size:1rem;
   font-weight:600;
   cursor:pointer;
+  font-size:1rem;
 }
 
 .primary { background:#4da3ff; color:black; }
-.danger { background:#ff4d4d; color:black; }
+.remove { background:#ff4c4c; color:white; }
 
-/* Remove account popup */
 .overlay {
   position:fixed;
   inset:0;
@@ -54,7 +53,6 @@ button {
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:1000;
 }
 .popup {
   width:90vw;
@@ -63,47 +61,37 @@ button {
   padding:30px;
   border-radius:20px;
   text-align:center;
-  position:relative;
 }
 .close { float:right; cursor:pointer; }
-input { 
-  width:90%;
-  padding:12px;
-  margin:12px 0;
-  border-radius:12px;
-  border:2px solid rgba(255,255,255,.2);
-  background:rgba(255,255,255,.08);
-  color:white;
-  font-size:1rem;
-}
-.error { color:#ff6b6b; min-height:1.2em; }
+.error { color:#ff6b6b; margin-top:10px; min-height:1.2em; }
 </style>
 </head>
 <body>
 
 <div class="card">
-  <h2 id="welcomeText">Welcome!</h2>
-  <button class="primary" id="logoutBtn">Logout</button>
-  <button class="danger" id="removeBtn">Remove Account</button>
+  <h2 id="welcomeText">Welcome</h2>
+
+  <button class="primary" onclick="logout()">Logout</button>
+  <button class="remove" onclick="openRemoveAccount()">Remove Account</button>
 </div>
 
-<!-- Remove Account Popup -->
+<!-- REMOVE ACCOUNT POPUP -->
 <div class="overlay" id="removeOverlay">
   <div class="popup">
-    <span class="close" onclick="closeRemove()">✕</span>
-    <h2>Confirm Account Removal</h2>
+    <span class="close" onclick="closeRemoveAccount()">✕</span>
+    <h2>Remove Account</h2>
     <p>Enter your password to confirm:</p>
     <input type="password" id="removePassword" placeholder="Password">
     <div class="error" id="removeError"></div>
-    <button class="danger" onclick="removeAccount()">Yes, Remove Account</button>
+    <button class="remove" onclick="removeAccount()">Yes, Remove</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, signOut, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, deleteDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -124,56 +112,72 @@ const db = getFirestore(app);
 
 /* Elements */
 const welcomeText = document.getElementById("welcomeText");
-const logoutBtn = document.getElementById("logoutBtn");
-const removeBtn = document.getElementById("removeBtn");
 const removeOverlay = document.getElementById("removeOverlay");
 const removePassword = document.getElementById("removePassword");
 const removeError = document.getElementById("removeError");
 
-/* Check user logged in */
-auth.onAuthStateChanged(async user=>{
-  if(!user){
-    location.replace("login.html");
-  } else {
-    let displayName = user.displayName || user.email;
-    // Check Firestore for username
-    const snap = await getDoc(doc(db,"usernames",user.uid));
-    if(snap.exists()) displayName = snap.id || displayName;
-    welcomeText.textContent = `Welcome, ${displayName}`;
+/* Check if logged in */
+auth.onAuthStateChanged(async (user) => {
+  if(!user) location.replace("login.html");
+
+  // Show welcome text
+  let username = user.displayName;
+  if(!username){
+    // If email login, find username from Firestore
+    const q = query(collection(db,"usernames"), where("uid","==",user.uid));
+    const snap = await getDocs(q);
+    if(!snap.empty) username = snap.docs[0].id;
+    else username = user.email.split("@")[0];
   }
+  welcomeText.textContent = `Welcome, ${username}`;
 });
 
 /* Logout */
-logoutBtn.onclick=async()=>{
+window.logout = async () => {
   await signOut(auth);
   location.replace("login.html");
 };
 
 /* Remove Account */
-removeBtn.onclick=()=>removeOverlay.style.display="flex";
-window.closeRemove=()=>removeOverlay.style.display="none";
-
-async function removeAccount(){
+window.openRemoveAccount = () => {
+  removeOverlay.style.display="flex";
+  removePassword.value="";
   removeError.textContent="";
-  const password = removePassword.value;
-  if(!password){ removeError.textContent="Enter password"; return; }
+};
+window.closeRemoveAccount = () => removeOverlay.style.display="none";
+
+window.removeAccount = async () => {
+  const pass = removePassword.value;
+  removeError.textContent="";
+
+  if(!pass){ removeError.textContent="Enter password"; return; }
 
   const user = auth.currentUser;
-  const credential = EmailAuthProvider.credential(user.email,password);
+  if(!user){ removeError.textContent="No user logged in"; return; }
 
-  try{
-    // Re-authenticate
-    await reauthenticateWithCredential(user,credential);
-    // Delete Firestore username
-    await deleteDoc(doc(db,"usernames",user.uid));
+  try {
+    // Reauthenticate user with email/password
+    if(user.email){
+      const cred = EmailAuthProvider.credential(user.email, pass);
+      await reauthenticateWithCredential(user,cred);
+    }
+
+    // Delete username doc if exists
+    const q = query(collection(db,"usernames"), where("uid","==",user.uid));
+    const snap = await getDocs(q);
+    snap.forEach(async d => await deleteDoc(doc(db,"usernames",d.id)));
+
     // Delete Firebase user
-    await user.delete();
+    await deleteUser(user);
+
+    // Redirect to login
     location.replace("login.html");
   } catch(e){
     console.error(e);
-    removeError.textContent=e.message;
+    removeError.textContent = e.message;
   }
-}
+};
 </script>
+
 </body>
 </html>
