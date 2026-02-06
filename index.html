@@ -1,61 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Loading...</title>
-<link rel="icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSMIC | Initializing...</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --accent: #a855f7; }
+        
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top, #1e1b4b, #020617);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center; justify-content: center;
+            overflow: hidden;
+        }
 
-<style>
-html, body { margin:0; height:100%; }
-body {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background: radial-gradient(circle at top, #0b1e3d, #050b1a);
-}
-.loader {
-  width:min(26vw,96px);
-  height:min(26vw,96px);
-  border:6px solid rgba(100,150,255,0.2);
-  border-top:6px solid #4da3ff;
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-  box-shadow:0 0 30px rgba(77,163,255,0.6);
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-</style>
+        /* Animated Stars Background */
+        .stars-container { position: fixed; inset: 0; z-index: -1; }
+        .star {
+            position: absolute; background: white; border-radius: 50%;
+            animation: pulse var(--duration) infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.1; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 12px white; }
+        }
+
+        /* High-End Orbital Loader */
+        .loader-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Outer ring */
+        .loader-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid rgba(168, 85, 247, 0.1);
+            border-top: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1.5s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+        }
+
+        /* Inner glowing orb */
+        .loader-core {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 30px 10px rgba(168, 85, 247, 0.6);
+            animation: corePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes corePulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 45px 15px rgba(168, 85, 247, 0.8); }
+        }
+
+        /* Status Text Animation */
+        .status-text {
+            margin-top: 40px;
+            font-size: 10px;
+            letter-spacing: 0.8em;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.4);
+            animation: blink 1.5s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.1; }
+        }
+    </style>
 </head>
 <body>
-<div class="loader"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <div class="stars-container" id="starField"></div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app",
-  messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41",
-  measurementId: "G-1MMT3C4M7K"
-};
+    <div class="loader-wrapper">
+        <div class="loader-ring"></div>
+        <div class="loader-core"></div>
+    </div>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+    <div class="status-text">Synchronizing Identity</div>
 
-/* Loader duration 1.7s */
-onAuthStateChanged(auth, user => {
-  setTimeout(() => {
-    if (user) {
-      window.location.replace("dashboard.html");
-    } else {
-      window.location.replace("login.html");
-    }
-  }, 1700);
-});
-</script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+            authDomain: "login-34954.firebaseapp.com",
+            projectId: "login-34954",
+            storageBucket: "login-34954.firebasestorage.app",
+            messagingSenderId: "422184727508",
+            appId: "1:422184727508:web:cef39fc913d526febe9c41"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Shimmery Stars (Matching your main theme)
+        const starField = document.getElementById('starField');
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 2 + 1;
+            star.style.width = star.style.height = `${size}px`;
+            star.style.left = `${Math.random() * 100}%`; 
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
+            starField.appendChild(star);
+        }
+
+        /* Verification Logic */
+        onAuthStateChanged(auth, user => {
+            // Keep the vibe for 1.7s to let animations play
+            setTimeout(() => {
+                if (user) {
+                    window.location.replace("dashboard.html");
+                } else {
+                    window.location.replace("login.html");
+                }
+            }, 1700);
+        });
+    </script>
 </body>
 </html>
