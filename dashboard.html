@@ -1,246 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
-<link rel="icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSMIC | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --accent: #a855f7; --glass: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.1); }
+        
+        body {
+            margin: 0; padding: 0;
+            background: radial-gradient(circle at top, #1e1b4b, #020617);
+            color: #e6f0ff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            opacity: 0;
+            animation: pageLoad 1s ease-out forwards;
+        }
 
-<style>
-html, body {
-  margin:0;
-  padding:0;
-  min-height:100%;
-  font-family:system-ui,sans-serif;
-  background:radial-gradient(circle at top,#0b2a55,#050b1a);
-  color:#e6f0ff;
-  overflow-x:hidden;
-}
+        @keyframes pageLoad { to { opacity: 1; } }
 
-/* Hamburger menu */
-#menuBtn {
-  position:fixed;
-  top:20px;
-  left:20px;
-  width:32px;
-  height:24px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  cursor:pointer;
-  z-index:150;
-}
-#menuBtn span {
-  height:4px;
-  background:white;
-  border-radius:4px;
-}
-body.menu-open #menuBtn {
-  opacity:0;
-  pointer-events:none;
-}
+        /* Slow Gradient Title matching Login */
+        .gradient-text {
+            background: linear-gradient(to right, #ffffff 0%, #a855f7 25%, #3b82f6 50%, #a855f7 75%, #ffffff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slowFlow 12s linear infinite;
+        }
+        @keyframes slowFlow { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
 
-/* Side panel */
-#sidePanel {
-  position:fixed;
-  top:0;
-  left:-300px;
-  width:260px;
-  height:100%;
-  background:#0a1e46; /* solid color, no transparency */
-  padding:20px;
-  box-sizing:border-box;
-  z-index:200;
-  transition:left .35s ease;
-}
-body.menu-open #sidePanel { left:0; }
+        /* Stars Background */
+        .stars-container { position: fixed; inset: 0; z-index: -1; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 12px white; } }
 
-/* Side panel header */
-#sidePanelHeader {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-#closeMenu { cursor:pointer; font-size:1.4rem; }
+        /* Sidebar Glass Effect */
+        #sidePanel {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
+            background: rgba(10, 10, 30, 0.8);
+            backdrop-filter: blur(40px);
+            border-right: 1px solid var(--border);
+            z-index: 200;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 2rem;
+        }
+        body.menu-open #sidePanel { transform: translateX(300px); }
 
-.divider {
-  height:1px;
-  background:rgba(255,255,255,.2);
-  margin:15px 0;
-}
+        .nav-tab {
+            padding: 1rem; border-radius: 12px; cursor: pointer;
+            margin-bottom: 0.5rem; transition: all 0.3s ease;
+            border: 1px solid transparent; color: rgba(255,255,255,0.6);
+        }
+        .nav-tab:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-tab.active { background: var(--accent); color: white; box-shadow: 0 10px 20px rgba(168, 85, 247, 0.2); }
 
-.nav-tab {
-  padding:12px;
-  border-radius:10px;
-  cursor:pointer;
-  margin-bottom:8px;
-  font-weight:600;
-}
-.nav-tab.active { background:#4da3ff; color:black; }
+        /* Card System */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+        }
 
-/* Blur layer */
-.blur-layer {
-  position:absolute;
-  inset:0;
-  z-index:5;
-}
-body.menu-open .blur-layer {
-  backdrop-filter: blur(8px); /* background blur while menu open */
-  pointer-events:none;
-}
+        /* Profile Bubble */
+        #profilePic {
+            width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; cursor: pointer; z-index: 100;
+            border: 2px solid var(--border); transition: transform 0.3s ease;
+            background-size: cover;
+        }
+        #profilePic:hover { transform: scale(1.1); border-color: var(--accent); }
 
-/* Welcome section */
-#welcomeWrapper {
-  min-height:80vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  z-index:10;
-}
+        /* Floating Scroll Animation */
+        .scroll-card {
+            opacity: 0; transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .scroll-card.show { opacity: 1; transform: translateY(0); }
 
-/* UPDATED welcome card: flat with subtle outline */
-.card {
-  width:92%;
-  max-width:560px;
-  background:rgba(80,140,255,0.14);
-  padding:38px;
-  border-radius:24px;
-  border:2px solid rgba(20,40,80,0.8); /* subtle darker outline */
-  text-align:center;
-  margin-bottom:24px;
-  box-shadow: none; /* no glow or blur */
-}
-.card h2 {
-  color: #e6f0ff;
-  text-shadow: none; /* remove glowing text shadow */
-}
-
-/* Scroll hint */
-#scrollHint {
-  font-weight:500;
-  color:#cfd8f0;
-  animation: float 2s ease-in-out infinite alternate;
-}
-@keyframes float {
-  from { transform:translateY(0); }
-  to { transform:translateY(-10px); }
-}
-
-/* Sliding cards */
-.scroll-card {
-  width:90%;
-  max-width:360px;
-  margin:60px auto;
-  padding:22px;
-  background:rgba(12,25,55,.7);
-  border-radius:16px;
-  opacity:0;
-  transform:translateY(40px);
-  transition:opacity 1s ease, transform 1s ease;
-}
-.scroll-card.show {
-  opacity:1;
-  transform:translateY(0);
-}
-
-/* Profile pic */
-#profilePic {
-  position:fixed;
-  top:20px;
-  right:20px;
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  font-size:1.3rem;
-  color:white;
-  cursor:pointer;
-  z-index:100;
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-position:center;
-}
-
-/* Profile panel */
-#profilePanel {
-  position:fixed;
-  top:80px;
-  right:20px;
-  width:180px;
-  background:rgba(12,25,55,0.85);
-  border-radius:14px;
-  display:none;
-  flex-direction:column;
-  padding:10px;
-  z-index:100;
-}
-#profilePanel h4 {
-  text-align:center;
-  margin:0 0 8px;
-}
-#profilePanel button {
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  margin-top:5px;
-  font-weight:600;
-  cursor:pointer;
-}
-.primary { background:#4da3ff; color:black; }
-</style>
+        #menuBtn { cursor: pointer; z-index: 150; }
+        #menuBtn div { width: 24px; height: 2px; background: white; margin: 5px 0; border-radius: 2px; transition: 0.3s; }
+    </style>
 </head>
-
 <body>
 
-<div id="menuBtn"><span></span><span></span><span></span></div>
+<div class="stars-container" id="starField"></div>
+
+<nav class="fixed top-0 w-full px-8 py-6 flex justify-between items-center z-50">
+    <div id="menuBtn" onclick="toggleMenu()">
+        <div></div><div></div><div></div>
+    </div>
+    
+    <div class="flex items-center gap-4">
+        <div id="profilePic"></div>
+    </div>
+</nav>
 
 <div id="sidePanel">
-  <div id="sidePanelHeader">
-    <div></div>
-    <h3>Navigation</h3>
-    <div id="closeMenu">✕</div>
-  </div>
-  <div class="divider"></div>
-  <div class="nav-tab active">Dashboard</div>
-  <div class="nav-tab" onclick="navigateTo('proxies.html')">Proxies</div>
-  <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
+    <div class="flex justify-between items-center mb-10">
+        <h3 class="text-xl font-black gradient-text">COSMIC</h3>
+        <button onclick="toggleMenu()" class="text-white/40 hover:text-white">✕</button>
+    </div>
+    <div class="nav-tab active">Dashboard</div>
+    <div class="nav-tab" onclick="navigateTo('proxies.html')">Proxies</div>
+    <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
+    <div class="mt-auto pt-10 border-t border-white/10">
+        <div class="nav-tab text-red-400 hover:bg-red-500/10" onclick="logout()">Logout</div>
+    </div>
 </div>
 
-<div class="blur-layer"></div>
-
-<div id="welcomeWrapper">
-  <div class="card">
-    <h2 id="welcomeText">Welcome</h2>
-  </div>
-  <div id="scrollHint">Scroll down for more info</div>
+<div id="profilePanel" class="fixed top-20 right-8 w-56 glass-card p-4 hidden flex-col z-50">
+    <h4 id="profileName" class="text-center font-bold text-purple-300 mb-4"></h4>
+    <button class="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl mb-2 transition" onclick="navigateTo('settings.html')">Account Settings</button>
+    <button class="w-full py-2 bg-red-500/20 text-red-300 hover:bg-red-500/40 rounded-xl transition" onclick="logout()">Logout</button>
 </div>
 
-<div class="scroll-card">🚀 Fast & responsive UI</div>
-<div class="scroll-card">🔒 Secure Firebase authentication</div>
-<div class="scroll-card">🎨 Glassy blue UI polish</div>
+<main id="welcomeWrapper" class="pt-32 px-6 flex flex-col items-center">
+    <div class="glass-card p-12 max-w-2xl w-full text-center mb-20">
+        <h2 id="welcomeText" class="text-4xl md:text-5xl font-black mb-2">Welcome</h2>
+        <p class="text-white/40 uppercase tracking-[0.4em] text-[10px] font-bold">Session Initialized</p>
+    </div>
 
-<div id="profilePic"></div>
-
-<div id="profilePanel">
-  <h4 id="profileName"></h4>
-  <button class="primary" onclick="navigateTo('settings.html')">Settings</button>
-  <button class="primary" onclick="logout()">Logout</button>
-</div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mb-20">
+        <div class="scroll-card glass-card p-8 flex flex-col items-center">
+            <span class="text-3xl mb-4">🛰️</span>
+            <p class="font-bold text-sm tracking-widest text-white/60">SYSTEM STATUS</p>
+            <p class="text-green-400 text-xs mt-2 font-mono">ALL SYSTEMS NOMINAL</p>
+        </div>
+        <div class="scroll-card glass-card p-8 flex flex-col items-center">
+            <span class="text-3xl mb-4">🔒</span>
+            <p class="font-bold text-sm tracking-widest text-white/60">SECURITY</p>
+            <p class="text-purple-400 text-xs mt-2 font-mono">FIREBASE PROTECTED</p>
+        </div>
+        <div class="scroll-card glass-card p-8 flex flex-col items-center">
+            <span class="text-3xl mb-4">🚀</span>
+            <p class="font-bold text-sm tracking-widest text-white/60">LATENCY</p>
+            <p class="text-blue-400 text-xs mt-2 font-mono">12ms TO HUB</p>
+        </div>
+    </div>
+</main>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const app = initializeApp({
-  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954"
-});
+const firebaseConfig = {
+    apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+    authDomain: "login-34954.firebaseapp.com",
+    projectId: "login-34954"
+};
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -249,61 +162,75 @@ const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
 const welcomeText = document.getElementById("welcomeText");
 
-function stringToColor(str){
-  let h=0;
-  for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
-  return `hsl(${h%360},70%,50%)`;
+// Theme-matching HSL Color Generator
+function stringToColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return `hsl(${hash % 360}, 60%, 65%)`;
 }
 
-onAuthStateChanged(auth, async user=>{
-  if(!user) location.replace("login.html");
+onAuthStateChanged(auth, async user => {
+    if (!user) location.replace("login.html");
 
-  const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
-  const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+    const snap = await getDocs(query(collection(db, "usernames"), where("uid", "==", user.uid)));
+    const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
 
-  welcomeText.textContent = `Welcome, ${username}`;
-  profileName.textContent = username;
+    welcomeText.textContent = `Welcome, ${username.toUpperCase()}`;
+    profileName.textContent = `@${username}`;
 
-  profilePic.textContent = username[0].toUpperCase();
-  profilePic.style.backgroundColor = stringToColor(username);
-  profilePic.style.backgroundImage = "";
+    profilePic.textContent = username[0].toUpperCase();
+    profilePic.style.backgroundColor = stringToColor(username);
 
-  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
-  if(pfpDoc.exists() && pfpDoc.data().data){
-    profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
-    profilePic.textContent = "";
-  }
+    const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
+    if (pfpDoc.exists() && pfpDoc.data().data) {
+        profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
+        profilePic.textContent = "";
+    }
 });
 
-/* Profile panel toggle */
-profilePic.onclick = () => {
-  profilePanel.style.display =
-    profilePanel.style.display === "flex" ? "none" : "flex";
+// UI Controls
+window.toggleMenu = () => document.body.classList.toggle("menu-open");
+
+profilePic.onclick = (e) => {
+    e.stopPropagation();
+    profilePanel.classList.toggle("hidden");
+    profilePanel.classList.toggle("flex");
 };
 
-/* Menu open/close */
-menuBtn.onclick = () => document.body.classList.add("menu-open");
-closeMenu.onclick = () => document.body.classList.remove("menu-open");
+document.addEventListener('click', () => {
+    profilePanel.classList.add("hidden");
+    profilePanel.classList.remove("flex");
+});
 
-/* Animated navigation */
 window.navigateTo = (page) => {
-  document.body.classList.remove("menu-open");
-  setTimeout(() => location.href = page, 350);
+    document.body.style.opacity = "0";
+    setTimeout(() => location.href = page, 400);
 };
 
 window.logout = async () => {
-  await signOut(auth);
-  location.href="login.html";
+    await signOut(auth);
+    location.href = "login.html";
 };
 
-/* Scroll animations */
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting) e.target.classList.add("show");
-  });
-},{threshold:0.15});
+// Shimmery Stars
+const starField = document.getElementById('starField');
+for (let i = 0; i < 120; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2 + 1;
+    star.style.width = star.style.height = `${size}px`;
+    star.style.left = `${Math.random() * 100}%`; 
+    star.style.top = `${Math.random() * 100}%`;
+    star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
+    starField.appendChild(star);
+}
 
-document.querySelectorAll(".scroll-card").forEach(c=>observer.observe(c));
+// Scroll Intersection Observer
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("show"); });
+}, { threshold: 0.2 });
+
+document.querySelectorAll(".scroll-card").forEach(c => observer.observe(c));
 </script>
 
 </body>
