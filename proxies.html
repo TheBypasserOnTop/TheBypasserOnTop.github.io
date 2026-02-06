@@ -5,61 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Proxies</title>
 <link rel="icon" href="favicon.ico">
-
 <style>
-html, body {
-  margin:0;
-  padding:0;
-  min-height:100%;
-  font-family:system-ui,sans-serif;
-  background:radial-gradient(circle at top,#0b2a55,#050b1a);
-  color:#e6f0ff;
-  overflow-x:hidden;
-}
-
+html, body { margin:0; padding:0; min-height:100%; font-family:system-ui,sans-serif; background:radial-gradient(circle at top,#0b2a55,#050b1a); color:#e6f0ff; overflow-x:hidden; }
 /* Hamburger menu */
 #menuBtn { position:fixed; top:20px; left:20px; width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; z-index:150; }
 #menuBtn span { height:4px; background:white; border-radius:4px; }
 body.menu-open #menuBtn { opacity:0; pointer-events:none; transition:.3s; }
-
 /* Side panel */
 #sidePanel { position:fixed; top:0; left:-300px; width:260px; height:100%; background:rgba(10,30,70,.95); backdrop-filter:blur(18px); padding:20px; box-sizing:border-box; z-index:200; transition:left .35s ease; display:flex; flex-direction:column; }
 body.menu-open #sidePanel { left:0; }
-
 #sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
 .divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
 .nav-tab { padding:12px; border-radius:10px; cursor:pointer; margin-bottom:8px; font-weight:600; }
 .nav-tab.active { background:#4da3ff; color:black; }
-
 /* Blur layer */
 .blur-layer { position:absolute; inset:0; z-index:5; }
 body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
-
 /* Profile pic panel */
 #profilePic { position:fixed; top:20px; right:20px; width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.3rem; color:white; cursor:pointer; z-index:100; background-size:cover; background-position:center; background-repeat:no-repeat; }
 #profilePanel { position:fixed; top:80px; right:20px; width:180px; background:rgba(12,25,55,.85); backdrop-filter:blur(10px); border-radius:14px; display:none; flex-direction:column; padding:10px; z-index:100; }
 #profilePanel h4 { text-align:center; margin:0 0 8px; }
 #profilePanel button { padding:10px; border:none; border-radius:10px; margin-top:5px; font-weight:600; cursor:pointer; }
 .primary { background:#4da3ff; color:black; }
-
 /* Content wrapper */
 #contentWrapper { min-height:90vh; display:flex; flex-direction:column; align-items:center; padding-top:100px; z-index:10; }
-
 /* Proxy generator panel */
 #proxyPanel { margin-top:20px; width:320px; text-align:center; z-index:10; position:relative; }
 #proxyPanel h3 { margin-bottom:10px; }
 #proxySelect { width:100%; padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,.1); color:white; font-size:1rem; cursor:pointer; margin-bottom:15px; z-index:20; position:relative; }
 #generateBtn { width:100%; padding:12px; font-size:1rem; border:none; border-radius:12px; background:#4da3ff; color:black; cursor:pointer; }
-
 /* Progress bar */
 #progressContainer { width:100%; background:rgba(255,255,255,.1); border-radius:12px; overflow:hidden; margin-top:20px; display:none; }
 #progressFill { width:0%; background:#4da3ff; height:28px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:bold; transition:width .2s; }
 #progressText { margin-top:8px; font-size:0.9rem; color:#cfd8f0; text-align:center; }
-
 /* Generated proxies list */
-#generatedList { margin-top:40px; width:90%; max-width:600px; }
-.generated-card { background:rgba(12,25,55,.7); padding:15px; border-radius:12px; margin-bottom:15px; text-align:left; }
+#generatedListWrapper { margin-top:40px; width:90%; max-width:600px; text-align:center; }
+#generatedListWrapper h3 { margin-bottom:10px; }
+#generatedList { text-align:left; }
+.generated-card { background:rgba(12,25,55,.7); padding:15px; border-radius:12px; margin-bottom:15px; }
 .generated-card .divider { margin:10px 0; height:1px; background:rgba(255,255,255,.2); }
 .generated-card button { margin-right:8px; padding:6px 12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
 .generated-card .thumbs-up { background:#4caf50; color:white; }
@@ -67,7 +51,6 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 .generated-card .count { margin-left:5px; font-weight:bold; }
 </style>
 </head>
-
 <body>
 
 <div id="menuBtn"><span></span><span></span><span></span></div>
@@ -78,7 +61,6 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
   <div class="nav-tab active">Proxies</div>
   <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
 </div>
-
 <div class="blur-layer"></div>
 
 <div id="contentWrapper">
@@ -96,13 +78,15 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
     <button id="generateBtn">Generate link</button>
     <div id="progressContainer">
       <div id="progressFill">0%</div>
-      <div id="progressText">Starting...</div>
     </div>
+    <div id="progressText">Starting...</div>
   </div>
 
-  <h3 style="margin-top:40px;">Generated Proxies</h3>
-  <div class="divider"></div>
-  <div id="generatedList"></div>
+  <div id="generatedListWrapper">
+    <h3>Generated Proxies</h3>
+    <div class="divider"></div>
+    <div id="generatedList"></div>
+  </div>
 </div>
 
 <div id="profilePic"></div>
@@ -125,21 +109,20 @@ const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
 
-function stringToColor(str){
-  let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
-  return `hsl(${h%360},70%,50%)`;
-}
+function stringToColor(str){ let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h); return `hsl(${h%360},70%,50%)`; }
 
 onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
-  const snap = await getDoc(doc(db,"usernames",user.uid));
-  const username = snap?.data()?.name || user.email.split("@")[0];
+  // Get username
+  const username = user.displayName || user.email.split("@")[0];
   profileName.textContent=username;
   profilePic.textContent=username[0].toUpperCase();
   profilePic.style.backgroundColor=stringToColor(username);
   profilePic.style.backgroundImage="";
+  // PFP
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){ profilePic.style.backgroundImage=`url(${pfpDoc.data().data})`; profilePic.textContent=""; }
+  loadGenerated();
 });
 
 profilePic.onclick = () => profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex";
@@ -148,71 +131,86 @@ document.getElementById("closeMenu").onclick = () => document.body.classList.rem
 window.navigateTo = (page) => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href=page,300); }
 window.logout = async()=>{ await signOut(auth); location.href="login.html"; }
 
-/* Proxies */
-const proxySelect = document.getElementById("proxySelect");
-const generateBtn = document.getElementById("generateBtn");
-const progressContainer = document.getElementById("progressContainer");
-const progressFill = document.getElementById("progressFill");
-const progressText = document.getElementById("progressText");
-const generatedList = document.getElementById("generatedList");
-
+// Proxies
+const proxySelect=document.getElementById("proxySelect");
+const generateBtn=document.getElementById("generateBtn");
+const progressContainer=document.getElementById("progressContainer");
+const progressFill=document.getElementById("progressFill");
+const progressText=document.getElementById("progressText");
+const generatedList=document.getElementById("generatedList");
 let cooldown=false;
+let clickedLinks=new Set();
 
-function addGeneratedCard(item){
-  const card=document.createElement("div"); card.className="generated-card";
-  card.innerHTML=`<strong>${item.proxy}</strong><div class="divider"></div><span>${item.link}</span>
-  <div style="margin-top:8px;">
-  <button class="thumbs-up">👍 <span class="count">${item.up}</span></button>
-  <button class="thumbs-down">👎 <span class="count">${item.down}</span></button></div>`;
-  const upBtn=card.querySelector(".thumbs-up"); const downBtn=card.querySelector(".thumbs-down");
-  const counts=card.querySelectorAll(".count");
-  upBtn.onclick=()=>{item.up++; counts[0].textContent=item.up; saveList();}
-  downBtn.onclick=()=>{item.down++; counts[1].textContent=item.down; saveList();}
-  generatedList.prepend(card);
+const proxyLinks={"Rammerhead":["link1","link2"],"Space":["link3"],"Shuttle":[],"Doge":["link4"],"Bolt":["link5"],"Shadow":["link6"],"Ghost":["link7"]};
+
+// Load saved generated
+async function loadGenerated(){
+  const user=auth.currentUser;
+  const snap=await getDoc(doc(db,"generatedProxies",user.uid));
+  if(snap.exists() && snap.data().list){
+    snap.data().list.reverse().forEach(item=>addGeneratedCard(item,false));
+  }
 }
 
+// Save list
 async function saveList(){
   const user=auth.currentUser;
-  const items=Array.from(generatedList.children).map(c=>({proxy:c.querySelector("strong").textContent, link:c.querySelector("span").textContent, up:parseInt(c.querySelectorAll(".count")[0].textContent), down:parseInt(c.querySelectorAll(".count")[1].textContent)}));
+  const items=Array.from(generatedList.children).map(c=>{
+    return {
+      proxy:c.querySelector("strong").textContent,
+      link:c.querySelector("span").textContent,
+      up:parseInt(c.querySelector(".thumbs-up .count").textContent),
+      down:parseInt(c.querySelector(".thumbs-down .count").textContent)
+    };
+  });
   await setDoc(doc(db,"generatedProxies",user.uid),{list:items});
 }
 
-async function loadList(){
-  const user=auth.currentUser;
-  const snap=await getDoc(doc(db,"generatedProxies",user.uid));
-  if(snap.exists() && snap.data().list){ snap.data().list.forEach(addGeneratedCard); }
+function addGeneratedCard(item,prepend=true){
+  const card=document.createElement("div");
+  card.className="generated-card";
+  card.innerHTML=`<strong>${item.proxy}</strong><div class="divider"></div><span>${item.link}</span>
+    <div style="margin-top:8px;">
+      <button class="thumbs-up">👍 <span class="count">${item.up}</span></button>
+      <button class="thumbs-down">👎 <span class="count">${item.down}</span></button>
+    </div>`;
+  const upBtn=card.querySelector(".thumbs-up");
+  const downBtn=card.querySelector(".thumbs-down");
+  const counts=card.querySelectorAll(".count");
+  upBtn.onclick=()=>{ if(clickedLinks.has(item.link)) return; item.up++; counts[0].textContent=item.up; clickedLinks.add(item.link); saveList();}
+  downBtn.onclick=()=>{ if(clickedLinks.has(item.link)) return; item.down++; counts[1].textContent=item.down; clickedLinks.add(item.link); saveList();}
+  if(prepend) generatedList.prepend(card); else generatedList.appendChild(card);
 }
-loadList();
 
+// Generate button
 generateBtn.onclick=()=>{
-  if(cooldown){ alert("Wait 10 seconds"); return; }
+  if(cooldown){ alert("Wait 10 seconds before generating again"); return; }
   cooldown=true; setTimeout(()=>cooldown=false,10000);
 
   progressContainer.style.display="block";
   progressFill.style.width="0%"; progressFill.textContent="0%";
   progressText.textContent="Starting...";
 
-  const selectedProxy=proxySelect.value;
+  const selected=proxySelect.value;
   const fakeLogs=["Searching for proxies","Clearing cookies and data","reaching-13.zaq","shrjw.aj","loading..."];
   let percent=0;
-
-  const proxyLinks={"Rammerhead":["link1","link2"],"Space":["link3"],"Shuttle":[],"Doge":["link4"],"Bolt":["link5"],"Shadow":["link6"],"Ghost":["link7"]};
 
   const interval=setInterval(()=>{
     if(percent>=100){
       clearInterval(interval);
-      const links=proxyLinks[selectedProxy];
+      const links=proxyLinks[selected];
       if(!links || links.length===0){ progressText.textContent="Failed to generate: no stock"; progressFill.style.backgroundColor="#ff4c4c"; }
       else{
         const link=links[Math.floor(Math.random()*links.length)];
         progressText.textContent="Successfully generated";
         progressFill.style.backgroundColor="#4da3ff";
-        addGeneratedCard({proxy:selectedProxy,link,up:0,down:0});
+        addGeneratedCard({proxy:selected,link,up:0,down:0});
         saveList();
       }
       return;
     }
-    percent+=Math.floor(Math.random()*5)+2; if(percent>100) percent=100;
+    percent+=Math.floor(Math.random()*5)+2;
+    if(percent>100) percent=100;
     progressFill.style.width=percent+"%";
     progressFill.textContent=percent+"%";
     progressText.textContent=fakeLogs[Math.floor(Math.random()*fakeLogs.length)];
