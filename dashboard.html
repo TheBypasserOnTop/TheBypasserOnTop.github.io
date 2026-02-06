@@ -16,6 +16,7 @@ body {
   align-items:center;
   font-family:system-ui,sans-serif;
   color:#e6f0ff;
+  position:relative;
 }
 
 .card {
@@ -27,6 +28,7 @@ body {
   border-radius:20px;
   box-shadow:0 20px 60px rgba(0,0,0,.4);
   text-align:center;
+  position:relative;
 }
 
 h2 { margin-bottom:20px; }
@@ -45,6 +47,45 @@ button {
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
 
+/* Profile pic */
+#profilePic {
+  position:absolute;
+  top:20px;
+  right:20px;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  font-size:1.3rem;
+  color:white;
+  cursor:pointer;
+  user-select:none;
+}
+
+/* Profile panel */
+#profilePanel {
+  position:absolute;
+  top:80px;
+  right:20px;
+  width:160px;
+  background:rgba(12,25,55,.85);
+  backdrop-filter:blur(8px);
+  border-radius:14px;
+  display:none;
+  flex-direction:column;
+  padding:10px;
+  z-index:10;
+}
+
+#profilePanel button {
+  width:100%;
+  margin:5px 0;
+}
+
+/* REMOVE ACCOUNT POPUP */
 .overlay {
   position:fixed;
   inset:0;
@@ -73,6 +114,12 @@ button {
 
   <button class="primary" onclick="logout()">Logout</button>
   <button class="remove" onclick="openRemoveAccount()">Remove Account</button>
+
+  <div id="profilePic"></div>
+  <div id="profilePanel">
+    <button class="primary" onclick="logout()">Logout</button>
+    <button class="remove" onclick="openRemoveAccount()">Remove Account</button>
+  </div>
 </div>
 
 <!-- REMOVE ACCOUNT POPUP -->
@@ -115,12 +162,25 @@ const welcomeText = document.getElementById("welcomeText");
 const removeOverlay = document.getElementById("removeOverlay");
 const removePassword = document.getElementById("removePassword");
 const removeError = document.getElementById("removeError");
+const profilePic = document.getElementById("profilePic");
+const profilePanel = document.getElementById("profilePanel");
+
+/* Generate consistent color per user */
+function stringToColor(str){
+  let hash = 0;
+  for(let i=0;i<str.length;i++){ hash = str.charCodeAt(i) + ((hash<<5)-hash); }
+  let color = '#';
+  for(let i=0;i<3;i++){
+    const value = (hash >> (i*8)) & 0xFF;
+    color += ('00'+value.toString(16)).slice(-2);
+  }
+  return color;
+}
 
 /* Check if logged in */
 auth.onAuthStateChanged(async (user) => {
   if(!user) location.replace("login.html");
 
-  // Show welcome text
   let username = user.displayName;
   if(!username){
     // If email login, find username from Firestore
@@ -130,6 +190,18 @@ auth.onAuthStateChanged(async (user) => {
     else username = user.email.split("@")[0];
   }
   welcomeText.textContent = `Welcome, ${username}`;
+
+  // Setup profile pic
+  const firstLetter = username[0].toUpperCase();
+  profilePic.textContent = firstLetter;
+  profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
+});
+
+/* Profile pic click toggle panel */
+let panelOpen = false;
+profilePic.addEventListener("click", ()=>{
+  panelOpen = !panelOpen;
+  profilePanel.style.display = panelOpen ? "flex" : "none";
 });
 
 /* Logout */
@@ -156,7 +228,6 @@ window.removeAccount = async () => {
   if(!user){ removeError.textContent="No user logged in"; return; }
 
   try {
-    // Reauthenticate user with email/password
     if(user.email){
       const cred = EmailAuthProvider.credential(user.email, pass);
       await reauthenticateWithCredential(user,cred);
@@ -167,10 +238,7 @@ window.removeAccount = async () => {
     const snap = await getDocs(q);
     snap.forEach(async d => await deleteDoc(doc(db,"usernames",d.id)));
 
-    // Delete Firebase user
     await deleteUser(user);
-
-    // Redirect to login
     location.replace("login.html");
   } catch(e){
     console.error(e);
