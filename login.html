@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic | Secure Terminal</title>
+    <title>COSMIC | Access Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root { --accent: #a855f7; --success: #22c55e; --error: #ef4444; }
+        
         body {
             margin: 0;
             background: radial-gradient(circle at top, #1e1b4b, #020617);
@@ -16,9 +17,37 @@
             display: flex;
             align-items: center; justify-content: center;
             overflow: hidden;
+            opacity: 0;
+            animation: pageLoad 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
 
-        /* Animated Stars Background */
+        @keyframes pageLoad {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Seamless Slow Gradient Title */
+        .gradient-text {
+            background: linear-gradient(
+                to right, 
+                #ffffff 0%, 
+                #a855f7 25%, 
+                #3b82f6 50%, 
+                #a855f7 75%, 
+                #ffffff 100%
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slowFlow 12s linear infinite;
+        }
+
+        @keyframes slowFlow {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        /* Animated Stars */
         .stars-container { position: fixed; inset: 0; z-index: -1; }
         .star {
             position: absolute; background: white; border-radius: 50%;
@@ -26,37 +55,50 @@
         }
         @keyframes pulse {
             0%, 100% { opacity: 0.1; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.8); box-shadow: 0 0 12px white; }
+            50% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 12px white; }
         }
 
-        /* Glass Cards */
+        /* Glass Card */
         .auth-card {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Form Styling */
+        /* Inputs */
         input {
             background: rgba(255, 255, 255, 0.05) !important;
             border: 2px solid transparent !important;
             transition: all 0.3s ease !important;
             outline: none !important;
+            color: white;
         }
         .input-valid { border-color: var(--success) !important; box-shadow: 0 0 15px rgba(34, 197, 94, 0.1); }
         .input-error { border-color: var(--error) !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.1); }
         input:focus:not(.input-valid):not(.input-error) { border-color: var(--accent) !important; }
 
-        /* Signup Overlay - STRICTLY HIDDEN BY DEFAULT */
+        /* Login Button */
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(168, 85, 247, 0.2);
+        }
+        .btn-primary:hover {
+            background-color: #9333ea;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(168, 85, 247, 0.3);
+        }
+
+        /* Signup Overlay */
         #signupOverlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(2, 6, 23, 0.92);
+            position: fixed; inset: 0;
+            background: rgba(2, 6, 23, 0.95);
             backdrop-filter: blur(20px);
-            display: none; /* This ensures it stays hidden on load */
+            display: none;
             z-index: 100;
-            align-items: center;
-            justify-content: center;
+            align-items: center; justify-content: center;
         }
 
         .error-msg { color: var(--error); font-size: 0.7rem; margin-top: 4px; min-height: 1rem; }
@@ -68,18 +110,20 @@
 
     <div class="w-full max-w-md px-6 z-10" id="loginPanel">
         <div class="auth-card p-10 rounded-[2.5rem] text-center shadow-2xl">
-            <h1 class="text-4xl font-black mb-2 tracking-tighter uppercase bg-clip-text text-transparent bg-gradient-to-b from-white to-purple-400">
-                Terminal
+            <h1 class="text-4xl font-black tracking-tighter uppercase gradient-text">
+                COSMIC
             </h1>
-            <p class="text-gray-500 text-[10px] tracking-[0.6em] uppercase mb-10">Access Portal v2.0</p>
+            <p class="text-gray-400 text-[10px] tracking-[0.5em] uppercase mt-1 mb-10 font-bold opacity-60">
+                BETA 1.2
+            </p>
             
             <div class="space-y-4">
-                <input id="emailUsername" type="text" placeholder="Email or Username" class="w-full p-4 rounded-2xl text-white">
-                <input id="password" type="password" placeholder="Password" class="w-full p-4 rounded-2xl text-white">
+                <input id="emailUsername" type="text" placeholder="Email or Username" class="w-full p-4 rounded-2xl">
+                <input id="password" type="password" placeholder="Password" class="w-full p-4 rounded-2xl">
                 <div id="loginError" class="error-msg text-center"></div>
 
-                <button onclick="login()" class="w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-purple-500 hover:text-white transition-all transform active:scale-95 shadow-lg shadow-purple-500/10">
-                    Sign In
+                <button onclick="login()" class="btn-primary w-full py-4 rounded-2xl uppercase tracking-widest text-sm">
+                    Login
                 </button>
 
                 <div class="flex items-center my-8">
@@ -93,7 +137,7 @@
                 </button>
 
                 <p class="pt-10 text-gray-500 text-sm">
-                    First time? <span onclick="openSignup()" class="text-purple-400 cursor-pointer hover:underline font-bold">Initialize Identity</span>
+                    Unknown identity? <span onclick="openSignup()" class="text-purple-400 cursor-pointer hover:underline font-bold">Register Now</span>
                 </p>
             </div>
         </div>
@@ -108,45 +152,42 @@
                 
                 <div class="space-y-4 text-left">
                     <div>
-                        <input id="suEmail" placeholder="Email Address" class="w-full p-4 rounded-xl text-white">
+                        <input id="suEmail" placeholder="Email Address" class="w-full p-4 rounded-xl">
                         <div id="emailCheck" class="error-msg"></div>
                     </div>
-                    
                     <div>
-                        <input id="suUsername" placeholder="Unique Username" class="w-full p-4 rounded-xl text-white">
+                        <input id="suUsername" placeholder="Unique Username" class="w-full p-4 rounded-xl">
                         <div id="usernameCheck" class="error-msg"></div>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <input id="suPassword" type="password" placeholder="Password (8+)" class="w-full p-4 rounded-xl text-white">
+                            <input id="suPassword" type="password" placeholder="Password (8+)" class="w-full p-4 rounded-xl">
                             <div id="passwordCheck" class="error-msg"></div>
                         </div>
                         <div>
-                            <input id="suPasswordRepeat" type="password" placeholder="Repeat Password" class="w-full p-4 rounded-xl text-white">
+                            <input id="suPasswordRepeat" type="password" placeholder="Repeat" class="w-full p-4 rounded-xl">
                             <div id="passwordRepeatCheck" class="error-msg"></div>
                         </div>
                     </div>
                 </div>
 
                 <div id="signupGeneralError" class="error-msg text-center my-4"></div>
-                <button onclick="signup()" class="w-full py-4 bg-purple-600 rounded-xl font-bold hover:bg-purple-500 transition-all shadow-lg shadow-purple-600/30">
-                    Register Identity
+                <button onclick="signup()" class="btn-primary w-full py-4 rounded-xl">
+                    Initialize Account
                 </button>
             </div>
 
             <div id="verifyBox" class="hidden text-center py-8">
                 <div class="text-6xl mb-6">📡</div>
-                <h3 class="text-2xl font-bold mb-2">Signal Sent</h3>
+                <h3 class="text-2xl font-bold mb-4">Signal Sent</h3>
                 <p class="text-gray-400 mb-8">Verification transmitted to:<br><span id="verifyEmail" class="text-purple-300 font-mono"></span></p>
-                <div id="resendCountdown" class="text-xs opacity-50">Resend lock active (30s)</div>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, setPersistence, browserSessionPersistence, reload } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -164,7 +205,7 @@
         const provider = new GoogleAuthProvider();
         setPersistence(auth, browserSessionPersistence);
 
-        // --- Real-Time Signup Validation ---
+        // --- Real-Time Validation ---
         const suEmail = document.getElementById("suEmail");
         const suUser = document.getElementById("suUsername");
         const suPass = document.getElementById("suPassword");
@@ -178,7 +219,7 @@
 
         suEmail.addEventListener("input", () => {
             const valid = /\S+@\S+\.\S+/.test(suEmail.value);
-            updateStatus(suEmail, "emailCheck", valid ? "" : "Invalid format", valid);
+            updateStatus(suEmail, "emailCheck", valid ? "" : "Invalid email", valid);
         });
 
         suUser.addEventListener("input", async () => {
@@ -190,21 +231,17 @@
 
         suPass.addEventListener("input", () => {
             const valid = suPass.value.length >= 8;
-            updateStatus(suPass, "passwordCheck", valid ? "" : "8+ characters required", valid);
+            updateStatus(suPass, "passwordCheck", valid ? "" : "8+ chars", valid);
         });
 
         suPassRep.addEventListener("input", () => {
             const match = suPassRep.value === suPass.value && suPassRep.value !== "";
-            updateStatus(suPassRep, "passwordRepeatCheck", match ? "" : "Mismatch", match);
+            updateStatus(suPassRep, "passwordRepeatCheck", match ? "" : "No match", match);
         });
 
         // --- Global Actions ---
-        window.openSignup = () => {
-            document.getElementById("signupOverlay").style.display = "flex";
-        };
-        window.closeSignup = () => {
-            document.getElementById("signupOverlay").style.display = "none";
-        };
+        window.openSignup = () => { document.getElementById("signupOverlay").style.display = "flex"; };
+        window.closeSignup = () => { document.getElementById("signupOverlay").style.display = "none"; };
 
         window.login = async () => {
             const input = document.getElementById("emailUsername").value.trim();
@@ -218,7 +255,7 @@
                 }
                 await signInWithEmailAndPassword(auth, email, pass);
                 location.replace("dashboard.html");
-            } catch(e) { document.getElementById("loginError").textContent = "Terminal Error: Identity not found or password incorrect"; }
+            } catch(e) { document.getElementById("loginError").textContent = "Access Denied: Invalid Credentials"; }
         };
 
         window.googleLogin = async () => {
@@ -241,7 +278,7 @@
             } catch(e) { document.getElementById("signupGeneralError").textContent = e.message; }
         };
 
-        // Shimmery Star Generation
+        // Shimmery Stars
         const starField = document.getElementById('starField');
         for (let i = 0; i < 110; i++) {
             const star = document.createElement('div');
