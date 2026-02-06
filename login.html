@@ -75,6 +75,9 @@ button { font-weight:600; cursor:pointer; }
 }
 .close { float:right; cursor:pointer; }
 .error-msg { color:#ff6b6b; font-size:0.9rem; margin-top:-10px; margin-bottom:10px; text-align:left; }
+.success-msg { color:#4caf50; font-size:0.9rem; margin-top:-10px; margin-bottom:10px; text-align:left; }
+#resendCountdown { margin-top:10px; font-size:0.9rem; cursor:default; }
+#resendCountdown.clickable { cursor:pointer; color:#4da3ff; text-decoration:underline; }
 </style>
 </head>
 <body>
@@ -100,10 +103,17 @@ button { font-weight:600; cursor:pointer; }
 
     <div id="signupForm">
       <input id="suEmail" placeholder="Email">
+      <div id="emailCheck" class="error-msg"></div>
+
       <input id="suUsername" placeholder="Username">
       <div id="usernameCheck" class="error-msg"></div>
+
       <input id="suPassword" type="password" placeholder="Password (min 8 chars)">
+      <div id="passwordCheck" class="error-msg"></div>
+
       <input id="suPasswordRepeat" type="password" placeholder="Repeat Password">
+      <div id="passwordRepeatCheck" class="error-msg"></div>
+
       <div class="error" id="signupError"></div>
       <button class="primary" onclick="signup()">Sign Up</button>
     </div>
@@ -112,6 +122,8 @@ button { font-weight:600; cursor:pointer; }
       <p><strong>Verify Email</strong></p>
       <p>Check your email: <span id="verifyEmail"></span></p>
       <p style="opacity:.7">Don't see it? Check spam or trash.</p>
+      <div id="resendCountdown">Resend email in 30s</div>
+      <div id="verifySuccess" class="success-msg"></div>
     </div>
   </div>
 </div>
@@ -120,7 +132,7 @@ button { font-weight:600; cursor:pointer; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, setPersistence, browserSessionPersistence, onAuthStateChanged, reload } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
@@ -149,13 +161,21 @@ const verifyBox = document.getElementById("verifyBox");
 const verifyEmail = document.getElementById("verifyEmail");
 const usernameInput = document.getElementById("suUsername");
 const usernameCheck = document.getElementById("usernameCheck");
+const emailInput = document.getElementById("suEmail");
+const emailCheck = document.getElementById("emailCheck");
+const passwordInput = document.getElementById("suPassword");
+const passwordCheck = document.getElementById("passwordCheck");
+const passwordRepeatInput = document.getElementById("suPasswordRepeat");
+const passwordRepeatCheck = document.getElementById("passwordRepeatCheck");
+const resendCountdown = document.getElementById("resendCountdown");
+const verifySuccess = document.getElementById("verifySuccess");
 
 /* Username check */
 usernameInput.addEventListener("input", async () => {
   const val = usernameInput.value.trim();
   usernameCheck.textContent="";
   usernameInput.style.borderColor="transparent";
-  if (!val) return;
+  if(!val) return;
   const snap = await getDoc(doc(db,"usernames",val));
   if(snap.exists()){
     usernameInput.style.borderColor="#ff4c4c";
@@ -165,15 +185,39 @@ usernameInput.addEventListener("input", async () => {
   }
 });
 
-/* Login with email or username */
+/* Email check */
+emailInput.addEventListener("input", () => {
+  const val = emailInput.value.trim();
+  emailCheck.textContent="";
+  emailInput.style.borderColor="transparent";
+  if(!val) return;
+  const re = /\S+@\S+\.\S+/;
+  if(re.test(val)) emailInput.style.borderColor="#4caf50";
+  else { emailInput.style.borderColor="#ff4c4c"; emailCheck.textContent="Invalid email format"; }
+});
+
+/* Password check */
+passwordInput.addEventListener("input", () => {
+  passwordCheck.textContent="";
+  if(passwordInput.value.length>=8) passwordInput.style.borderColor="#4caf50";
+  else { passwordInput.style.borderColor="#ff4c4c"; passwordCheck.textContent="Password must be 8+ chars"; }
+});
+
+/* Repeat password check */
+passwordRepeatInput.addEventListener("input", () => {
+  passwordRepeatCheck.textContent="";
+  if(passwordRepeatInput.value===passwordInput.value && passwordInput.value.length>=8) passwordRepeatInput.style.borderColor="#4caf50";
+  else { passwordRepeatInput.style.borderColor="#ff4c4c"; passwordRepeatCheck.textContent="Passwords do not match"; }
+});
+
+/* Login with email/username */
 window.login = async () => {
   const input = document.getElementById("emailUsername").value.trim();
   const pass = document.getElementById("password").value;
   document.getElementById("error").textContent="";
 
-  try {
+  try{
     let emailToUse = input;
-    // If input doesn't contain "@", treat as username
     if(!input.includes("@")){
       const q = await getDoc(doc(db,"usernames",input));
       if(q.exists()) emailToUse = q.data().email;
@@ -181,7 +225,7 @@ window.login = async () => {
     }
     await signInWithEmailAndPassword(auth,emailToUse,pass);
     location.replace("dashboard.html");
-  } catch(e){
+  }catch(e){
     console.error(e);
     document.getElementById("error").textContent="Incorrect email/username or password";
   }
@@ -189,13 +233,8 @@ window.login = async () => {
 
 /* Google login */
 window.googleLogin = async () => {
-  try {
-    await signInWithPopup(auth, provider);
-    location.replace("dashboard.html");
-  } catch(e){
-    console.error(e);
-    document.getElementById("error").textContent=e.message;
-  }
+  try { await signInWithPopup(auth, provider); location.replace("dashboard.html"); }
+  catch(e){ console.error(e); document.getElementById("error").textContent=e.message; }
 };
 
 /* Popups */
@@ -203,20 +242,19 @@ window.openSignup = () => signupOverlay.style.display="flex";
 window.closeSignup = () => signupOverlay.style.display="none";
 
 /* Sign Up */
+let resendInterval;
 window.signup = async () => {
-  const email = document.getElementById("suEmail").value.trim();
-  const username = document.getElementById("suUsername").value.trim();
-  const pass = document.getElementById("suPassword").value;
-  const passRepeat = document.getElementById("suPasswordRepeat").value;
+  const email = emailInput.value.trim();
+  const username = usernameInput.value.trim();
+  const pass = passwordInput.value;
+  const passRepeat = passwordRepeatInput.value;
   const signupError = document.getElementById("signupError");
-
   signupError.textContent="";
-
-  if(!email || !username || !pass || !passRepeat) { signupError.textContent="Fill all fields"; return; }
+  if(!email||!username||!pass||!passRepeat){ signupError.textContent="Fill all fields"; return; }
   if(pass.length<8){ signupError.textContent="Password must be 8+ chars"; return; }
   if(pass!==passRepeat){ signupError.textContent="Passwords do not match"; return; }
 
-  try {
+  try{
     const snap = await getDoc(doc(db,"usernames",username));
     if(snap.exists()){ signupError.textContent="Username in use"; return; }
 
@@ -227,12 +265,50 @@ window.signup = async () => {
     signupForm.style.display="none";
     verifyBox.style.display="block";
     verifyEmail.textContent=email;
-  } catch(e){
-    console.error(e);
-    signupError.textContent=e.message;
-  }
+
+    /* Start countdown */
+    let timeLeft=30;
+    resendCountdown.classList.remove("clickable");
+    resendCountdown.textContent=`Resend email in ${timeLeft}s`;
+    clearInterval(resendInterval);
+    resendInterval = setInterval(()=>{
+      timeLeft--;
+      if(timeLeft>0) resendCountdown.textContent=`Resend email in ${timeLeft}s`;
+      else {
+        resendCountdown.textContent="Resend Email";
+        resendCountdown.classList.add("clickable");
+        clearInterval(resendInterval);
+      }
+    },1000);
+
+    resendCountdown.onclick = async () => {
+      if(!resendCountdown.classList.contains("clickable")) return;
+      await sendEmailVerification(auth.currentUser);
+      verifySuccess.textContent="Resent email successfully";
+      setTimeout(()=>{ verifySuccess.textContent=""; },2000);
+
+      timeLeft=30;
+      resendCountdown.classList.remove("clickable");
+      resendCountdown.textContent=`Resend email in ${timeLeft}s`;
+      clearInterval(resendInterval);
+      resendInterval = setInterval(()=>{
+        timeLeft--;
+        if(timeLeft>0) resendCountdown.textContent=`Resend email in ${timeLeft}s`;
+        else { resendCountdown.textContent="Resend Email"; resendCountdown.classList.add("clickable"); clearInterval(resendInterval); }
+      },1000);
+    };
+
+    /* Auto login once email verified */
+    const checkEmailVerified = setInterval(async ()=>{
+      await reload(auth.currentUser);
+      if(auth.currentUser.emailVerified){
+        clearInterval(checkEmailVerified);
+        location.replace("dashboard.html");
+      }
+    },3000);
+
+  }catch(e){ console.error(e); signupError.textContent=e.message; }
 };
 </script>
-
 </body>
 </html>
