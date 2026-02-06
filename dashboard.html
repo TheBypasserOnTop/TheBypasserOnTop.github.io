@@ -5,168 +5,203 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 <link rel="icon" href="favicon.ico">
+
 <style>
-html, body {
+body {
   margin:0;
-  padding:0;
-  min-height:100%;
-  font-family:system-ui,sans-serif;
+  min-height:100vh;
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
+  font-family:system-ui,sans-serif;
   color:#e6f0ff;
-  overflow-x:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
 }
 
-/* Cards, scroll, menu etc. - same as before */
-#welcomeWrapper { width:100%; display:flex; justify-content:center; align-items:center; flex-direction:column; min-height:80vh; position:relative; z-index:1; }
-.card { width:90%; max-width:400px; padding:30px; background:rgba(12,25,55,.65); backdrop-filter:blur(16px); border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.4); text-align:center; margin:20px auto; z-index:10; }
-h2 { margin-bottom:10px; }
-.subtext { font-size:0.9rem; opacity:0; transition: opacity 2s; margin-top:10px; color:#cfd8f0; }
-#scrollText { text-align:center; font-weight:500; animation: upDown 2s ease-in-out infinite alternate; color:#cfd8f0; margin-top:15px; }
-@keyframes upDown{ 0%{ transform:translateY(0);} 100%{ transform:translateY(-10px);} }
-.scroll-card { width:90%; max-width:350px; padding:20px; background:rgba(12,25,55,.7); border-radius:15px; margin:50px auto; opacity:0; transform:translateY(50px); transition:all 1s ease; }
+.card {
+  width:90vw;
+  max-width:400px;
+  padding:30px;
+  background:rgba(12,25,55,.65);
+  backdrop-filter:blur(16px);
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  text-align:center;
+}
 
-/* Menu and side panel */
-#menuBtn { position:fixed; top:20px; left:20px; width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; z-index:150; transition:opacity .3s, transform .3s; }
-#menuBtn span { height:4px; background:white; border-radius:4px; }
-body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
-#sidePanel { position:fixed; top:0; left:-300px; width:260px; height:100%; background:rgba(12,25,55,.95); backdrop-filter:blur(16px); padding:20px; box-sizing:border-box; z-index:200; transition:left .35s ease; display:flex; flex-direction:column; }
-body.menu-open #sidePanel { left:0; }
-#sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
-#sidePanelHeader h3 { margin:0 auto; }
-#closeMenu { cursor:pointer; font-size:1.4rem; }
-.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
-#navSearch { padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,.08); color:white; margin-bottom:15px; }
-.nav-tab { padding:12px; border-radius:10px; cursor:pointer; margin-bottom:8px; font-weight:600; }
-.nav-tab.active { background:#4da3ff; color:black; }
-.nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
-.blur-layer { position:absolute; inset:0; z-index:5; }
-body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
+/* Profile pic */
+#profilePic {
+  position:fixed;
+  top:20px;
+  right:20px;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  font-size:1.3rem;
+  color:white;
+  cursor:pointer;
+  user-select:none;
+  z-index:100;
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+}
 
-/* Profile picture */
-#profilePic { position:fixed; top:20px; right:20px; width:50px; height:50px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:1.3rem; color:white; cursor:pointer; user-select:none; z-index:100; background-size:cover; background-position:center; background-repeat:no-repeat; }
-#profilePanel { position:fixed; top:80px; right:20px; width:180px; background:rgba(12,25,55,.85); backdrop-filter:blur(8px); border-radius:14px; display:none; flex-direction:column; padding:10px; z-index:100; }
-#profilePanel h4 { margin:0 0 8px 0; font-size:1rem; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px; }
-#profilePanel button { width:100%; margin:5px 0; padding:10px; border:none; border-radius:10px; font-weight:600; cursor:pointer; }
+/* Profile panel */
+#profilePanel {
+  position:fixed;
+  top:80px;
+  right:20px;
+  width:180px;
+  background:rgba(12,25,55,.85);
+  backdrop-filter:blur(10px);
+  border-radius:14px;
+  display:none;
+  flex-direction:column;
+  padding:10px;
+  z-index:100;
+}
+#profilePanel h4 {
+  margin:0 0 8px;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,.2);
+  padding-bottom:5px;
+}
+#profilePanel button {
+  margin:5px 0;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+}
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
+
+/* Overlay */
+.overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(6px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:200;
+}
+.popup {
+  width:90vw;
+  max-width:400px;
+  background:#0c1937;
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+}
+.close {
+  position:absolute;
+  top:10px;
+  right:15px;
+  cursor:pointer;
+}
 </style>
 </head>
+
 <body>
 
-<!-- Menu -->
-<div id="menuBtn"><span></span><span></span><span></span></div>
-<div id="sidePanel">
-  <div id="sidePanelHeader">
-    <div></div>
-    <h3>Navigation</h3>
-    <div id="closeMenu">✕</div>
-  </div>
-  <div class="divider"></div>
-  <input id="navSearch" placeholder="Search...">
-  <div class="nav-tab active" id="tabDashboard">Dashboard</div>
-  <div class="nav-tab" id="tabCommunicate">Communicate</div>
-  <div class="nav-tab" id="tabSettings">Settings</div>
-</div>
-<div class="blur-layer"></div>
-
-<!-- Welcome -->
-<div id="welcomeWrapper">
-  <div class="card">
-    <h2 id="welcomeText">Welcome</h2>
-    <div class="subtext" id="welcomeSubtext">Use the menu to navigate</div>
-  </div>
-  <div id="scrollText">Scroll down for more info</div>
+<div class="card">
+  <h2 id="welcomeText">Welcome</h2>
 </div>
 
-<div class="scroll-card">🚀 Cool feature 1: Fast, responsive design</div>
-<div class="scroll-card">💡 Tip: Use the menu to quickly access sections</div>
-<div class="scroll-card">🎨 Design: Radial gradient background + smooth animations</div>
-
-<!-- Profile -->
 <div id="profilePic"></div>
+
 <div id="profilePanel">
-  <h4 id="profileName">Username</h4>
+  <h4 id="profileName"></h4>
   <button class="primary" onclick="openSettings()">Settings</button>
   <button class="primary" onclick="confirmLogout()">Logout</button>
 </div>
 
+<div class="overlay" id="logoutOverlay">
+  <div class="popup">
+    <span class="close" onclick="closeLogout()">✕</span>
+    <h2>Confirm Logout</h2>
+    <button class="primary" onclick="logout()">Yes</button>
+    <button class="remove" onclick="closeLogout()">No</button>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const firebaseConfig = {
+/* Firebase */
+const app = initializeApp({
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app",
-  messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41"
-};
-
-const app = initializeApp(firebaseConfig);
+  projectId: "login-34954"
+});
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* Elements */
-const welcomeSubtext = document.getElementById("welcomeSubtext");
-const scrollCards = document.querySelectorAll(".scroll-card");
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
+const welcomeText = document.getElementById("welcomeText");
+const logoutOverlay = document.getElementById("logoutOverlay");
 
-/* Color fallback */
-function colorFrom(str){
-  let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h); return `hsl(${h%360},70%,50%)`;
+/* Color */
+function stringToColor(str){
+  let h=0;
+  for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
+  return `hsl(${h%360},70%,50%)`;
 }
 
+/* Auth */
 onAuthStateChanged(auth, async user=>{
-  if(!user) location.href="login.html";
+  if(!user) location.replace("login.html");
 
-  // Get username from Firestore like settings
+  let username;
   const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
-  const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+  username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
 
-  document.getElementById("welcomeText").textContent = `Welcome, ${username}`;
+  welcomeText.textContent = `Welcome, ${username}`;
   profileName.textContent = username;
-  welcomeSubtext.style.opacity = 1;
 
-  // Profile pic from Firestore
+  // Default letter
+  profilePic.textContent = username[0].toUpperCase();
+  profilePic.style.backgroundColor = stringToColor(username);
+
+  // Load saved PFP
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
-  if(pfpDoc.exists() && pfpDoc.data().data?.trim()){
-    profilePic.style.backgroundImage = `url("${pfpDoc.data().data}")`;
-    profilePic.style.backgroundSize = "cover";
-    profilePic.style.backgroundPosition = "center";
-    profilePic.style.backgroundColor = "transparent";
+  if(pfpDoc.exists() && pfpDoc.data().data){
+    profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
     profilePic.textContent = "";
-  } else {
-    profilePic.style.backgroundImage = "none";
-    profilePic.style.backgroundColor = colorFrom(username);
-    profilePic.textContent = username[0].toUpperCase();
   }
 });
 
-/* Menu toggle */
-let panelOpen=false;
-profilePic.addEventListener("click", ()=>{ panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none"; });
+/* Panel toggle */
+let open=false;
+profilePic.onclick=()=>{
+  open=!open;
+  profilePanel.style.display=open?"flex":"none";
+};
 
-const menuBtn = document.getElementById("menuBtn");
-const closeMenu = document.getElementById("closeMenu");
-menuBtn.onclick = () => document.body.classList.add("menu-open");
-closeMenu.onclick = () => document.body.classList.remove("menu-open");
+/* Logout */
+window.confirmLogout=()=>logoutOverlay.style.display="flex";
+window.closeLogout=()=>logoutOverlay.style.display="none";
+window.logout=async()=>{
+  await signOut(auth);
+  location.replace("login.html");
+};
 
-document.getElementById("tabDashboard").onclick = () => document.body.classList.remove("menu-open");
-document.getElementById("tabSettings").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350);}
-document.getElementById("tabCommunicate").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="chat.html",350); }
-
-window.openSettings = ()=>location.href="settings.html";
-window.confirmLogout = ()=>{ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); };
-
-/* Scroll fade-in */
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{ if(e.isIntersecting){ e.target.style.opacity=1; e.target.style.transform="translateY(0)"; } });
-},{threshold:0.1});
-scrollCards.forEach(c=>observer.observe(c));
+window.openSettings=()=>location.replace("settings.html");
 </script>
+
 </body>
 </html>
