@@ -15,6 +15,7 @@ html, body {
   background:radial-gradient(circle at top,#0b2a55,#050b1a);
   color:#e6f0ff;
   overflow-x:hidden;
+  position:relative;
 }
 
 /* Hamburger menu */
@@ -35,7 +36,7 @@ html, body {
   background:white;
   border-radius:4px;
 }
-body.menu-open #menuBtn {opacity:0;pointer-events:none;}
+body.menu-open #menuBtn { opacity:0; pointer-events:none; }
 
 /* Side panel */
 #sidePanel {
@@ -45,7 +46,6 @@ body.menu-open #menuBtn {opacity:0;pointer-events:none;}
   width:260px;
   height:100%;
   background:rgba(10,30,70,.95);
-  backdrop-filter:blur(18px);
   padding:20px;
   box-sizing:border-box;
   z-index:200;
@@ -59,13 +59,8 @@ body.menu-open #sidePanel { left:0; }
   align-items:center;
 }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
-#sidePanelHeader h3 { margin:0 auto; }
 
-.divider {
-  height:1px;
-  background:rgba(255,255,255,.2);
-  margin:15px 0;
-}
+.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
 
 .nav-tab {
   padding:12px;
@@ -75,7 +70,6 @@ body.menu-open #sidePanel { left:0; }
   font-weight:600;
 }
 .nav-tab.active { background:#4da3ff; color:black; }
-.nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
 
 /* Blur layer */
 .blur-layer {
@@ -83,10 +77,36 @@ body.menu-open #sidePanel { left:0; }
   inset:0;
   z-index:5;
 }
-body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
+body.menu-open .blur-layer {
+  backdrop-filter: blur(8px);
+  pointer-events:none;
+}
+
+/* Card */
+.card{
+  width:90%;
+  max-width:500px;
+  background:rgba(80,140,255,0.14);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  padding:30px;
+  border-radius:20px;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.5),
+    0 0 30px rgba(80,140,255,.3);
+  margin:80px auto 40px auto;
+}
+
+/* Sections */
+.section{
+  background:rgba(0,0,0,.25);
+  padding:15px;
+  border-radius:14px;
+  margin-bottom:15px;
+}
 
 /* Profile pic */
-#profilePic {
+#profilePic{
   position:fixed;
   top:20px;
   right:20px;
@@ -98,16 +118,16 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
   justify-content:center;
   font-weight:bold;
   font-size:1.3rem;
-  color:white;
   cursor:pointer;
-  z-index:100;
-  background-size:cover;
-  background-repeat:no-repeat;
+  color:white;
+  background-size:contain;
   background-position:center;
+  background-repeat:no-repeat;
+  z-index:100;
 }
 
 /* Profile panel */
-#profilePanel {
+#profilePanel{
   position:fixed;
   top:80px;
   right:20px;
@@ -120,53 +140,20 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
   padding:10px;
   z-index:100;
 }
-#panelUsername { text-align:center; font-weight:600; margin-bottom:8px; }
-#profilePanel button { padding:10px; border:none; border-radius:10px; margin-top:5px; font-weight:600; cursor:pointer; }
-
-/* Main content */
-#mainContent {
-  padding:100px 20px 40px;
-  max-width:600px;
-  margin:0 auto;
-  z-index:10;
-  position:relative;
+#profilePanel h4{
+  text-align:center;
+  margin:0 0 8px;
 }
-
-.card {
-  background:rgba(80,140,255,0.14);
-  backdrop-filter:blur(26px);
-  -webkit-backdrop-filter:blur(26px);
-  padding:38px;
-  border-radius:24px;
-  box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 35px rgba(90,150,255,.35);
-}
-
-.card h2 { text-align:center; text-shadow:0 0 12px rgba(120,180,255,.65); margin-bottom:24px; }
-
-.section {
-  background:rgba(12,25,55,.7);
-  padding:15px;
-  border-radius:14px;
-  margin-bottom:15px;
-}
-
-#pfpPreview{
-  width:55px;
-  height:55px;
-  border-radius:50%;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  color:white;
+#profilePanel button{
+  margin-top:6px;
+  padding:9px;
+  border:none;
+  border-radius:10px;
   cursor:pointer;
-  background-size:cover;
-  background-repeat:no-repeat;
-  background-position:center;
 }
+.primary{ background:#4da3ff; color:black; }
 
-#pfpPanel{ display:none; margin-top:8px; }
-
+/* Overlays and popups */
 .overlay{
   position:fixed;
   inset:0;
@@ -207,10 +194,29 @@ button{
 }
 
 .error{ color:#ff4c4c; margin-top:8px; }
+
+/* PFP preview */
+#pfpPreview{
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  color:white;
+  cursor:pointer;
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+#pfpPanel{ display:none; margin-top:8px; }
 </style>
 </head>
+
 <body>
 
+<!-- Menu -->
 <div id="menuBtn"><span></span><span></span><span></span></div>
 
 <div id="sidePanel">
@@ -220,45 +226,46 @@ button{
     <div id="closeMenu">✕</div>
   </div>
   <div class="divider"></div>
-  <input id="navSearch" placeholder="Search...">
   <div class="nav-tab" id="tabDashboard">Dashboard</div>
+  <div class="nav-tab" id="tabProxies">Proxies</div>
   <div class="nav-tab active" id="tabSettings">Settings</div>
 </div>
+
 <div class="blur-layer"></div>
 
+<!-- Profile -->
 <div id="profilePic"></div>
 <div id="profilePanel">
-  <div id="panelUsername"></div>
+  <h4 id="panelUsername"></h4>
   <button onclick="navigateTo('dashboard.html')">Dashboard</button>
+  <button onclick="navigateTo('proxies.html')">Proxies</button>
   <button id="logoutBtn">Logout</button>
 </div>
 
-<div id="mainContent">
-  <div class="card">
-    <h2>Settings</h2>
-    <div class="section">
-      <strong>Profile Picture</strong><br><br>
-      <div id="pfpPreview"></div>
-      <div id="pfpPanel">
-        <button id="changePfpBtn">Change</button>
-        <button id="removePfpBtn">Remove</button>
-      </div>
+<!-- Settings card -->
+<div class="card">
+  <h2>Settings</h2>
+  <div class="section">
+    <strong>Profile Picture</strong><br><br>
+    <div id="pfpPreview"></div>
+    <div id="pfpPanel">
+      <button id="changePfpBtn">Change</button>
+      <button id="removePfpBtn">Remove</button>
     </div>
+  </div>
 
-    <div class="section">
-      <strong>Username:</strong>
-      <span id="usernameDisplay"></span><br>
-      <button id="changeUsernameBtn">Change Username</button>
-    </div>
+  <div class="section">
+    <strong>Username:</strong> <span id="usernameDisplay"></span><br>
+    <button id="changeUsernameBtn">Change Username</button>
+  </div>
 
-    <div class="section">
-      <strong>Password:</strong> ••••••••<br>
-      <button id="changePasswordBtn">Change Password</button>
-    </div>
+  <div class="section">
+    <strong>Password:</strong> ••••••••<br>
+    <button id="changePasswordBtn">Change Password</button>
+  </div>
 
-    <div class="section">
-      <button id="removeAccountBtn">Remove Account</button>
-    </div>
+  <div class="section">
+    <button id="removeAccountBtn">Remove Account</button>
   </div>
 </div>
 
@@ -316,10 +323,7 @@ function stringToColor(str){
   return `hsl(${h%360},70%,50%)`;
 }
 
-// Close overlays
-document.querySelectorAll(".close").forEach(x=>{
-  x.onclick=()=>x.closest(".overlay").classList.remove("show");
-});
+document.querySelectorAll(".close").forEach(x=>x.onclick=()=>x.closest(".overlay").classList.remove("show"));
 
 let username="";
 
@@ -329,58 +333,46 @@ onAuthStateChanged(auth, async user=>{
   const snap=await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
   username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
 
-  document.getElementById("usernameDisplay").textContent=username;
-  document.getElementById("panelUsername").textContent=username;
+  usernameDisplay.textContent=username;
+  panelUsername.textContent=username;
 
-  const profilePicEl=document.getElementById("profilePic");
-  const pfpPreview=document.getElementById("pfpPreview");
-  profilePicEl.textContent=username[0].toUpperCase();
-  profilePicEl.style.backgroundColor=stringToColor(username);
+  profilePic.textContent=username[0].toUpperCase();
+  profilePic.style.backgroundColor=stringToColor(username);
   pfpPreview.textContent=username[0].toUpperCase();
   pfpPreview.style.backgroundColor=stringToColor(username);
 
-  const pfp=await getDoc(doc(db,"userPFPs",user.uid));
-  if(pfp.exists() && pfp.data().data){
-    profilePicEl.style.backgroundImage=`url(${pfp.data().data})`;
-    profilePicEl.textContent="";
-    pfpPreview.style.backgroundImage=`url(${pfp.data().data})`;
+  const pfpDoc=await getDoc(doc(db,"userPFPs",user.uid));
+  if(pfpDoc.exists() && pfpDoc.data().data){
+    profilePic.style.backgroundImage=`url(${pfpDoc.data().data})`;
+    pfpPreview.style.backgroundImage=`url(${pfpDoc.data().data})`;
+    profilePic.textContent="";
     pfpPreview.textContent="";
   }
 });
 
-/* Menus */
-const profilePicEl=document.getElementById("profilePic");
-const profilePanel=document.getElementById("profilePanel");
-profilePicEl.onclick=()=>profilePanel.style.display =
-  profilePanel.style.display==="flex"?"none":"flex";
-
-const pfpPreview=document.getElementById("pfpPreview");
-const pfpPanel=document.getElementById("pfpPanel");
-pfpPreview.onclick=()=>pfpPanel.style.display =
-  pfpPanel.style.display==="block"?"none":"block";
-
-/* PFP Change/Remove */
-document.getElementById("changePfpBtn").onclick=()=>pfpFile.click();
-const pfpFile=document.getElementById("pfpFile");
+/* Profile & PFP menus */
+profilePic.onclick=()=>profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex";
+pfpPreview.onclick=()=>pfpPanel.style.display = pfpPanel.style.display==="block"?"none":"block";
+changePfpBtn.onclick=()=>pfpFile.click();
 pfpFile.onchange=e=>{
   const r=new FileReader();
   r.onload=async ev=>{
-    profilePicEl.textContent="";
+    profilePic.textContent="";
     pfpPreview.textContent="";
-    profilePicEl.style.backgroundImage=`url(${ev.target.result})`;
+    profilePic.style.backgroundImage=`url(${ev.target.result})`;
     pfpPreview.style.backgroundImage=`url(${ev.target.result})`;
     await setDoc(doc(db,"userPFPs",auth.currentUser.uid),{data:ev.target.result});
   };
   r.readAsDataURL(e.target.files[0]);
 };
-document.getElementById("removePfpBtn").onclick=async()=>{
+removePfpBtn.onclick=async()=>{
   await deleteDoc(doc(db,"userPFPs",auth.currentUser.uid));
   location.reload();
 };
 
 /* Username */
-document.getElementById("changeUsernameBtn").onclick=()=>usernameOverlay.classList.add("show");
-document.getElementById("saveUsernameBtn").onclick=async()=>{
+changeUsernameBtn.onclick=()=>usernameOverlay.classList.add("show");
+saveUsernameBtn.onclick=async()=>{
   const name=newUsername.value.trim().toLowerCase();
   if(!name){ usernameError.textContent="Enter username"; return; }
   const taken=await getDoc(doc(db,"usernames",name));
@@ -392,8 +384,8 @@ document.getElementById("saveUsernameBtn").onclick=async()=>{
 };
 
 /* Password */
-document.getElementById("changePasswordBtn").onclick=()=>passwordOverlay.classList.add("show");
-document.getElementById("savePasswordBtn").onclick=async()=>{
+changePasswordBtn.onclick=()=>passwordOverlay.classList.add("show");
+savePasswordBtn.onclick=async()=>{
   if(newPassword.value!==repeatPassword.value){
     passwordError.textContent="Passwords do not match"; return;
   }
@@ -406,8 +398,8 @@ document.getElementById("savePasswordBtn").onclick=async()=>{
 };
 
 /* Remove account */
-document.getElementById("removeAccountBtn").onclick=()=>removeOverlay.classList.add("show");
-document.getElementById("confirmRemoveBtn").onclick=async()=>{
+removeAccountBtn.onclick=()=>removeOverlay.classList.add("show");
+confirmRemoveBtn.onclick=async()=>{
   try{
     const cred=EmailAuthProvider.credential(auth.currentUser.email,removePassword.value);
     await reauthenticateWithCredential(auth.currentUser,cred);
@@ -419,21 +411,23 @@ document.getElementById("confirmRemoveBtn").onclick=async()=>{
 };
 
 /* Logout */
-document.getElementById("logoutBtn").onclick=()=>{ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); };
+logoutBtn.onclick=()=>{ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); };
 
-/* Slide-in Menu Logic */
-const menuBtn=document.getElementById("menuBtn");
-const closeMenu=document.getElementById("closeMenu");
-menuBtn.onclick=()=>document.body.classList.add("menu-open");
-closeMenu.onclick=()=>document.body.classList.remove("menu-open");
+/* Slide-in menu logic */
+const menuBtn = document.getElementById("menuBtn");
+const closeMenu = document.getElementById("closeMenu");
+menuBtn.onclick = () => document.body.classList.add("menu-open");
+closeMenu.onclick = () => document.body.classList.remove("menu-open");
 
-// Tabs
-document.getElementById("tabDashboard").onclick=()=>{
+/* Tab navigation with menu close animation */
+function navigateTo(page){
   document.body.classList.remove("menu-open");
-  setTimeout(()=>location.href="dashboard.html",350);
-};
-document.getElementById("tabSettings").onclick=()=>{ document.body.classList.remove("menu-open"); };
-</script>
+  setTimeout(()=>location.href=page,350);
+}
+document.getElementById("tabDashboard").onclick = ()=>navigateTo("dashboard.html");
+document.getElementById("tabProxies").onclick = ()=>navigateTo("proxies.html");
+document.getElementById("tabSettings").onclick = ()=>document.body.classList.remove("menu-open");
 
+</script>
 </body>
 </html>
