@@ -1,314 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
-<link rel="icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic | Secure Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --accent: #a855f7; --success: #22c55e; --error: #ef4444; }
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top, #1e1b4b, #020617);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center; justify-content: center;
+            overflow: hidden;
+        }
 
-<style>
-body {
-  margin:0;
-  min-height:100vh;
-  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-family:system-ui,sans-serif;
-  color:#e6f0ff;
-}
+        /* Animated Stars Background */
+        .stars-container { position: fixed; inset: 0; z-index: -1; }
+        .star {
+            position: absolute; background: white; border-radius: 50%;
+            animation: pulse var(--duration) infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.1; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.8); box-shadow: 0 0 12px white; }
+        }
 
-.card {
-  width:95vw;
-  max-width:420px;
-  padding:40px;
-  background:rgba(12,25,55,.65);
-  backdrop-filter:blur(16px);
-  border-radius:20px;
-  box-shadow:0 20px 60px rgba(0,0,0,.4);
-  text-align:center;
-}
+        /* Glass Cards */
+        .auth-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-h2 { margin-bottom:20px; }
+        /* Form Styling */
+        input {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 2px solid transparent !important;
+            transition: all 0.3s ease !important;
+            outline: none !important;
+        }
+        .input-valid { border-color: var(--success) !important; box-shadow: 0 0 15px rgba(34, 197, 94, 0.1); }
+        .input-error { border-color: var(--error) !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.1); }
+        input:focus:not(.input-valid):not(.input-error) { border-color: var(--accent) !important; }
 
-input, button {
-  width:100%;
-  padding:15px;
-  margin-bottom:12px;
-  border-radius:14px;
-  border:2px solid transparent;
-  font-size:1rem;
-  box-sizing:border-box;
-}
+        /* Signup Overlay - STRICTLY HIDDEN BY DEFAULT */
+        #signupOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.92);
+            backdrop-filter: blur(20px);
+            display: none; /* This ensures it stays hidden on load */
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
 
-input { background:rgba(255,255,255,.08); color:white; }
-button { font-weight:600; cursor:pointer; }
-
-.primary { background:#4da3ff; color:black; }
-.alt { background:rgba(255,255,255,.12); color:white; }
-.error { color:#ff6b6b; min-height:1.2em; }
-
-#createAccountText {
-  cursor:pointer;
-  color:#4da3ff;
-  margin-top:12px;
-  text-decoration:underline;
-}
-
-/* Popup */
-.overlay {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.4);
-  backdrop-filter:blur(6px);
-  display:none;
-  justify-content:center;
-  align-items:center;
-}
-.popup {
-  width:90vw;
-  max-width:400px;
-  background:#0c1937;
-  padding:30px;
-  border-radius:20px;
-  text-align:center;
-}
-.close { float:right; cursor:pointer; }
-.error-msg { color:#ff6b6b; font-size:0.9rem; margin-top:-10px; margin-bottom:10px; text-align:left; }
-.success-msg { color:#4caf50; font-size:0.9rem; margin-top:-10px; margin-bottom:10px; text-align:left; }
-#resendCountdown { margin-top:10px; font-size:0.9rem; cursor:default; }
-#resendCountdown.clickable { cursor:pointer; color:#4da3ff; text-decoration:underline; }
-</style>
+        .error-msg { color: var(--error); font-size: 0.7rem; margin-top: 4px; min-height: 1rem; }
+    </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>Login</h2>
+    <div class="stars-container" id="starField"></div>
 
-  <input id="emailUsername" placeholder="Email / Username">
-  <input id="password" type="password" placeholder="Password">
-  <div class="error" id="error"></div>
+    <div class="w-full max-w-md px-6 z-10" id="loginPanel">
+        <div class="auth-card p-10 rounded-[2.5rem] text-center shadow-2xl">
+            <h1 class="text-4xl font-black mb-2 tracking-tighter uppercase bg-clip-text text-transparent bg-gradient-to-b from-white to-purple-400">
+                Terminal
+            </h1>
+            <p class="text-gray-500 text-[10px] tracking-[0.6em] uppercase mb-10">Access Portal v2.0</p>
+            
+            <div class="space-y-4">
+                <input id="emailUsername" type="text" placeholder="Email or Username" class="w-full p-4 rounded-2xl text-white">
+                <input id="password" type="password" placeholder="Password" class="w-full p-4 rounded-2xl text-white">
+                <div id="loginError" class="error-msg text-center"></div>
 
-  <button class="primary" onclick="login()">Login</button>
-  <button class="alt" onclick="googleLogin()">Continue with Google</button>
+                <button onclick="login()" class="w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-purple-500 hover:text-white transition-all transform active:scale-95 shadow-lg shadow-purple-500/10">
+                    Sign In
+                </button>
 
-  <p id="createAccountText" onclick="openSignup()">Create Account</p>
-</div>
+                <div class="flex items-center my-8">
+                    <div class="flex-grow h-px bg-white/10"></div>
+                    <span class="px-4 text-[10px] text-gray-500 uppercase tracking-widest">OR</span>
+                    <div class="flex-grow h-px bg-white/10"></div>
+                </div>
 
-<!-- SIGN UP POPUP -->
-<div class="overlay" id="signupOverlay">
-  <div class="popup">
-    <span class="close" onclick="closeSignup()">✕</span>
-    <h2>Sign Up</h2>
+                <button onclick="googleLogin()" class="w-full py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-sm font-medium">
+                    Continue with Google
+                </button>
 
-    <div id="signupForm">
-      <input id="suEmail" placeholder="Email">
-      <div id="emailCheck" class="error-msg"></div>
-
-      <input id="suUsername" placeholder="Username">
-      <div id="usernameCheck" class="error-msg"></div>
-
-      <input id="suPassword" type="password" placeholder="Password (min 8 chars)">
-      <div id="passwordCheck" class="error-msg"></div>
-
-      <input id="suPasswordRepeat" type="password" placeholder="Repeat Password">
-      <div id="passwordRepeatCheck" class="error-msg"></div>
-
-      <div class="error" id="signupError"></div>
-      <button class="primary" onclick="signup()">Sign Up</button>
+                <p class="pt-10 text-gray-500 text-sm">
+                    First time? <span onclick="openSignup()" class="text-purple-400 cursor-pointer hover:underline font-bold">Initialize Identity</span>
+                </p>
+            </div>
+        </div>
     </div>
 
-    <div id="verifyBox" style="display:none;">
-      <p><strong>Verify Email</strong></p>
-      <p>Check your email: <span id="verifyEmail"></span></p>
-      <p style="opacity:.7">Don't see it? Check spam or trash.</p>
-      <div id="resendCountdown">Resend email in 30s</div>
-      <div id="verifySuccess" class="success-msg"></div>
+    <div id="signupOverlay">
+        <div class="auth-card w-full max-w-lg p-8 md:p-12 rounded-[3rem] relative m-4">
+            <button onclick="closeSignup()" class="absolute top-8 right-8 text-3xl opacity-50 hover:opacity-100">&times;</button>
+            
+            <div id="signupForm">
+                <h2 class="text-3xl font-bold mb-8 italic">New Identity</h2>
+                
+                <div class="space-y-4 text-left">
+                    <div>
+                        <input id="suEmail" placeholder="Email Address" class="w-full p-4 rounded-xl text-white">
+                        <div id="emailCheck" class="error-msg"></div>
+                    </div>
+                    
+                    <div>
+                        <input id="suUsername" placeholder="Unique Username" class="w-full p-4 rounded-xl text-white">
+                        <div id="usernameCheck" class="error-msg"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <input id="suPassword" type="password" placeholder="Password (8+)" class="w-full p-4 rounded-xl text-white">
+                            <div id="passwordCheck" class="error-msg"></div>
+                        </div>
+                        <div>
+                            <input id="suPasswordRepeat" type="password" placeholder="Repeat Password" class="w-full p-4 rounded-xl text-white">
+                            <div id="passwordRepeatCheck" class="error-msg"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="signupGeneralError" class="error-msg text-center my-4"></div>
+                <button onclick="signup()" class="w-full py-4 bg-purple-600 rounded-xl font-bold hover:bg-purple-500 transition-all shadow-lg shadow-purple-600/30">
+                    Register Identity
+                </button>
+            </div>
+
+            <div id="verifyBox" class="hidden text-center py-8">
+                <div class="text-6xl mb-6">📡</div>
+                <h3 class="text-2xl font-bold mb-2">Signal Sent</h3>
+                <p class="text-gray-400 mb-8">Verification transmitted to:<br><span id="verifyEmail" class="text-purple-300 font-mono"></span></p>
+                <div id="resendCountdown" class="text-xs opacity-50">Resend lock active (30s)</div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- Firebase CDN -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, setPersistence, browserSessionPersistence, onAuthStateChanged, reload } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, setPersistence, browserSessionPersistence, reload } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-/* Firebase config */
-const firebaseConfig = {
-  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app",
-  messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41",
-  measurementId: "G-1MMT3C4M7K"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+            authDomain: "login-34954.firebaseapp.com",
+            projectId: "login-34954",
+            storageBucket: "login-34954.firebasestorage.app",
+            messagingSenderId: "422184727508",
+            appId: "1:422184727508:web:cef39fc913d526febe9c41"
+        };
 
-/* Init Firebase */
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const provider = new GoogleAuthProvider();
-setPersistence(auth, browserSessionPersistence);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+        setPersistence(auth, browserSessionPersistence);
 
-/* Elements */
-const signupOverlay = document.getElementById("signupOverlay");
-const signupForm = document.getElementById("signupForm");
-const verifyBox = document.getElementById("verifyBox");
-const verifyEmail = document.getElementById("verifyEmail");
-const usernameInput = document.getElementById("suUsername");
-const usernameCheck = document.getElementById("usernameCheck");
-const emailInput = document.getElementById("suEmail");
-const emailCheck = document.getElementById("emailCheck");
-const passwordInput = document.getElementById("suPassword");
-const passwordCheck = document.getElementById("passwordCheck");
-const passwordRepeatInput = document.getElementById("suPasswordRepeat");
-const passwordRepeatCheck = document.getElementById("passwordRepeatCheck");
-const resendCountdown = document.getElementById("resendCountdown");
-const verifySuccess = document.getElementById("verifySuccess");
+        // --- Real-Time Signup Validation ---
+        const suEmail = document.getElementById("suEmail");
+        const suUser = document.getElementById("suUsername");
+        const suPass = document.getElementById("suPassword");
+        const suPassRep = document.getElementById("suPasswordRepeat");
 
-/* Username check (case-insensitive) */
-usernameInput.addEventListener("input", async () => {
-  const val = usernameInput.value.trim().toLowerCase();
-  usernameCheck.textContent="";
-  usernameInput.style.borderColor="transparent";
-  if(!val) return;
-  const snap = await getDoc(doc(db,"usernames",val));
-  if(snap.exists()){
-    usernameInput.style.borderColor="#ff4c4c";
-    usernameCheck.textContent="Username in use";
-  } else {
-    usernameInput.style.borderColor="#4caf50";
-  }
-});
+        const updateStatus = (el, id, msg, isValid) => {
+            document.getElementById(id).textContent = msg;
+            el.classList.toggle("input-valid", isValid && el.value !== "");
+            el.classList.toggle("input-error", !isValid && el.value !== "");
+        };
 
-/* Email check */
-emailInput.addEventListener("input", () => {
-  const val = emailInput.value.trim();
-  emailCheck.textContent="";
-  emailInput.style.borderColor="transparent";
-  if(!val) return;
-  const re = /\S+@\S+\.\S+/;
-  if(re.test(val)) emailInput.style.borderColor="#4caf50";
-  else { emailInput.style.borderColor="#ff4c4c"; emailCheck.textContent="Invalid email format"; }
-});
+        suEmail.addEventListener("input", () => {
+            const valid = /\S+@\S+\.\S+/.test(suEmail.value);
+            updateStatus(suEmail, "emailCheck", valid ? "" : "Invalid format", valid);
+        });
 
-/* Password check */
-passwordInput.addEventListener("input", () => {
-  passwordCheck.textContent="";
-  if(passwordInput.value.length>=8) passwordInput.style.borderColor="#4caf50";
-  else { passwordInput.style.borderColor="#ff4c4c"; passwordCheck.textContent="Password must be 8+ chars"; }
-});
+        suUser.addEventListener("input", async () => {
+            const val = suUser.value.trim().toLowerCase();
+            if(!val) return;
+            const snap = await getDoc(doc(db, "usernames", val));
+            updateStatus(suUser, "usernameCheck", snap.exists() ? "Taken" : "", !snap.exists());
+        });
 
-/* Repeat password check */
-passwordRepeatInput.addEventListener("input", () => {
-  passwordRepeatCheck.textContent="";
-  if(passwordRepeatInput.value===passwordInput.value && passwordInput.value.length>=8) passwordRepeatInput.style.borderColor="#4caf50";
-  else { passwordRepeatInput.style.borderColor="#ff4c4c"; passwordRepeatCheck.textContent="Passwords do not match"; }
-});
+        suPass.addEventListener("input", () => {
+            const valid = suPass.value.length >= 8;
+            updateStatus(suPass, "passwordCheck", valid ? "" : "8+ characters required", valid);
+        });
 
-/* Login with email/username (case-insensitive) */
-window.login = async () => {
-  const input = document.getElementById("emailUsername").value.trim();
-  const pass = document.getElementById("password").value;
-  document.getElementById("error").textContent="";
+        suPassRep.addEventListener("input", () => {
+            const match = suPassRep.value === suPass.value && suPassRep.value !== "";
+            updateStatus(suPassRep, "passwordRepeatCheck", match ? "" : "Mismatch", match);
+        });
 
-  try{
-    let emailToUse = input;
-    if(!input.includes("@")){
-      const snap = await getDoc(doc(db,"usernames",input.toLowerCase()));
-      if(snap.exists()) emailToUse = snap.data().email;
-      else { document.getElementById("error").textContent="Username not found"; return; }
-    }
-    await signInWithEmailAndPassword(auth,emailToUse,pass);
-    location.replace("dashboard.html");
-  }catch(e){
-    console.error(e);
-    document.getElementById("error").textContent="Incorrect email/username or password";
-  }
-};
+        // --- Global Actions ---
+        window.openSignup = () => {
+            document.getElementById("signupOverlay").style.display = "flex";
+        };
+        window.closeSignup = () => {
+            document.getElementById("signupOverlay").style.display = "none";
+        };
 
-/* Google login */
-window.googleLogin = async () => {
-  try { await signInWithPopup(auth, provider); location.replace("dashboard.html"); }
-  catch(e){ console.error(e); document.getElementById("error").textContent=e.message; }
-};
+        window.login = async () => {
+            const input = document.getElementById("emailUsername").value.trim();
+            const pass = document.getElementById("password").value;
+            try {
+                let email = input;
+                if(!input.includes("@")) {
+                    const snap = await getDoc(doc(db, "usernames", input.toLowerCase()));
+                    if(snap.exists()) email = snap.data().email;
+                    else throw new Error();
+                }
+                await signInWithEmailAndPassword(auth, email, pass);
+                location.replace("dashboard.html");
+            } catch(e) { document.getElementById("loginError").textContent = "Terminal Error: Identity not found or password incorrect"; }
+        };
 
-/* Popups */
-window.openSignup = () => signupOverlay.style.display="flex";
-window.closeSignup = () => signupOverlay.style.display="none";
+        window.googleLogin = async () => {
+            try { await signInWithPopup(auth, provider); location.replace("dashboard.html"); }
+            catch(e) { document.getElementById("loginError").textContent = e.message; }
+        };
 
-/* Sign Up */
-let resendInterval;
-window.signup = async () => {
-  const email = emailInput.value.trim();
-  const username = usernameInput.value.trim().toLowerCase(); // store lowercase
-  const pass = passwordInput.value;
-  const passRepeat = passwordRepeatInput.value;
-  const signupError = document.getElementById("signupError");
-  signupError.textContent="";
-  if(!email||!username||!pass||!passRepeat){ signupError.textContent="Fill all fields"; return; }
-  if(pass.length<8){ signupError.textContent="Password must be 8+ chars"; return; }
-  if(pass!==passRepeat){ signupError.textContent="Passwords do not match"; return; }
+        window.signup = async () => {
+            const email = suEmail.value.trim();
+            const user = suUser.value.trim().toLowerCase();
+            const pass = suPass.value;
+            if(document.querySelectorAll(".input-error").length > 0 || !email || !user) return;
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "usernames", user), { uid: cred.user.uid, email });
+                await sendEmailVerification(cred.user);
+                document.getElementById("signupForm").classList.add("hidden");
+                document.getElementById("verifyBox").classList.remove("hidden");
+                document.getElementById("verifyEmail").textContent = email;
+            } catch(e) { document.getElementById("signupGeneralError").textContent = e.message; }
+        };
 
-  try{
-    const snap = await getDoc(doc(db,"usernames",username));
-    if(snap.exists()){ signupError.textContent="Username in use"; return; }
-
-    const cred = await createUserWithEmailAndPassword(auth,email,pass);
-    await setDoc(doc(db,"usernames",username),{uid:cred.user.uid,email});
-    await sendEmailVerification(cred.user);
-
-    signupForm.style.display="none";
-    verifyBox.style.display="block";
-    verifyEmail.textContent=email;
-
-    /* Countdown */
-    let timeLeft=30;
-    resendCountdown.classList.remove("clickable");
-    resendCountdown.textContent=`Resend email in ${timeLeft}s`;
-    clearInterval(resendInterval);
-    resendInterval = setInterval(()=>{
-      timeLeft--;
-      if(timeLeft>0) resendCountdown.textContent=`Resend email in ${timeLeft}s`;
-      else {
-        resendCountdown.textContent="Resend Email";
-        resendCountdown.classList.add("clickable");
-        clearInterval(resendInterval);
-      }
-    },1000);
-
-    resendCountdown.onclick = async () => {
-      if(!resendCountdown.classList.contains("clickable")) return;
-      await sendEmailVerification(auth.currentUser);
-      verifySuccess.textContent="Resent email successfully";
-      setTimeout(()=>{ verifySuccess.textContent=""; },2000);
-
-      timeLeft=30;
-      resendCountdown.classList.remove("clickable");
-      resendCountdown.textContent=`Resend email in ${timeLeft}s`;
-      clearInterval(resendInterval);
-      resendInterval = setInterval(()=>{
-        timeLeft--;
-        if(timeLeft>0) resendCountdown.textContent=`Resend email in ${timeLeft}s`;
-        else { resendCountdown.textContent="Resend Email"; resendCountdown.classList.add("clickable"); clearInterval(resendInterval); }
-      },1000);
-    };
-
-    /* Auto login when verified */
-    const checkEmailVerified = setInterval(async ()=>{
-      await reload(auth.currentUser);
-      if(auth.currentUser.emailVerified){
-        clearInterval(checkEmailVerified);
-        location.replace("dashboard.html");
-      }
-    },3000);
-
-  }catch(e){ console.error(e); signupError.textContent=e.message; }
-};
-</script>
+        // Shimmery Star Generation
+        const starField = document.getElementById('starField');
+        for (let i = 0; i < 110; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 3 + 1;
+            star.style.width = star.style.height = `${size}px`;
+            star.style.left = `${Math.random() * 100}%`; 
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.setProperty('--duration', `${1.5 + Math.random() * 4}s`);
+            starField.appendChild(star);
+        }
+    </script>
 </body>
 </html>
