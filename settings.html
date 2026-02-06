@@ -15,15 +15,17 @@ body {
   color:#e6f0ff;
   overflow-x:hidden;
 }
+
+/* CARD */
 .card {
   width:90%;
-  max-width:380px;
+  max-width:450px;
   padding:30px;
   background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
   border-radius:16px;
   box-shadow:0 15px 40px rgba(0,0,0,.4);
-  text-align:center;
+  text-align:left;
   position:absolute;
   top:50%;
   left:50%;
@@ -46,6 +48,8 @@ body {
   cursor:pointer;
   color:white;
 }
+
+/* PANEL UNDER PROFILE */
 #profilePanel {
   position:fixed;
   top:80px;
@@ -56,9 +60,10 @@ body {
   display:none;
   flex-direction:column;
   padding:10px;
-  width:150px;
+  width:180px;
   box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
+#profilePanel .accountName { font-weight:bold; padding:5px 0; text-align:center; border-bottom:1px solid rgba(255,255,255,.2); margin-bottom:5px; }
 #profilePanel button {
   margin:5px 0;
   padding:10px;
@@ -68,8 +73,29 @@ body {
   cursor:pointer;
 }
 #profilePanel .primary { background:#4da3ff; color:black; }
-#profilePanel .remove { background:#ff4c4c; color:white; }
 #profilePanel .settings { background:#888cff; color:black; }
+
+/* ACCOUNT SETTINGS */
+.setting-section { margin-bottom:25px; }
+.setting-section h3 { margin-bottom:12px; text-align:center; }
+.setting-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.setting-row input { flex:1; padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,.08); color:white; }
+.setting-row button { margin-left:8px; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold; }
+.setting-error { color:#ff6b6b; font-size:0.9rem; min-height:1.2em; }
+
+/* PROFILE PIC POPUP */
+#pfpOptions {
+  display:none;
+  position:absolute;
+  top:60px;
+  left:120px;
+  background:rgba(12,25,55,0.9);
+  backdrop-filter:blur(12px);
+  border-radius:12px;
+  padding:10px;
+  flex-direction:column;
+}
+#pfpOptions button { margin:5px 0; }
 
 /* OVERLAY */
 .overlay {
@@ -90,20 +116,56 @@ body {
   text-align:center;
 }
 .close { float:right; cursor:pointer; }
+
 </style>
 </head>
 <body>
 
 <div class="card">
-  <h2>Settings</h2>
-  <p>Example template for settings page.</p>
+  <h2>Account Settings</h2>
+
+  <!-- Profile Picture -->
+  <div class="setting-section">
+    <h3>Profile Picture</h3>
+    <div class="setting-row">
+      <div id="pfpPreview" style="width:50px;height:50px;border-radius:50%;background:#555;display:flex;justify-content:center;align-items:center;color:white;cursor:pointer;font-weight:bold;"></div>
+    </div>
+    <div id="pfpOptions" style="display:flex;">
+      <button id="changePfpBtn">Change Pfp</button>
+      <button id="removePfpBtn">Remove Pfp</button>
+      <button id="viewPfpBtn">View Pfp</button>
+    </div>
+  </div>
+
+  <!-- Username -->
+  <div class="setting-section">
+    <h3>Username</h3>
+    <div class="setting-row">
+      <input type="text" id="usernameInput">
+      <button id="saveUsernameBtn">Save</button>
+    </div>
+    <div class="setting-error" id="usernameError"></div>
+  </div>
+
+  <!-- Password -->
+  <div class="setting-section">
+    <h3>Password</h3>
+    <div class="setting-row">
+      <input type="password" id="passwordInput" placeholder="New Password">
+    </div>
+    <div class="setting-row">
+      <input type="password" id="passwordConfirmInput" placeholder="Confirm Password">
+      <button id="savePasswordBtn">Save</button>
+    </div>
+    <div class="setting-error" id="passwordError"></div>
+  </div>
 </div>
 
 <div id="profilePic"></div>
 <div id="profilePanel">
+  <div class="accountName" id="panelUsername"></div>
   <button class="primary" id="logoutBtn">Logout</button>
-  <button class="remove" id="removeBtn">Remove Account</button>
-  <button class="settings" id="dashboardBtn">Dashboard</button>
+  <button class="settings" id="dashboardBtn">Settings</button>
 </div>
 
 <!-- LOGOUT CONFIRM -->
@@ -120,8 +182,10 @@ body {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getAuth, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
+/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
@@ -131,29 +195,60 @@ const firebaseConfig = {
   appId: "1:422184727508:web:cef39fc913d526febe9c41",
   measurementId: "G-1MMT3C4M7K"
 };
+
+/* Init Firebase */
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 /* Elements */
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
+const panelUsername = document.getElementById("panelUsername");
+
 const logoutOverlay = document.getElementById("logoutOverlay");
+
+const pfpPreview = document.getElementById("pfpPreview");
+const pfpOptions = document.getElementById("pfpOptions");
+const changePfpBtn = document.getElementById("changePfpBtn");
+const removePfpBtn = document.getElementById("removePfpBtn");
+const viewPfpBtn = document.getElementById("viewPfpBtn");
+
+const usernameInput = document.getElementById("usernameInput");
+const saveUsernameBtn = document.getElementById("saveUsernameBtn");
+const usernameError = document.getElementById("usernameError");
+
+const passwordInput = document.getElementById("passwordInput");
+const passwordConfirmInput = document.getElementById("passwordConfirmInput");
+const savePasswordBtn = document.getElementById("savePasswordBtn");
+const passwordError = document.getElementById("passwordError");
 
 /* PROFILE PANEL TOGGLE */
 profilePic.addEventListener("click", ()=>{ profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex"; });
 
-/* AUTH STATE PROTECTION */
-auth.onAuthStateChanged((user)=>{
+/* AUTH STATE */
+let currentUser;
+auth.onAuthStateChanged(async (user)=>{
   if(!user) location.replace("login.html");
+  currentUser = user;
+  
+  let username = user.displayName || user.email.split("@")[0];
+  panelUsername.textContent = username;
 
-  const username = user.displayName || user.email.split("@")[0];
+  // PFP
   const firstLetter = username.charAt(0).toUpperCase();
   profilePic.textContent = firstLetter;
+  pfpPreview.textContent = firstLetter;
+
+  // Color based on username
   let hash = 0;
   for(let i=0;i<username.length;i++) hash = username.charCodeAt(i) + ((hash<<5)-hash);
   const color = `hsl(${hash%360},65%,50%)`;
   profilePic.style.background=color;
+  pfpPreview.style.background=color;
+
+  usernameInput.value = username;
 });
 
 /* LOGOUT */
@@ -163,6 +258,41 @@ async function confirmLogout(){ await signOut(auth); location.replace("login.htm
 
 /* NAVIGATION */
 document.getElementById("dashboardBtn").onclick = ()=>{ location.replace("dashboard.html"); };
+
+/* PFP OPTIONS */
+pfpPreview.addEventListener("click", ()=>{ pfpOptions.style.display = pfpOptions.style.display==="flex"?"none":"flex"; });
+changePfpBtn.onclick = ()=>{ alert("Here you would implement file picker + crop logic"); };
+removePfpBtn.onclick = ()=>{ alert("Here you would revert to default Pfp logic"); };
+viewPfpBtn.onclick = ()=>{ alert("Here you would open Pfp in new tab"); };
+
+/* USERNAME SAVE */
+saveUsernameBtn.onclick = async ()=>{
+  const newName = usernameInput.value.trim().toLowerCase();
+  usernameError.textContent = "";
+  if(!newName) return usernameError.textContent="Enter a username";
+  const usernameRef = doc(db,"usernames",newName);
+  const snap = await getDoc(usernameRef);
+  if(snap.exists()) return usernameError.textContent="Username already in use";
+  // Save new username
+  await setDoc(usernameRef,{uid:currentUser.uid});
+  panelUsername.textContent = newName;
+  usernameError.textContent="Username updated!";
+};
+
+/* PASSWORD SAVE */
+savePasswordBtn.onclick = async ()=>{
+  const pass = passwordInput.value;
+  const confirm = passwordConfirmInput.value;
+  passwordError.textContent="";
+  if(pass.length<8) return passwordError.textContent="Password must be 8+ chars";
+  if(pass!==confirm) return passwordError.textContent="Passwords do not match";
+  try{
+    await updatePassword(currentUser,pass);
+    passwordError.textContent="Password updated!";
+    passwordInput.value=""; passwordConfirmInput.value="";
+  }catch(e){ passwordError.textContent=e.message; }
+};
+
 </script>
 
 </body>
