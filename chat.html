@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat</title>
+<title>Chat App</title>
 <style>
 html, body {
   margin:0;
@@ -12,11 +12,72 @@ html, body {
   font-family:system-ui,sans-serif;
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   color:#e6f0ff;
+  overflow-x:hidden;
 }
+
+/* Hamburger menu */
+#menuBtn {
+  position:fixed;
+  top:20px;
+  left:20px;
+  width:32px;
+  height:24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  cursor:pointer;
+  z-index:150;
+}
+#menuBtn span {
+  height:4px;
+  background:white;
+  border-radius:4px;
+}
+body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
+
+/* Side panel */
+#sidePanel {
+  position:fixed;
+  top:0;
+  left:-300px;
+  width:260px;
+  height:100%;
+  background:rgba(12,25,55,.95);
+  backdrop-filter:blur(16px);
+  padding:20px;
+  box-sizing:border-box;
+  z-index:200;
+  transition:left .35s ease;
+  display:flex;
+  flex-direction:column;
+}
+body.menu-open #sidePanel { left:0; }
+
+/* Side panel header */
+#sidePanelHeader {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+#sidePanelHeader h3 { margin:0 auto; }
+#closeMenu { cursor:pointer; font-size:1.4rem; }
+
+/* Tabs */
+.nav-tab {
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  margin-bottom:8px;
+  font-weight:600;
+}
+.nav-tab.active { background:#4da3ff; color:black; }
+.nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
+
+/* Chat wrapper */
 #chatWrapper {
   max-width:600px;
   width:90%;
-  margin:50px auto 80px auto;
+  margin:100px auto 80px auto;
   display:flex;
   flex-direction:column;
   gap:12px;
@@ -28,7 +89,9 @@ html, body {
   background:rgba(12,25,55,.7);
   padding:10px;
   border-radius:15px;
+  max-width:100%;
   word-wrap:break-word;
+  position:relative;
 }
 .message .pfp {
   width:40px;
@@ -49,6 +112,25 @@ html, body {
   gap:3px;
 }
 .message .username { font-weight:600; }
+.message .time { font-size:0.7rem; color:#cfd8f0; }
+.message .actions {
+  position:absolute;
+  top:5px;
+  right:5px;
+  display:flex;
+  gap:5px;
+}
+.message .actions button {
+  background:rgba(77,163,255,.8);
+  border:none;
+  padding:2px 5px;
+  border-radius:5px;
+  font-size:0.7rem;
+  cursor:pointer;
+  color:black;
+}
+
+/* Chat input */
 #chatInputWrapper {
   position:fixed;
   bottom:0;
@@ -57,7 +139,10 @@ html, body {
   display:flex;
   gap:10px;
   padding:10px;
+  box-sizing:border-box;
   background:rgba(12,25,55,.85);
+  backdrop-filter:blur(8px);
+  z-index:100;
 }
 #chatInput {
   flex:1;
@@ -77,12 +162,86 @@ html, body {
   font-size:1.2rem;
   font-weight:bold;
 }
+
+/* Profile pic */
+#profilePic {
+  position:fixed;
+  top:20px;
+  right:20px;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  font-size:1.3rem;
+  color:white;
+  cursor:pointer;
+  user-select:none;
+  z-index:100;
+  background-size:cover;
+  background-position:center;
+}
+
+/* Profile panel */
+#profilePanel {
+  position:fixed;
+  top:80px;
+  right:20px;
+  width:180px;
+  background:rgba(12,25,55,.85);
+  backdrop-filter:blur(8px);
+  border-radius:14px;
+  display:none;
+  flex-direction:column;
+  padding:10px;
+  z-index:100;
+}
+#profilePanel h4 {
+  margin:0 0 8px 0;
+  font-size:1rem;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+  padding-bottom:5px;
+}
+#profilePanel button {
+  width:100%;
+  margin:5px 0;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+.primary { background:#4da3ff; color:black; }
+.remove { background:#ff4c4c; color:white; }
 </style>
 </head>
 <body>
 
-<div id="chatWrapper"></div>
+<!-- Hamburger menu -->
+<div id="menuBtn"><span></span><span></span><span></span></div>
+<div id="sidePanel">
+  <div id="sidePanelHeader">
+    <div></div>
+    <h3>Menu</h3>
+    <div id="closeMenu">✕</div>
+  </div>
+  <div class="nav-tab active" id="tabChat">Chat</div>
+  <div class="nav-tab" id="tabSettings">Settings</div>
+</div>
 
+<!-- Profile pic -->
+<div id="profilePic"></div>
+<div id="profilePanel">
+  <h4 id="profileName"></h4>
+  <button class="primary" onclick="alert('Settings')">Settings</button>
+  <button class="remove" onclick="alert('Logout')">Logout</button>
+</div>
+
+<!-- Chat -->
+<div id="chatWrapper"></div>
 <div id="chatInputWrapper">
   <input type="text" id="chatInput" placeholder="Type a message...">
   <button id="sendBtn">➤</button>
@@ -90,7 +249,7 @@ html, body {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCShLuRlublVM7uQFjz_PBkccfUYtZtqX4",
@@ -105,18 +264,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* Elements */
 const chatWrapper = document.getElementById("chatWrapper");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
+const profilePic = document.getElementById("profilePic");
+const profilePanel = document.getElementById("profilePanel");
+const profileName = document.getElementById("profileName");
 
 let username = prompt("Enter your name") || "Guest";
 
+/* Helper to make a color from string */
 function stringToColor(str){
   let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
   let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
   return color;
 }
 
+/* Profile pic */
+profileName.textContent = username;
+profilePic.textContent = username.charAt(0).toUpperCase();
+profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
+let panelOpen=false;
+profilePic.addEventListener("click", ()=>{ panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none"; });
+
+/* Menu logic */
+const menuBtn = document.getElementById("menuBtn");
+const closeMenu = document.getElementById("closeMenu");
+menuBtn.onclick = ()=>document.body.classList.add("menu-open");
+closeMenu.onclick = ()=>document.body.classList.remove("menu-open");
+
+/* Send message */
 async function sendMessage() {
   const text = chatInput.value.trim();
   if(!text) return;
@@ -124,32 +302,58 @@ async function sendMessage() {
   await addDoc(collection(db,"messages"),{
     user: username,
     message: text,
-    pfp: ""
+    pfp: "",
+    timestamp: serverTimestamp()
   });
 }
 
 sendBtn.onclick = sendMessage;
-chatInput.addEventListener("keypress", e => { if(e.key==="Enter") sendMessage(); });
+chatInput.addEventListener("keypress", e=>{ if(e.key==="Enter") sendMessage(); });
 
-const q = query(collection(db,"messages"), orderBy("user")); // simple ordering
-onSnapshot(q, snapshot => {
-  chatWrapper.innerHTML = "";
-  snapshot.docs.forEach(doc => {
-    const data = doc.data();
+/* Real-time chat */
+const q = query(collection(db,"messages"), orderBy("timestamp"));
+onSnapshot(q, snapshot=>{
+  chatWrapper.innerHTML="";
+  snapshot.docs.forEach(docSnap=>{
+    const data = docSnap.data();
     const msgDiv = document.createElement("div");
-    msgDiv.className = "message";
+    msgDiv.className="message";
+
     const pfpDiv = document.createElement("div");
-    pfpDiv.className = "pfp";
+    pfpDiv.className="pfp";
     pfpDiv.textContent = data.user.charAt(0).toUpperCase();
     pfpDiv.style.backgroundColor = stringToColor(data.user.toLowerCase());
+
     const contentDiv = document.createElement("div");
-    contentDiv.className = "content";
+    contentDiv.className="content";
     const userDiv = document.createElement("div");
-    userDiv.className = "username";
+    userDiv.className="username";
     userDiv.textContent = data.user;
     const textDiv = document.createElement("div");
     textDiv.textContent = data.message;
-    contentDiv.append(userDiv, textDiv);
+    const timeDiv = document.createElement("div");
+    timeDiv.className="time";
+    if(data.timestamp) timeDiv.textContent = new Date(data.timestamp.seconds*1000).toLocaleTimeString();
+
+    /* Actions */
+    const actionsDiv = document.createElement("div");
+    actionsDiv.className="actions";
+
+    /* Edit */
+    const editBtn = document.createElement("button");
+    editBtn.textContent="Edit";
+    editBtn.onclick = async ()=> {
+      const newText = prompt("Edit message:", data.message);
+      if(newText) await updateDoc(doc(db,"messages",docSnap.id),{ message:newText });
+    };
+
+    /* Delete */
+    const delBtn = document.createElement("button");
+    delBtn.textContent="Del";
+    delBtn.onclick = async ()=> { if(confirm("Delete this message?")) await deleteDoc(doc(db,"messages",docSnap.id)); };
+
+    actionsDiv.append(editBtn, delBtn);
+    contentDiv.append(userDiv, textDiv, timeDiv, actionsDiv);
     msgDiv.append(pfpDiv, contentDiv);
     chatWrapper.appendChild(msgDiv);
   });
