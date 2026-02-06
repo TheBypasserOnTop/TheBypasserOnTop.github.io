@@ -86,8 +86,7 @@ body.menu-open #sidePanel { left:0; }
   color:white;
   cursor:pointer;
   z-index:100;
-  background-size:contain;
-  background-repeat:no-repeat;
+  background-size:cover;
   background-position:center;
 }
 
@@ -97,107 +96,110 @@ body.menu-open #sidePanel { left:0; }
   top:80px;
   right:20px;
   width:180px;
-  background:rgba(12,25,55,.95);
+  background:rgba(12,25,55,.85);
   border-radius:14px;
   display:none;
   flex-direction:column;
   padding:10px;
   z-index:100;
 }
-#profilePanel h4 {
-  text-align:center;
-  margin:0 0 8px;
-}
-#profilePanel button {
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  margin-top:5px;
-  font-weight:600;
-  cursor:pointer;
-}
+#profilePanel h4 { text-align:center; margin:0 0 8px; }
+#profilePanel button { padding:10px; border:none; border-radius:10px; margin-top:5px; font-weight:600; cursor:pointer; }
 .primary { background:#4da3ff; color:black; }
 
 /* Main container */
-.container {
-  width:90%;
+#mainContent {
+  padding:120px 20px 20px 20px;
   max-width:600px;
-  margin:100px auto 50px auto;
+  margin:0 auto;
+}
+
+/* Drop-down */
+#proxySelect {
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(12,25,55,.8);
+  border:none;
+  color:white;
+  font-size:1rem;
+  cursor:pointer;
+  margin-bottom:15px;
 }
 
 /* Generate button */
 #generateBtn {
-  padding:12px 20px;
+  width:100%;
+  padding:12px;
   border:none;
   border-radius:10px;
-  background:#4da3ff;
-  color:black;
   font-weight:600;
   cursor:pointer;
-  margin-bottom:20px;
+  background:#4da3ff;
+  color:black;
+  margin-bottom:15px;
 }
 
-/* Card */
-.link-card {
-  background:rgba(12,25,55,.9);
-  padding:12px 15px;
-  border-radius:14px;
-  margin-bottom:12px;
+/* Fake progress */
+#progressContainer {
+  width:100%;
+  height:18px;
+  background:rgba(255,255,255,.1);
+  border-radius:9px;
+  margin-bottom:10px;
+  overflow:hidden;
+}
+#progressBar {
+  height:100%;
+  width:0%;
+  background:#4da3ff;
+  transition:width .2s linear;
+}
+#fakeText { margin-bottom:15px; }
+
+/* Generated links */
+#generatedLinks { margin-top:20px; }
+.generatedCard {
   display:flex;
   justify-content:space-between;
   align-items:center;
+  background:rgba(12,25,55,.7);
+  padding:10px;
+  border-radius:12px;
+  margin-bottom:10px;
 }
-
-.link-card span {
-  word-break:break-all;
-}
-
-.delete-btn {
-  background:#ff4c4c;
-  border:none;
+.generatedCard .linkInfo { flex:1; }
+.generatedCard button.deleteBtn {
+  margin-left:10px;
   padding:6px 10px;
+  background:red;
+  border:none;
   border-radius:8px;
   color:white;
   cursor:pointer;
-  font-weight:600;
 }
 
-/* Overlay */
-.overlay {
+/* Confirmation overlay */
+#confirmOverlay {
+  display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.45);
-  display:none;
+  background:rgba(0,0,0,.6);
+  z-index:500;
   justify-content:center;
   align-items:center;
-  z-index:200;
 }
-.overlay.show { display:flex; }
-.popup {
-  width:90%;
-  max-width:400px;
+#confirmOverlay .popup {
   background:#0c1937;
   padding:25px;
   border-radius:18px;
-  text-align:left;
+  text-align:center;
 }
-.popup .close {
-  float:right;
-  cursor:pointer;
-}
-.popup button {
-  margin-top:15px;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:#4da3ff;
-  color:black;
-  font-weight:600;
-  cursor:pointer;
-}
+#confirmOverlay button { margin:10px; padding:10px 15px; border:none; border-radius:10px; cursor:pointer; }
+#confirmOverlay .yesBtn { background:green; color:white; }
+#confirmOverlay .noBtn { background:red; color:white; }
 </style>
 </head>
-
 <body>
 
 <div id="menuBtn"><span></span><span></span><span></span></div>
@@ -209,32 +211,47 @@ body.menu-open #sidePanel { left:0; }
     <div id="closeMenu">✕</div>
   </div>
   <div class="divider"></div>
-  <div class="nav-tab" id="tabDashboard">Dashboard</div>
-  <div class="nav-tab active" id="tabProxies">Proxies</div>
-  <div class="nav-tab" id="tabSettings">Settings</div>
+  <div class="nav-tab" onclick="navigateTo('dashboard.html')">Dashboard</div>
+  <div class="nav-tab active" onclick="navigateTo('proxies.html')">Proxies</div>
+  <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
 </div>
 
 <div id="profilePic"></div>
-
 <div id="profilePanel">
-  <h4 id="panelUsername"></h4>
+  <h4 id="profileName"></h4>
   <button onclick="navigateTo('dashboard.html')">Dashboard</button>
-  <button onclick="navigateTo('proxies.html')">Proxies</button>
+  <button onclick="navigateTo('settings.html')">Settings</button>
   <button onclick="logout()">Logout</button>
 </div>
 
-<div class="container">
-  <button id="generateBtn">Generate Link</button>
-  <div id="linksContainer"></div>
+<div id="mainContent">
+  <h2>Select a proxy</h2>
+  <select id="proxySelect">
+    <option value="" disabled selected>Select a proxy</option>
+    <option>Rammerhead</option>
+    <option>Space</option>
+    <option>Shuttle</option>
+    <option>Doge</option>
+    <option>Bolt</option>
+    <option>Shadow</option>
+    <option>Ghost</option>
+  </select>
+
+  <button id="generateBtn">Generate link</button>
+
+  <div id="progressContainer"><div id="progressBar"></div></div>
+  <div id="fakeText"></div>
+
+  <h3>Generated Proxies</h3>
+  <div class="divider"></div>
+  <div id="generatedLinks"></div>
 </div>
 
-<!-- Delete confirmation overlay -->
-<div class="overlay" id="deleteOverlay">
+<div id="confirmOverlay">
   <div class="popup">
-    <span class="close">✕</span>
-    <h3>Delete Link?</h3>
     <p>Are you sure you want to permanently delete this link?</p>
-    <button id="confirmDeleteBtn">Yes, Delete</button>
+    <button class="yesBtn">Yes</button>
+    <button class="noBtn">No</button>
   </div>
 </div>
 
@@ -244,132 +261,125 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain:"login-34954.firebaseapp.com",
-  projectId:"login-34954"
+  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain: "login-34954.firebaseapp.com",
+  projectId: "login-34954"
 });
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+/* Profile pic logic */
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
-const panelUsername = document.getElementById("panelUsername");
-const generateBtn = document.getElementById("generateBtn");
-const linksContainer = document.getElementById("linksContainer");
-const deleteOverlay = document.getElementById("deleteOverlay");
-const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+const profileName = document.getElementById("profileName");
 
-let links = JSON.parse(localStorage.getItem("generatedLinks") || "[]");
-let cooldown = false;
-let cooldownSeconds = 20;
-let deleteIndex = null;
-
-// Function to render all links
-function renderLinks(){
-  linksContainer.innerHTML = "";
-  links.forEach((link,i)=>{
-    const card = document.createElement("div");
-    card.className="link-card";
-    const span = document.createElement("span");
-    span.textContent = link;
-    const delBtn = document.createElement("button");
-    delBtn.className="delete-btn";
-    delBtn.textContent="Delete";
-    delBtn.onclick=()=>{ deleteIndex=i; deleteOverlay.classList.add("show"); };
-    card.appendChild(span);
-    card.appendChild(delBtn);
-    linksContainer.appendChild(card);
-  });
-}
-renderLinks();
-
-// Generate link function
-function generateLink(){
-  if(cooldown) return;
-  const link = "https://example.com/"+Math.random().toString(36).substring(2,10);
-  links.push(link);
-  localStorage.setItem("generatedLinks",JSON.stringify(links));
-  renderLinks();
-  startCooldown();
-}
-
-// Cooldown function
-function startCooldown(){
-  cooldown = true;
-  let sec = cooldownSeconds;
-  generateBtn.disabled=true;
-  generateBtn.style.background="gray";
-  const interval = setInterval(()=>{
-    generateBtn.textContent=`Cooldown (${sec}s)`;
-    sec--;
-    if(sec<0){
-      clearInterval(interval);
-      cooldown=false;
-      generateBtn.disabled=false;
-      generateBtn.textContent="Generate Link";
-      generateBtn.style.background="#4da3ff";
-    }
-  },1000);
-}
-
-// Confirm delete
-confirmDeleteBtn.onclick=()=>{
-  links.splice(deleteIndex,1);
-  localStorage.setItem("generatedLinks",JSON.stringify(links));
-  renderLinks();
-  deleteOverlay.classList.remove("show");
-};
-
-// Close overlay
-deleteOverlay.querySelector(".close").onclick=()=>deleteOverlay.classList.remove("show");
-
-// Generate button
-generateBtn.onclick=generateLink;
-
-/* Profile */
-function colorFrom(str){
+function stringToColor(str){
   let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
   return `hsl(${h%360},70%,50%)`;
 }
 
 onAuthStateChanged(auth, async user=>{
-  if(!user) location.href="login.html";
+  if(!user) location.replace("login.html");
+
   const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
   const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
-  panelUsername.textContent=username;
-  profilePic.textContent=username[0].toUpperCase();
-  profilePic.style.background=colorFrom(username);
 
-  const pfp=await getDoc(doc(db,"userPFPs",user.uid));
-  if(pfp.exists() && pfp.data().data){
-    profilePic.style.backgroundImage=`url(${pfp.data().data})`;
-    profilePic.textContent="";
+  profileName.textContent = username;
+  profilePic.textContent = username[0].toUpperCase();
+  profilePic.style.backgroundColor = stringToColor(username);
+
+  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
+  if(pfpDoc.exists() && pfpDoc.data().data){
+    profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
+    profilePic.textContent = "";
   }
 });
 
-/* Profile menu */
-profilePic.onclick=()=>profilePanel.style.display =
-  profilePanel.style.display==="flex"?"none":"flex";
-
-/* Menu */
-const menuBtn=document.getElementById("menuBtn");
-const closeMenu=document.getElementById("closeMenu");
-menuBtn.onclick=()=>document.body.classList.add("menu-open");
-closeMenu.onclick=()=>document.body.classList.remove("menu-open");
-
-/* Tabs */
-document.getElementById("tabDashboard").onclick=()=>{
-  document.body.classList.remove("menu-open");
-  setTimeout(()=>location.href="dashboard.html",350);
-};
-document.getElementById("tabSettings").onclick=()=>{
-  document.body.classList.remove("menu-open");
-  setTimeout(()=>location.href="settings.html",350);
-};
+/* Menu toggle */
+document.getElementById("menuBtn").onclick = () => document.body.classList.add("menu-open");
+document.getElementById("closeMenu").onclick = () => document.body.classList.remove("menu-open");
+profilePic.onclick = () => profilePanel.style.display = profilePanel.style.display === "flex" ? "none" : "flex";
 
 /* Logout */
-function logout(){ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); }
+function logout(){ signOut(auth).then(()=>location.href="login.html"); }
+function navigateTo(page){ document.body.classList.remove("menu-open"); setTimeout(()=>location.href=page,350); }
 
+/* Proxies logic */
+const proxySelect = document.getElementById("proxySelect");
+const generateBtn = document.getElementById("generateBtn");
+const progressBar = document.getElementById("progressBar");
+const fakeText = document.getElementById("fakeText");
+const generatedLinks = document.getElementById("generatedLinks");
+const confirmOverlay = document.getElementById("confirmOverlay");
+const yesBtn = confirmOverlay.querySelector(".yesBtn");
+const noBtn = confirmOverlay.querySelector(".noBtn");
+
+let cooldown = 0;
+let lastGenerated = null;
+let links = JSON.parse(localStorage.getItem("generatedLinks")) || [];
+
+function renderLinks(){
+  generatedLinks.innerHTML = "";
+  links.slice().reverse().forEach((l,i)=>{
+    const card = document.createElement("div");
+    card.className="generatedCard";
+    const info = document.createElement("div");
+    info.className="linkInfo";
+    info.textContent = `${l.proxy} - ${l.link}`;
+    card.appendChild(info);
+
+    const del = document.createElement("button");
+    del.className="deleteBtn";
+    del.textContent="Delete";
+    del.onclick=()=>{ confirmOverlay.style.display="flex"; yesBtn.onclick=()=>{ links.splice(links.indexOf(l),1); saveLinks(); renderLinks(); confirmOverlay.style.display="none"; }; noBtn.onclick=()=>confirmOverlay.style.display="none"; };
+    card.appendChild(del);
+
+    generatedLinks.appendChild(card);
+  });
+}
+function saveLinks(){ localStorage.setItem("generatedLinks",JSON.stringify(links)); }
+renderLinks();
+
+generateBtn.onclick = async ()=>{
+  if(cooldown>0 || !proxySelect.value) return;
+  cooldown=20; updateCooldown();
+  let progress=0;
+  progressBar.style.width="0%";
+  fakeText.textContent="";
+  const fakeSteps=["Searching for proxies","Clearing cookies and data","reaching-13.zaq","shrjw.aj","checking server"];
+  const interval=setInterval(()=>{
+    progress++;
+    progressBar.style.width=progress+"%";
+    if(progress%10===0) fakeText.textContent=fakeSteps[Math.floor(Math.random()*fakeSteps.length)];
+    if(progress>=100){
+      clearInterval(interval);
+      let success = Math.random()<0.8; // 80% chance
+      if(success){
+        const newLink = {proxy:proxySelect.value,link:`${proxySelect.value.toLowerCase()}-${Date.now()}`};
+        links.push(newLink); saveLinks(); renderLinks();
+        fakeText.textContent="Successfully generated";
+      }else{ fakeText.textContent="Failed to generate: no stock"; }
+    }
+  },200);
+
+  lastGenerated=Date.now();
+  const cooldownInterval=setInterval(()=>{
+    cooldown--;
+    updateCooldown();
+    if(cooldown<=0) clearInterval(cooldownInterval);
+  },1000);
+};
+function updateCooldown(){
+  if(cooldown>0){
+    generateBtn.textContent=`Cooldown (${cooldown}s)`;
+    generateBtn.style.background="gray";
+    generateBtn.disabled=true;
+  }else{
+    generateBtn.textContent="Generate link";
+    generateBtn.style.background="#4da3ff";
+    generateBtn.disabled=false;
+  }
+}
 </script>
 
 </body>
