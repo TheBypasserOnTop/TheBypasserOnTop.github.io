@@ -14,6 +14,38 @@ html, body {
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   color:#e6f0ff;
   overflow-x:hidden;
+  overflow-y:auto;
+}
+
+/* Centered chat wrapper */
+#chatWrapper {
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:80vh;
+  padding-top:100px;
+  box-sizing:border-box;
+  z-index:1;
+}
+
+/* Chat container */
+#chatContainer {
+  width:90%;
+  max-width:600px;
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  margin-bottom:80px;
+}
+
+/* Chat message */
+.chat-message {
+  padding:10px 15px;
+  background:rgba(12,25,55,.7);
+  border-radius:15px;
+  max-width:75%;
+  word-wrap:break-word;
 }
 
 /* Hamburger menu */
@@ -152,49 +184,6 @@ body.menu-open .blur-layer {
 }
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
-
-/* Chat container */
-#chatContainer {
-  margin-top:100px;
-  width:90%;
-  max-width:600px;
-  margin-left:auto;
-  margin-right:auto;
-  display:flex;
-  flex-direction:column;
-  gap:15px;
-}
-
-/* Example chat message */
-.chat-message {
-  padding:10px 15px;
-  background:rgba(12,25,55,.7);
-  border-radius:15px;
-  max-width:75%;
-  word-wrap:break-word;
-}
-
-/* Overlay popups for logout */
-.overlay {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.4);
-  backdrop-filter:blur(6px);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:200;
-}
-.popup {
-  width:90vw;
-  max-width:400px;
-  background:#0c1937;
-  padding:30px;
-  border-radius:20px;
-  text-align:center;
-  position:relative;
-}
-.close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.2rem; }
 </style>
 </head>
 <body>
@@ -215,9 +204,11 @@ body.menu-open .blur-layer {
 </div>
 <div class="blur-layer"></div>
 
-<!-- Chat area -->
-<div id="chatContainer">
-  <div class="chat-message">Welcome to the chat!</div>
+<!-- Chat content -->
+<div id="chatWrapper">
+  <div id="chatContainer">
+    <div class="chat-message">Welcome to the chat!</div>
+  </div>
 </div>
 
 <!-- Profile pic top-right -->
@@ -233,6 +224,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebas
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
+/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
@@ -292,7 +284,6 @@ profilePic.addEventListener("click", ()=>{
 /* Menu logic */
 const menuBtn = document.getElementById("menuBtn");
 const closeMenu = document.getElementById("closeMenu");
-const sidePanel = document.getElementById("sidePanel");
 menuBtn.onclick = () => document.body.classList.add("menu-open");
 closeMenu.onclick = () => document.body.classList.remove("menu-open");
 
