@@ -6,29 +6,25 @@
 <title>Dashboard</title>
 <link rel="icon" href="favicon.ico">
 <style>
-html, body {
+body{
   margin:0;
-  padding:0;
-  height:100%;
   font-family:system-ui,sans-serif;
-  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   color:#e6f0ff;
+  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   overflow-x:hidden;
-  scroll-behavior:smooth;
 }
 
-/* Centered welcome card */
-#welcomeWrapper {
+/* Welcome Wrapper */
+#welcomeWrapper{
   display:flex;
   justify-content:center;
-  align-items:center;
   flex-direction:column;
-  min-height:100vh;
-  position:relative;
+  align-items:center;
+  margin-top:10vh;
   text-align:center;
   z-index:1;
 }
-.card {
+.card{
   width:90%;
   max-width:400px;
   padding:30px;
@@ -36,139 +32,53 @@ html, body {
   backdrop-filter:blur(16px);
   border-radius:20px;
   box-shadow:0 20px 60px rgba(0,0,0,.4);
-  margin-bottom:20px;
+  margin-bottom:50px;
 }
-h2 { margin-bottom:10px; }
-.subtext {
+.subtext{
+  margin-top:10px;
   font-size:0.9rem;
   opacity:0;
-  transition: opacity 2s;
-  margin-top:10px;
-  color:#cfd8f0;
+  transition: opacity 1.5s ease-in;
 }
 
-/* Scroll text fixed bottom */
-#scrollText {
+/* Scroll down text */
+#scrollText{
   position:fixed;
   bottom:15px;
-  width:100%;
-  text-align:center;
-  font-weight:500;
-  animation: upDown 2s ease-in-out infinite alternate;
-  color:#cfd8f0;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:1rem;
+  animation: upDown 2s ease-in-out infinite;
   z-index:1;
 }
 @keyframes upDown{
-  0%{ transform:translateY(0);}
-  100%{ transform:translateY(-10px);}
-}
-
-/* Scroll cards container */
-#cardsContainer {
-  padding-top:50px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  0%,100%{ transform:translateX(-50%) translateY(0); }
+  50%{ transform:translateX(-50%) translateY(-10px); }
 }
 
 /* Scroll cards */
-.scroll-card {
-  width:90%;
-  max-width:350px;
-  padding:20px;
-  background:rgba(12,25,55,.7);
-  border-radius:15px;
-  margin:30px 0;
-  opacity:0;
-  transform:translateY(50px);
-  transition:all 1s ease;
-}
-
-/* Hamburger menu */
-#menuBtn {
-  position:fixed;
-  top:20px;
-  left:20px;
-  width:32px;
-  height:24px;
+#cardsContainer{
   display:flex;
   flex-direction:column;
-  justify-content:space-between;
-  cursor:pointer;
-  z-index:150;
-  transition:opacity .3s, transform .3s;
-}
-#menuBtn span {
-  height:4px;
-  background:white;
-  border-radius:4px;
-}
-body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
-
-/* Side panel */
-#sidePanel {
-  position:fixed;
-  top:0;
-  left:-300px;
-  width:260px;
-  height:100%;
-  background:rgba(12,25,55,.95);
-  backdrop-filter:blur(16px);
-  padding:20px;
-  box-sizing:border-box;
-  z-index:200;
-  transition:left .35s ease;
-  display:flex;
-  flex-direction:column;
-}
-body.menu-open #sidePanel { left:0; }
-
-/* Side panel header */
-#sidePanelHeader {
-  display:flex;
-  justify-content:space-between;
   align-items:center;
+  padding-bottom:50px;
 }
-#sidePanelHeader h3 { margin:0 auto; }
-#closeMenu { cursor:pointer; font-size:1.4rem; }
-
-/* Divider */
-.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
-
-/* Search */
-#navSearch {
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  background:rgba(255,255,255,.08);
-  color:white;
-  margin-bottom:15px;
-}
-
-/* Tabs */
-.nav-tab {
-  padding:12px;
-  border-radius:10px;
-  cursor:pointer;
-  margin-bottom:8px;
-  font-weight:600;
-}
-.nav-tab.active { background:#4da3ff; color:black; }
-.nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
-
-/* Blur layer */
-.blur-layer {
-  position:absolute;
-  inset:0;
-  z-index:5;
-}
-body.menu-open .blur-layer {
-  backdrop-filter: blur(8px);
-  pointer-events:none;
+.scroll-card{
+  opacity:0;
+  transform:translateY(40px);
+  width:90%;
+  max-width:400px;
+  margin:20px 0;
+  padding:25px;
+  background:rgba(12,25,55,.65);
+  border-radius:20px;
+  backdrop-filter:blur(16px);
+  box-shadow:0 15px 45px rgba(0,0,0,.35);
+  transition: all 0.8s ease-out;
 }
 
-/* Top-right PFP */
-#profilePic {
+/* Profile pic top-right */
+#profilePic{
   position:fixed;
   top:20px;
   right:20px;
@@ -184,12 +94,13 @@ body.menu-open .blur-layer {
   cursor:pointer;
   user-select:none;
   z-index:100;
-  background-size:cover;
+  background-size:contain;
   background-position:center;
+  background-repeat:no-repeat;
 }
 
 /* Profile panel */
-#profilePanel {
+#profilePanel{
   position:fixed;
   top:80px;
   right:20px;
@@ -202,14 +113,14 @@ body.menu-open .blur-layer {
   padding:10px;
   z-index:100;
 }
-#profilePanel h4 {
+#profilePanel h4{
   margin:0 0 8px 0;
   font-size:1rem;
   text-align:center;
   border-bottom:1px solid rgba(255,255,255,0.2);
   padding-bottom:5px;
 }
-#profilePanel button {
+#profilePanel button{
   width:100%;
   margin:5px 0;
   padding:10px;
@@ -218,70 +129,104 @@ body.menu-open .blur-layer {
   font-weight:600;
   cursor:pointer;
 }
-.primary { background:#4da3ff; color:black; }
-.remove { background:#ff4c4c; color:white; }
+.primary{ background:#4da3ff; color:black; }
+.remove{ background:#ff4c4c; color:white; }
 
-/* Overlay popups */
-.overlay {
+/* Menu button */
+#menuBtn{
+  position:fixed;
+  top:20px;
+  left:20px;
+  width:40px;
+  height:40px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-around;
+  cursor:pointer;
+  z-index:101;
+}
+#menuBtn div{
+  width:100%;
+  height:4px;
+  background:white;
+  border-radius:2px;
+}
+
+/* Side panel */
+#sidePanel{
+  position:fixed;
+  top:0;
+  left:-250px;
+  width:250px;
+  height:100%;
+  background:rgba(12,25,55,.95);
+  backdrop-filter:blur(12px);
+  display:flex;
+  flex-direction:column;
+  padding:20px;
+  z-index:105;
+  transition: left 0.4s ease;
+}
+#sidePanel.show{ left:0; }
+#sidePanel .closePanel{
+  align-self:flex-end;
+  font-size:1.2rem;
+  cursor:pointer;
+}
+#sidePanel h3{
+  text-align:center;
+  margin:10px 0;
+  font-weight:bold;
+  border-bottom:1px solid rgba(255,255,255,.2);
+  padding-bottom:5px;
+}
+#sidePanel input{
+  padding:8px;
+  margin:10px 0;
+  border-radius:8px;
+  border:none;
+  width:100%;
+  background:#0c1937;
+  color:white;
+}
+.sideTab{
+  margin:10px 0;
+  padding:10px;
+  border-radius:10px;
+  background:#0c1937;
+  cursor:pointer;
+  font-weight:bold;
+}
+.sideTab.selected{ background:#4da3ff; color:black; }
+
+/* Blur overlay behind panel */
+#panelBlur{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.4);
-  backdrop-filter:blur(6px);
+  backdrop-filter:blur(4px);
   display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:200;
+  z-index:104;
 }
-.popup {
-  width:90vw;
-  max-width:400px;
-  background:#0c1937;
-  padding:30px;
-  border-radius:20px;
-  text-align:center;
-  position:relative;
-}
-.close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.2rem; }
-.error { color:#ff6b6b; margin-top:10px; min-height:1.2em; text-align:left; }
 </style>
 </head>
 <body>
 
-<!-- Hamburger menu -->
-<div id="menuBtn"><span></span><span></span><span></span></div>
+<!-- Menu -->
+<div id="menuBtn"><div></div><div></div><div></div></div>
+
+<!-- Side Panel -->
 <div id="sidePanel">
-  <div id="sidePanelHeader">
-    <div></div>
-    <h3>Navigation</h3>
-    <div id="closeMenu">✕</div>
-  </div>
-  <div class="divider"></div>
-  <input id="navSearch" placeholder="Search...">
-  <div class="nav-tab active" id="tabDashboard">Dashboard</div>
-  <div class="nav-tab" id="tabCommunicate">Communicate</div>
-  <div class="nav-tab" id="tabSettings">Settings</div>
+  <span class="closePanel">✕</span>
+  <h3>Navigation</h3>
+  <input type="text" placeholder="Search...">
+  <div class="sideTab selected" data-target="dashboard">Dashboard</div>
+  <div class="sideTab" data-target="settings">Settings</div>
+  <div class="sideTab" data-target="chat">Communicate</div>
 </div>
-<div class="blur-layer"></div>
+<div id="panelBlur"></div>
 
-<!-- Welcome card -->
-<div id="welcomeWrapper">
-  <div class="card">
-    <h2 id="welcomeText">Welcome</h2>
-    <div class="subtext" id="welcomeSubtext">Use the menu to navigate</div>
-  </div>
-</div>
-
-<!-- Scroll down text -->
-<div id="scrollText">Scroll down for more info</div>
-
-<!-- Scroll cards container -->
-<div id="cardsContainer">
-  <div class="scroll-card">🚀 Cool feature 1: Fast, responsive design</div>
-  <div class="scroll-card">💡 Tip: Use the menu to quickly access sections</div>
-  <div class="scroll-card">🎨 Design: Radial gradient background + smooth animations</div>
-</div>
-
-<!-- Profile pic top-right -->
+<!-- Profile -->
 <div id="profilePic"></div>
 <div id="profilePanel">
   <h4 id="profileName">Username</h4>
@@ -289,93 +234,117 @@ body.menu-open .blur-layer {
   <button class="primary" onclick="confirmLogout()">Logout</button>
 </div>
 
+<!-- Welcome -->
+<div id="welcomeWrapper">
+  <div class="card">
+    <h2 id="welcomeText">Welcome</h2>
+    <div class="subtext" id="welcomeSubtext">Use the menu to navigate</div>
+  </div>
+</div>
+
+<!-- Scroll down prompt -->
+<div id="scrollText">Scroll down for more info</div>
+
+<!-- Scroll cards container -->
+<div id="cardsContainer">
+  <div class="scroll-card">🚀 Cool feature 1: Fast, responsive design</div>
+  <div class="scroll-card">💡 Tip: Use the menu to quickly access sections</div>
+  <div class="scroll-card">🎨 Design: Radial gradient background + smooth animations</div>
+  <div class="scroll-card">⚡ Optimized for mobile & desktop</div>
+  <div class="scroll-card">🔒 Secure login & user management</div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app",
-  messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41",
-  measurementId: "G-1MMT3C4M7K"
-};
-const app = initializeApp(firebaseConfig);
+/* Firebase */
+const app = initializeApp({
+  apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain:"login-34954.firebaseapp.com",
+  projectId:"login-34954"
+});
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const welcomeSubtext = document.getElementById("welcomeSubtext");
-const scrollCards = document.querySelectorAll(".scroll-card");
-const profilePic = document.getElementById("profilePic");
-const profilePanel = document.getElementById("profilePanel");
-const profileName = document.getElementById("profileName");
+/* Elements */
+const welcomeSubtext=document.getElementById("welcomeSubtext");
+const profilePic=document.getElementById("profilePic");
+const profilePanel=document.getElementById("profilePanel");
+const profileName=document.getElementById("profileName");
+const scrollCards=document.querySelectorAll(".scroll-card");
+const menuBtn=document.getElementById("menuBtn");
+const sidePanel=document.getElementById("sidePanel");
+const panelBlur=document.getElementById("panelBlur");
+const sideTabs=document.querySelectorAll(".sideTab");
 
-/* Profile letter color */
-function stringToColor(str){
-  let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
-  let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
-  return color;
-}
+/* Show subtext after load */
+window.addEventListener("load",()=>{ setTimeout(()=>welcomeSubtext.style.opacity=1,500); });
 
-/* Auth check */
+/* Auth & PFP */
 onAuthStateChanged(auth, async user=>{
-  if(!user) location.replace("login.html");
-  let username = user.displayName;
-  if(!username){
-    const q=query(collection(db,"usernames"),where("uid","==",user.uid));
-    const snap=await getDocs(q);
-    username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
-  }
-  document.getElementById("welcomeText").textContent=`Welcome, ${username}`;
+  if(!user) location.href="login.html";
+  let username=user.displayName || user.email.split("@")[0];
   profileName.textContent=username;
-  welcomeSubtext.style.opacity=1;
+  profilePic.textContent=username[0].toUpperCase();
+  profilePic.style.backgroundColor=stringToColor(username);
+  profilePic.style.backgroundSize="contain";
+  profilePic.style.backgroundPosition="center";
 
-  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
+  const pfpDoc=await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
-    profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
-    profilePic.textContent = "";
-  } else {
-    profilePic.style.backgroundImage = "";
-    profilePic.textContent = username.charAt(0).toUpperCase();
-    profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
+    profilePic.style.backgroundImage=`url(${pfpDoc.data().data})`;
+    profilePic.textContent="";
   }
 });
+
+/* Helper */
+function stringToColor(str){
+  let hash=0; for(let c of str) hash=c.charCodeAt(0)+((hash<<5)-hash);
+  return `hsl(${hash%360},70%,50%)`;
+}
 
 /* Profile panel toggle */
 let panelOpen=false;
-profilePic.addEventListener("click", ()=>{
-  panelOpen=!panelOpen;
-  profilePanel.style.display=panelOpen?"flex":"none";
+profilePic.onclick=()=>{ panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none"; };
+
+/* Logout */
+function confirmLogout(){ if(confirm("Logout?")) signOut(auth).then(()=>location.href="login.html"); }
+function openSettings(){ location.href="settings.html"; }
+
+/* Side menu */
+menuBtn.onclick=()=>{ sidePanel.classList.add("show"); panelBlur.style.display="block"; menuBtn.style.display="none"; };
+sidePanel.querySelector(".closePanel").onclick=()=>{ sidePanel.classList.remove("show"); panelBlur.style.display="none"; menuBtn.style.display="flex"; };
+
+/* Tabs logic */
+sideTabs.forEach(tab=>{
+  tab.onclick=()=>{
+    const target=tab.dataset.target;
+    sidePanel.classList.remove("show");
+    panelBlur.style.display="none";
+    menuBtn.style.display="flex";
+    setTimeout(()=>{
+      if(target==="dashboard") location.href="dashboard.html";
+      else if(target==="settings") location.href="settings.html";
+      else if(target==="chat") location.href="chat.html";
+    },400);
+  };
 });
 
-/* Menu logic */
-const menuBtn = document.getElementById("menuBtn");
-const closeMenu = document.getElementById("closeMenu");
-menuBtn.onclick = () => document.body.classList.add("menu-open");
-closeMenu.onclick = () => document.body.classList.remove("menu-open");
-
-/* Tabs redirect after animation */
-document.getElementById("tabDashboard").onclick = () => document.body.classList.remove("menu-open");
-document.getElementById("tabSettings").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350);}
-document.getElementById("tabCommunicate").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="chat.html",350);}
-
-/* Scroll cards animation on scroll */
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      e.target.style.opacity=1;
-      e.target.style.transform="translateY(0)";
+/* Scroll animations */
+function animateOnScroll(){
+  scrollCards.forEach(card=>{
+    const rect=card.getBoundingClientRect();
+    if(rect.top < window.innerHeight - 100){
+      card.style.opacity=1;
+      card.style.transform="translateY(0)";
     }
   });
-},{threshold:0.1});
-scrollCards.forEach(c=>observer.observe(c));
+}
+window.addEventListener("scroll",animateOnScroll);
+animateOnScroll(); // in case some are already visible
 
-/* Logout/settings buttons */
-window.openSettings = ()=>location.href="settings.html";
-window.confirmLogout = ()=>{ if(confirm("Are you sure you want to logout?")) signOut(auth).then(()=>location.href="login.html"); };
 </script>
 </body>
 </html>
