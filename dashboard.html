@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 <link rel="icon" href="favicon.ico">
+
 <style>
 body {
   margin:0;
@@ -17,6 +18,7 @@ body {
   align-items:center;
   position:relative;
 }
+
 .card {
   width:90vw;
   max-width:400px;
@@ -27,9 +29,8 @@ body {
   box-shadow:0 20px 60px rgba(0,0,0,.4);
   text-align:center;
 }
-h2 { margin-bottom:20px; }
 
-/* Profile pic top-right */
+/* Profile pic */
 #profilePic {
   position:fixed;
   top:20px;
@@ -46,8 +47,9 @@ h2 { margin-bottom:20px; }
   cursor:pointer;
   user-select:none;
   z-index:100;
-  background-size:cover;
+  background-size:contain;
   background-position:center;
+  background-repeat:no-repeat;
 }
 
 /* Profile panel */
@@ -57,7 +59,7 @@ h2 { margin-bottom:20px; }
   right:20px;
   width:180px;
   background:rgba(12,25,55,.85);
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(10px);
   border-radius:14px;
   display:none;
   flex-direction:column;
@@ -65,14 +67,12 @@ h2 { margin-bottom:20px; }
   z-index:100;
 }
 #profilePanel h4 {
-  margin:0 0 8px 0;
-  font-size:1rem;
+  margin:0 0 8px;
   text-align:center;
-  border-bottom:1px solid rgba(255,255,255,0.2);
+  border-bottom:1px solid rgba(255,255,255,.2);
   padding-bottom:5px;
 }
 #profilePanel button {
-  width:100%;
   margin:5px 0;
   padding:10px;
   border:none;
@@ -83,11 +83,11 @@ h2 { margin-bottom:20px; }
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
 
-/* Overlay popups */
+/* Overlay */
 .overlay {
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.4);
+  background:rgba(0,0,0,.45);
   backdrop-filter:blur(6px);
   display:none;
   justify-content:center;
@@ -101,44 +101,34 @@ h2 { margin-bottom:20px; }
   padding:30px;
   border-radius:20px;
   text-align:center;
-  position:relative;
 }
-.close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.2rem; }
-.error { color:#ff6b6b; margin-top:10px; min-height:1.2em; text-align:left; }
+.close {
+  position:absolute;
+  top:10px;
+  right:15px;
+  cursor:pointer;
+}
 </style>
 </head>
+
 <body>
 
 <div class="card">
   <h2 id="welcomeText">Welcome</h2>
 </div>
 
-<!-- Profile pic top-right -->
 <div id="profilePic"></div>
+
 <div id="profilePanel">
-  <h4 id="profileName">Username</h4>
+  <h4 id="profileName"></h4>
   <button class="primary" onclick="openSettings()">Settings</button>
   <button class="primary" onclick="confirmLogout()">Logout</button>
 </div>
 
-<!-- REMOVE ACCOUNT POPUP -->
-<div class="overlay" id="removeOverlay">
-  <div class="popup">
-    <span class="close" onclick="closeRemoveAccount()">✕</span>
-    <h2>Remove Account</h2>
-    <p>Enter your password to confirm:</p>
-    <input type="password" id="removePassword" placeholder="Password">
-    <div class="error" id="removeError"></div>
-    <button class="remove" onclick="removeAccount()">Yes, Remove</button>
-  </div>
-</div>
-
-<!-- LOGOUT CONFIRM POPUP -->
 <div class="overlay" id="logoutOverlay">
   <div class="popup">
     <span class="close" onclick="closeLogout()">✕</span>
     <h2>Confirm Logout</h2>
-    <p>Are you sure you want to logout?</p>
     <button class="primary" onclick="logout()">Yes</button>
     <button class="remove" onclick="closeLogout()">No</button>
   </div>
@@ -146,119 +136,72 @@ h2 { margin-bottom:20px; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, query, collection, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-/* Firebase config */
-const firebaseConfig = {
+/* Firebase */
+const app = initializeApp({
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app",
-  messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41",
-  measurementId: "G-1MMT3C4M7K"
-};
-
-/* Init Firebase */
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+  projectId: "login-34954"
+});
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* Elements */
-const welcomeText = document.getElementById("welcomeText");
-const removeOverlay = document.getElementById("removeOverlay");
-const removePassword = document.getElementById("removePassword");
-const removeError = document.getElementById("removeError");
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
+const welcomeText = document.getElementById("welcomeText");
 const logoutOverlay = document.getElementById("logoutOverlay");
 
-/* Consistent color for user letter */
+/* Color */
 function stringToColor(str){
-  let hash=0;
-  for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash); }
-  let color='#';
-  for(let i=0;i<3;i++){
-    const value=(hash>>(i*8))&0xFF;
-    color+=('00'+value.toString(16)).slice(-2);
-  }
-  return color;
+  let h=0;
+  for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
+  return `hsl(${h%360},70%,50%)`;
 }
 
-/* Auth check */
-onAuthStateChanged(auth, async (user)=>{
+/* Auth */
+onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
-  let username = user.displayName;
-  if(!username){
-    const q=query(collection(db,"usernames"),where("uid","==",user.uid));
-    const snap=await getDocs(q);
-    if(!snap.empty) username=snap.docs[0].id;
-    else username=user.email.split("@")[0];
-  }
-  welcomeText.textContent=`Welcome, ${username}`;
-  profileName.textContent=username;
 
-  // Load PFP if saved
+  let username;
+  const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
+  username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+
+  welcomeText.textContent = `Welcome, ${username}`;
+  profileName.textContent = username;
+
+  // Default letter
+  profilePic.textContent = username[0].toUpperCase();
+  profilePic.style.backgroundColor = stringToColor(username);
+
+  // Load saved PFP
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
-    const pfpData = pfpDoc.data().data;
-    profilePic.style.backgroundImage = `url(${pfpData})`;
+    profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
     profilePic.textContent = "";
-  } else {
-    profilePic.style.backgroundImage = "";
-    profilePic.textContent = username.charAt(0).toUpperCase();
-    profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
   }
 });
 
-/* Toggle profile panel */
-let panelOpen=false;
-profilePic.addEventListener("click", ()=>{
-  panelOpen=!panelOpen;
-  profilePanel.style.display=panelOpen?"flex":"none";
-});
+/* Panel toggle */
+let open=false;
+profilePic.onclick=()=>{
+  open=!open;
+  profilePanel.style.display=open?"flex":"none";
+};
 
 /* Logout */
-window.confirmLogout=()=>{ logoutOverlay.style.display="flex"; };
-window.closeLogout=()=>{ logoutOverlay.style.display="none"; };
-window.logout=async ()=>{
+window.confirmLogout=()=>logoutOverlay.style.display="flex";
+window.closeLogout=()=>logoutOverlay.style.display="none";
+window.logout=async()=>{
   await signOut(auth);
   location.replace("login.html");
 };
 
-/* Remove Account */
-window.openRemoveAccount=()=>{
-  removeOverlay.style.display="flex";
-  removePassword.value="";
-  removeError.textContent="";
-};
-window.closeRemoveAccount=()=>{ removeOverlay.style.display="none"; };
-window.removeAccount=async ()=>{
-  const pass=removePassword.value;
-  removeError.textContent="";
-  if(!pass){ removeError.textContent="Enter password"; return; }
-  const user = auth.currentUser;
-  if(!user){ removeError.textContent="No user logged in"; return; }
-  try{
-    const cred = EmailAuthProvider.credential(user.email, pass);
-    await reauthenticateWithCredential(user,cred);
-
-    const q=query(collection(db,"usernames"),where("uid","==",user.uid));
-    const snap=await getDocs(q);
-    snap.forEach(async d=>await deleteDoc(doc(db,"usernames",d.id)));
-
-    await deleteUser(user);
-    location.replace("login.html");
-  }catch(e){ console.error(e); removeError.textContent=e.message; }
-};
-
-/* Open settings */
-window.openSettings=()=>{ location.replace("settings.html"); };
-
+window.openSettings=()=>location.replace("settings.html");
 </script>
+
 </body>
 </html>
