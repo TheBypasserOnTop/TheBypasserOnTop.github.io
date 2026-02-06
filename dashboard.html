@@ -89,7 +89,7 @@ body.menu-open .blur-layer {
   pointer-events:none;
 }
 
-/* Welcome */
+/* Welcome section */
 #welcomeWrapper {
   min-height:80vh;
   display:flex;
@@ -98,12 +98,19 @@ body.menu-open .blur-layer {
   align-items:center;
   z-index:10;
 }
+
+/* UPDATED welcome card */
 .card {
-  background:rgba(12,25,55,.65);
-  backdrop-filter:blur(16px);
-  padding:30px;
-  border-radius:20px;
-  margin-bottom:20px;
+  width:90%;
+  max-width:520px;            /* wider */
+  background:rgba(255,255,255,0.08); /* lighter */
+  backdrop-filter:blur(22px); /* stronger blur */
+  -webkit-backdrop-filter:blur(22px);
+  padding:36px;
+  border-radius:22px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
+  text-align:center;
+  margin-bottom:24px;
 }
 
 /* Scroll hint */
@@ -120,9 +127,9 @@ body.menu-open .blur-layer {
 /* Sliding cards */
 .scroll-card {
   width:90%;
-  max-width:350px;
+  max-width:360px;
   margin:60px auto;
-  padding:20px;
+  padding:22px;
   background:rgba(12,25,55,.7);
   border-radius:16px;
   opacity:0;
@@ -134,7 +141,7 @@ body.menu-open .blur-layer {
   transform:translateY(0);
 }
 
-/* ✅ PROFILE PIC */
+/* Profile pic */
 #profilePic {
   position:fixed;
   top:20px;
@@ -197,7 +204,7 @@ body.menu-open .blur-layer {
   </div>
   <div class="divider"></div>
   <div class="nav-tab active">Dashboard</div>
-  <div class="nav-tab" onclick="location.href='settings.html'">Settings</div>
+  <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
 </div>
 
 <div class="blur-layer"></div>
@@ -217,7 +224,7 @@ body.menu-open .blur-layer {
 
 <div id="profilePanel">
   <h4 id="profileName"></h4>
-  <button class="primary" onclick="location.href='settings.html'">Settings</button>
+  <button class="primary" onclick="navigateTo('settings.html')">Settings</button>
   <button class="primary" onclick="logout()">Logout</button>
 </div>
 
@@ -265,20 +272,30 @@ onAuthStateChanged(auth, async user=>{
   }
 });
 
+/* Profile panel */
 profilePic.onclick = () => {
   profilePanel.style.display =
     profilePanel.style.display === "flex" ? "none" : "flex";
 };
 
+/* Menu open/close */
 menuBtn.onclick = () => document.body.classList.add("menu-open");
 closeMenu.onclick = () => document.body.classList.remove("menu-open");
+
+/* ✅ Animated navigation */
+window.navigateTo = (page) => {
+  document.body.classList.remove("menu-open");
+  setTimeout(() => {
+    location.href = page;
+  }, 350);
+};
 
 window.logout = async () => {
   await signOut(auth);
   location.href="login.html";
 };
 
-/* Scroll animation */
+/* Scroll animations */
 const observer = new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(e.isIntersecting) e.target.classList.add("show");
