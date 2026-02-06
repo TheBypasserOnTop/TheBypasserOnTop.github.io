@@ -35,7 +35,7 @@ html, body {
   background:white;
   border-radius:4px;
 }
-body.menu-open #menuBtn {opacity:0;pointer-events:none;}
+body.menu-open #menuBtn { opacity:0; pointer-events:none; }
 
 /* Side panel */
 #sidePanel {
@@ -45,7 +45,6 @@ body.menu-open #menuBtn {opacity:0;pointer-events:none;}
   width:260px;
   height:100%;
   background:rgba(10,30,70,.95);
-  backdrop-filter:blur(18px);
   padding:20px;
   box-sizing:border-box;
   z-index:200;
@@ -60,11 +59,7 @@ body.menu-open #sidePanel { left:0; }
 }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
 
-.divider {
-  height:1px;
-  background:rgba(255,255,255,.2);
-  margin:15px 0;
-}
+.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
 
 .nav-tab {
   padding:12px;
@@ -74,14 +69,6 @@ body.menu-open #sidePanel { left:0; }
   font-weight:600;
 }
 .nav-tab.active { background:#4da3ff; color:black; }
-
-/* Blur layer */
-.blur-layer {
-  position:absolute;
-  inset:0;
-  z-index:5;
-}
-body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 
 /* Profile pic */
 #profilePic {
@@ -99,7 +86,7 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
   color:white;
   cursor:pointer;
   z-index:100;
-  background-size:cover;
+  background-size:contain;
   background-repeat:no-repeat;
   background-position:center;
 }
@@ -110,94 +97,107 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
   top:80px;
   right:20px;
   width:180px;
-  background:rgba(12,25,55,.85);
-  backdrop-filter:blur(10px);
+  background:rgba(12,25,55,.95);
   border-radius:14px;
   display:none;
   flex-direction:column;
   padding:10px;
   z-index:100;
 }
-#profilePanel h4 { text-align:center; margin:0 0 8px; }
-#profilePanel button { padding:10px; border:none; border-radius:10px; margin-top:5px; font-weight:600; cursor:pointer; }
+#profilePanel h4 {
+  text-align:center;
+  margin:0 0 8px;
+}
+#profilePanel button {
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  margin-top:5px;
+  font-weight:600;
+  cursor:pointer;
+}
 .primary { background:#4da3ff; color:black; }
 
-/* Page content */
-#mainContent {
-  padding:100px 20px 40px;
+/* Main container */
+.container {
+  width:90%;
   max-width:600px;
-  margin:0 auto;
-  z-index:10;
-  position:relative;
-}
-
-/* Proxy selection */
-#proxySelect { 
-  width:100%; 
-  padding:12px; 
-  border-radius:10px; 
-  border:none; 
-  font-size:1rem;
-  margin-top:10px;
-  z-index:20;
+  margin:100px auto 50px auto;
 }
 
 /* Generate button */
 #generateBtn {
-  margin-top:15px;
-  padding:12px;
-  width:100%;
-  font-weight:600;
-  border-radius:10px;
+  padding:12px 20px;
   border:none;
+  border-radius:10px;
   background:#4da3ff;
   color:black;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:20px;
+}
+
+/* Card */
+.link-card {
+  background:rgba(12,25,55,.9);
+  padding:12px 15px;
+  border-radius:14px;
+  margin-bottom:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.link-card span {
+  word-break:break-all;
+}
+
+.delete-btn {
+  background:#ff4c4c;
+  border:none;
+  padding:6px 10px;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* Overlay */
+.overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:200;
+}
+.overlay.show { display:flex; }
+.popup {
+  width:90%;
+  max-width:400px;
+  background:#0c1937;
+  padding:25px;
+  border-radius:18px;
+  text-align:left;
+}
+.popup .close {
+  float:right;
   cursor:pointer;
 }
-
-/* Progress bar */
-#progressContainer {
-  width:100%;
-  background:rgba(255,255,255,.15);
-  border-radius:10px;
+.popup button {
   margin-top:15px;
-  height:24px;
-  overflow:hidden;
-  display:none;
-}
-#progressBar {
-  width:0%;
-  height:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
   background:#4da3ff;
-  transition:width .1s linear;
+  color:black;
+  font-weight:600;
+  cursor:pointer;
 }
-
-/* Fake progress text */
-#progressText {
-  margin-top:10px;
-  font-family:monospace;
-  color:#cfd8f0;
-  min-height:24px;
-  z-index:10;
-}
-
-/* Generated links */
-#generatedSection {
-  margin-top:30px;
-}
-#generatedSection h3 {
-  margin-bottom:5px;
-}
-.generated-card {
-  background:rgba(12,25,55,.7);
-  padding:15px;
-  margin-top:12px;
-  border-radius:14px;
-}
-.generated-card .divider { margin:10px 0; height:1px; background:rgba(255,255,255,.2); }
-.generated-card button { margin-right:8px; padding:5px 10px; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
 </style>
 </head>
+
 <body>
 
 <div id="menuBtn"><span></span><span></span><span></span></div>
@@ -209,43 +209,32 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
     <div id="closeMenu">✕</div>
   </div>
   <div class="divider"></div>
-  <div class="nav-tab" onclick="navigateTo('dashboard.html')">Dashboard</div>
-  <div class="nav-tab active">Proxies</div>
-  <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
+  <div class="nav-tab" id="tabDashboard">Dashboard</div>
+  <div class="nav-tab active" id="tabProxies">Proxies</div>
+  <div class="nav-tab" id="tabSettings">Settings</div>
 </div>
-
-<div class="blur-layer"></div>
 
 <div id="profilePic"></div>
+
 <div id="profilePanel">
-  <h4 id="profileName"></h4>
-  <button class="primary" onclick="navigateTo('settings.html')">Settings</button>
-  <button class="primary" onclick="logout()">Logout</button>
+  <h4 id="panelUsername"></h4>
+  <button onclick="navigateTo('dashboard.html')">Dashboard</button>
+  <button onclick="navigateTo('proxies.html')">Proxies</button>
+  <button onclick="logout()">Logout</button>
 </div>
 
-<div id="mainContent">
-  <h2>Select a proxy</h2>
-  <select id="proxySelect">
-    <option value="" disabled selected>Select a proxy</option>
-    <option value="Rammerhead">Rammerhead</option>
-    <option value="Space">Space</option>
-    <option value="Shuttle">Shuttle</option>
-    <option value="Doge">Doge</option>
-    <option value="Bolt">Bolt</option>
-    <option value="Shadow">Shadow</option>
-    <option value="Ghost">Ghost</option>
-  </select>
-  <button id="generateBtn">Generate link</button>
+<div class="container">
+  <button id="generateBtn">Generate Link</button>
+  <div id="linksContainer"></div>
+</div>
 
-  <div id="progressContainer">
-    <div id="progressBar"></div>
-  </div>
-  <div id="progressText"></div>
-
-  <div id="generatedSection">
-    <h3>Generated Proxies</h3>
-    <div class="divider"></div>
-    <div id="generatedLinksContainer"></div>
+<!-- Delete confirmation overlay -->
+<div class="overlay" id="deleteOverlay">
+  <div class="popup">
+    <span class="close">✕</span>
+    <h3>Delete Link?</h3>
+    <p>Are you sure you want to permanently delete this link?</p>
+    <button id="confirmDeleteBtn">Yes, Delete</button>
   </div>
 </div>
 
@@ -255,160 +244,133 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954"
+  apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain:"login-34954.firebaseapp.com",
+  projectId:"login-34954"
 });
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
-const profileName = document.getElementById("profileName");
-const proxySelect = document.getElementById("proxySelect");
+const panelUsername = document.getElementById("panelUsername");
 const generateBtn = document.getElementById("generateBtn");
-const progressContainer = document.getElementById("progressContainer");
-const progressBar = document.getElementById("progressBar");
-const progressText = document.getElementById("progressText");
-const generatedLinksContainer = document.getElementById("generatedLinksContainer");
+const linksContainer = document.getElementById("linksContainer");
+const deleteOverlay = document.getElementById("deleteOverlay");
+const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 
-function stringToColor(str){
-  let h=0;
-  for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
+let links = JSON.parse(localStorage.getItem("generatedLinks") || "[]");
+let cooldown = false;
+let cooldownSeconds = 20;
+let deleteIndex = null;
+
+// Function to render all links
+function renderLinks(){
+  linksContainer.innerHTML = "";
+  links.forEach((link,i)=>{
+    const card = document.createElement("div");
+    card.className="link-card";
+    const span = document.createElement("span");
+    span.textContent = link;
+    const delBtn = document.createElement("button");
+    delBtn.className="delete-btn";
+    delBtn.textContent="Delete";
+    delBtn.onclick=()=>{ deleteIndex=i; deleteOverlay.classList.add("show"); };
+    card.appendChild(span);
+    card.appendChild(delBtn);
+    linksContainer.appendChild(card);
+  });
+}
+renderLinks();
+
+// Generate link function
+function generateLink(){
+  if(cooldown) return;
+  const link = "https://example.com/"+Math.random().toString(36).substring(2,10);
+  links.push(link);
+  localStorage.setItem("generatedLinks",JSON.stringify(links));
+  renderLinks();
+  startCooldown();
+}
+
+// Cooldown function
+function startCooldown(){
+  cooldown = true;
+  let sec = cooldownSeconds;
+  generateBtn.disabled=true;
+  generateBtn.style.background="gray";
+  const interval = setInterval(()=>{
+    generateBtn.textContent=`Cooldown (${sec}s)`;
+    sec--;
+    if(sec<0){
+      clearInterval(interval);
+      cooldown=false;
+      generateBtn.disabled=false;
+      generateBtn.textContent="Generate Link";
+      generateBtn.style.background="#4da3ff";
+    }
+  },1000);
+}
+
+// Confirm delete
+confirmDeleteBtn.onclick=()=>{
+  links.splice(deleteIndex,1);
+  localStorage.setItem("generatedLinks",JSON.stringify(links));
+  renderLinks();
+  deleteOverlay.classList.remove("show");
+};
+
+// Close overlay
+deleteOverlay.querySelector(".close").onclick=()=>deleteOverlay.classList.remove("show");
+
+// Generate button
+generateBtn.onclick=generateLink;
+
+/* Profile */
+function colorFrom(str){
+  let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
   return `hsl(${h%360},70%,50%)`;
 }
 
-// ==== PFP & Name EXACT dashboard logic ====
 onAuthStateChanged(auth, async user=>{
-  if(!user) location.replace("login.html");
-
+  if(!user) location.href="login.html";
   const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
   const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+  panelUsername.textContent=username;
+  profilePic.textContent=username[0].toUpperCase();
+  profilePic.style.background=colorFrom(username);
 
-  profileName.textContent = username;
-  profilePic.textContent = username[0].toUpperCase();
-  profilePic.style.backgroundColor = stringToColor(username);
-  profilePic.style.backgroundImage = "";
-
-  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
-  if(pfpDoc.exists() && pfpDoc.data().data){
-    profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
-    profilePic.textContent = "";
+  const pfp=await getDoc(doc(db,"userPFPs",user.uid));
+  if(pfp.exists() && pfp.data().data){
+    profilePic.style.backgroundImage=`url(${pfp.data().data})`;
+    profilePic.textContent="";
   }
 });
 
-// Profile panel toggle
-profilePic.onclick = () => {
-  profilePanel.style.display =
-    profilePanel.style.display === "flex" ? "none" : "flex";
-};
+/* Profile menu */
+profilePic.onclick=()=>profilePanel.style.display =
+  profilePanel.style.display==="flex"?"none":"flex";
 
-// Menu open/close
-menuBtn.onclick = () => document.body.classList.add("menu-open");
-closeMenu.onclick = () => document.body.classList.remove("menu-open");
+/* Menu */
+const menuBtn=document.getElementById("menuBtn");
+const closeMenu=document.getElementById("closeMenu");
+menuBtn.onclick=()=>document.body.classList.add("menu-open");
+closeMenu.onclick=()=>document.body.classList.remove("menu-open");
 
-// Navigation
-window.navigateTo = page => {
+/* Tabs */
+document.getElementById("tabDashboard").onclick=()=>{
   document.body.classList.remove("menu-open");
-  setTimeout(()=>location.href=page,350);
+  setTimeout(()=>location.href="dashboard.html",350);
 };
-window.logout = async () => { await signOut(auth); location.href="login.html"; };
-
-// LocalStorage for generated links and cooldown
-let generatedLinks = JSON.parse(localStorage.getItem("generatedLinks")||"[]");
-let lastGenerated = parseInt(localStorage.getItem("lastGenerated")||0);
-
-function saveLinks() {
-  localStorage.setItem("generatedLinks", JSON.stringify(generatedLinks));
-}
-
-function renderGeneratedLinks(){
-  generatedLinksContainer.innerHTML="";
-  generatedLinks.forEach(item=>{
-    const card = document.createElement("div");
-    card.className="generated-card";
-    card.innerHTML=`
-      <h4>${item.name}</h4>
-      <div class="divider"></div>
-      <p>${item.link}</p>
-      <button data-type="up" ${item.voted?"disabled":""}>👍 ${item.up||0}</button>
-      <button data-type="down" ${item.voted?"disabled":""}>👎 ${item.down||0}</button>
-    `;
-    const upBtn = card.querySelector("button[data-type='up']");
-    const downBtn = card.querySelector("button[data-type='down']");
-    upBtn.onclick = ()=>vote(item.link,"up",card);
-    downBtn.onclick = ()=>vote(item.link,"down",card);
-    generatedLinksContainer.appendChild(card);
-  });
-}
-renderGeneratedLinks();
-
-function vote(link,type,card){
-  const item = generatedLinks.find(i=>i.link===link);
-  if(item.voted) return;
-  if(type==="up"){item.up=(item.up||0)+1;}
-  else{item.down=(item.down||0)+1;}
-  item.voted=true;
-  saveLinks();
-  renderGeneratedLinks();
-}
-
-// Generate logic
-generateBtn.onclick = async ()=>{
-  const now = Date.now();
-  if(now - lastGenerated < 10000){
-    progressText.textContent="Please wait for cooldown";
-    return;
-  }
-  const selected = proxySelect.value;
-  if(!selected) return alert("Select a proxy");
-
-  lastGenerated=now;
-  localStorage.setItem("lastGenerated",lastGenerated);
-  progressContainer.style.display="block";
-  progressBar.style.width="0%";
-  progressText.textContent="";
-
-  const fakeTexts = [
-    "Searching for proxies...",
-    "Clearing cookies and data...",
-    "Connecting to server...",
-    "Initializing...",
-    "Reaching-13.zaq...",
-    "shrjw.aj...",
-  ];
-
-  let progress=0;
-  let textIndex=0;
-  const interval = setInterval(()=>{
-    progress+=Math.random()*5; 
-    if(progress>100) progress=100;
-    progressBar.style.width=progress+"%";
-    if(progress>=textIndex*20 && textIndex<fakeTexts.length){
-      progressText.textContent=fakeTexts[textIndex];
-      textIndex++;
-    }
-    if(progress>=100){
-      clearInterval(interval);
-      // Fake stock check (simulate)
-      const stockLinks = [
-        "https://proxy1.com/"+selected,
-        "https://proxy2.com/"+selected,
-        "https://proxy3.com/"+selected
-      ]; 
-      const inStock = Math.random()>0.3;
-      if(!inStock){
-        progressText.textContent="Failed to generate: no stock";
-      }else{
-        progressText.textContent="Successfully generated";
-        const link = stockLinks[Math.floor(Math.random()*stockLinks.length)];
-        generatedLinks.unshift({name:selected,link:link});
-        saveLinks();
-        renderGeneratedLinks();
-      }
-    }
-  },200);
+document.getElementById("tabSettings").onclick=()=>{
+  document.body.classList.remove("menu-open");
+  setTimeout(()=>location.href="settings.html",350);
 };
+
+/* Logout */
+function logout(){ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); }
+
 </script>
+
 </body>
 </html>
