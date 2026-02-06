@@ -1,1 +1,310 @@
-whatt
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat</title>
+<link rel="icon" href="favicon.ico">
+<style>
+html, body {
+  margin:0;
+  padding:0;
+  min-height:100%;
+  font-family:system-ui,sans-serif;
+  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
+  color:#e6f0ff;
+  overflow-x:hidden;
+}
+
+/* Hamburger menu */
+#menuBtn {
+  position:fixed;
+  top:20px;
+  left:20px;
+  width:32px;
+  height:24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  cursor:pointer;
+  z-index:150;
+  transition:opacity .3s, transform .3s;
+}
+#menuBtn span {
+  height:4px;
+  background:white;
+  border-radius:4px;
+}
+body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
+
+/* Side panel */
+#sidePanel {
+  position:fixed;
+  top:0;
+  left:-300px;
+  width:260px;
+  height:100%;
+  background:rgba(12,25,55,.95);
+  backdrop-filter:blur(16px);
+  padding:20px;
+  box-sizing:border-box;
+  z-index:200;
+  transition:left .35s ease;
+  display:flex;
+  flex-direction:column;
+}
+body.menu-open #sidePanel { left:0; }
+
+/* Side panel header */
+#sidePanelHeader {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+#sidePanelHeader h3 { margin:0 auto; }
+#closeMenu { cursor:pointer; font-size:1.4rem; }
+
+/* Divider */
+.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
+
+/* Search */
+#navSearch {
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,.08);
+  color:white;
+  margin-bottom:15px;
+}
+
+/* Tabs */
+.nav-tab {
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  margin-bottom:8px;
+  font-weight:600;
+}
+.nav-tab.active { background:#4da3ff; color:black; }
+.nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
+
+/* Blur layer */
+.blur-layer {
+  position:absolute;
+  inset:0;
+  z-index:5;
+}
+body.menu-open .blur-layer {
+  backdrop-filter: blur(8px);
+  pointer-events:none;
+}
+
+/* Top-right PFP */
+#profilePic {
+  position:fixed;
+  top:20px;
+  right:20px;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  font-size:1.3rem;
+  color:white;
+  cursor:pointer;
+  user-select:none;
+  z-index:100;
+  background-size:cover;
+  background-position:center;
+}
+
+/* Profile panel */
+#profilePanel {
+  position:fixed;
+  top:80px;
+  right:20px;
+  width:180px;
+  background:rgba(12,25,55,.85);
+  backdrop-filter:blur(8px);
+  border-radius:14px;
+  display:none;
+  flex-direction:column;
+  padding:10px;
+  z-index:100;
+}
+#profilePanel h4 {
+  margin:0 0 8px 0;
+  font-size:1rem;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+  padding-bottom:5px;
+}
+#profilePanel button {
+  width:100%;
+  margin:5px 0;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+.primary { background:#4da3ff; color:black; }
+.remove { background:#ff4c4c; color:white; }
+
+/* Chat container */
+#chatContainer {
+  margin-top:100px;
+  width:90%;
+  max-width:600px;
+  margin-left:auto;
+  margin-right:auto;
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+/* Example chat message */
+.chat-message {
+  padding:10px 15px;
+  background:rgba(12,25,55,.7);
+  border-radius:15px;
+  max-width:75%;
+  word-wrap:break-word;
+}
+
+/* Overlay popups for logout */
+.overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(6px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:200;
+}
+.popup {
+  width:90vw;
+  max-width:400px;
+  background:#0c1937;
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+  position:relative;
+}
+.close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.2rem; }
+</style>
+</head>
+<body>
+
+<!-- Hamburger menu -->
+<div id="menuBtn"><span></span><span></span><span></span></div>
+<div id="sidePanel">
+  <div id="sidePanelHeader">
+    <div></div>
+    <h3>Navigation</h3>
+    <div id="closeMenu">✕</div>
+  </div>
+  <div class="divider"></div>
+  <input id="navSearch" placeholder="Search...">
+  <div class="nav-tab" id="tabDashboard">Dashboard</div>
+  <div class="nav-tab active" id="tabCommunicate">Communicate</div>
+  <div class="nav-tab" id="tabSettings">Settings</div>
+</div>
+<div class="blur-layer"></div>
+
+<!-- Chat area -->
+<div id="chatContainer">
+  <div class="chat-message">Welcome to the chat!</div>
+</div>
+
+<!-- Profile pic top-right -->
+<div id="profilePic"></div>
+<div id="profilePanel">
+  <h4 id="profileName">Username</h4>
+  <button class="primary" onclick="openSettings()">Settings</button>
+  <button class="primary" onclick="confirmLogout()">Logout</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain: "login-34954.firebaseapp.com",
+  projectId: "login-34954",
+  storageBucket: "login-34954.firebasestorage.app",
+  messagingSenderId: "422184727508",
+  appId: "1:422184727508:web:cef39fc913d526febe9c41",
+  measurementId: "G-1MMT3C4M7K"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* Elements */
+const profilePic = document.getElementById("profilePic");
+const profilePanel = document.getElementById("profilePanel");
+const profileName = document.getElementById("profileName");
+
+/* Profile pic letter color */
+function stringToColor(str){
+  let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
+  let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
+  return color;
+}
+
+/* Auth check */
+onAuthStateChanged(auth, async user=>{
+  if(!user) location.replace("login.html");
+  let username = user.displayName;
+  if(!username){
+    const q=query(collection(db,"usernames"),where("uid","==",user.uid));
+    const snap=await getDocs(q);
+    username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+  }
+  profileName.textContent=username;
+
+  // Profile pic
+  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
+  if(pfpDoc.exists() && pfpDoc.data().data){
+    profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
+    profilePic.textContent = "";
+  } else {
+    profilePic.style.backgroundImage = "";
+    profilePic.textContent = username.charAt(0).toUpperCase();
+    profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
+  }
+});
+
+/* Profile panel toggle */
+let panelOpen=false;
+profilePic.addEventListener("click", ()=>{
+  panelOpen=!panelOpen;
+  profilePanel.style.display=panelOpen?"flex":"none";
+});
+
+/* Menu logic */
+const menuBtn = document.getElementById("menuBtn");
+const closeMenu = document.getElementById("closeMenu");
+const sidePanel = document.getElementById("sidePanel");
+menuBtn.onclick = () => document.body.classList.add("menu-open");
+closeMenu.onclick = () => document.body.classList.remove("menu-open");
+
+/* Tabs */
+document.getElementById("tabDashboard").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="dashboard.html",350);}
+document.getElementById("tabSettings").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350);}
+document.getElementById("tabCommunicate").onclick = () => document.body.classList.remove("menu-open");
+
+/* Logout/settings buttons */
+window.openSettings = ()=>location.href="settings.html";
+window.confirmLogout = ()=>{ if(confirm("Are you sure you want to logout?")) signOut(auth).then(()=>location.href="login.html"); };
+</script>
+
+</body>
+</html>
