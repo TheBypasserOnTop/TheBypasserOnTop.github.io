@@ -7,238 +7,74 @@
 <link rel="icon" href="favicon.ico">
 <style>
 html, body {
-  margin:0;
-  padding:0;
+  margin:0; padding:0;
   min-height:100%;
   font-family:system-ui,sans-serif;
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   color:#e6f0ff;
   overflow:hidden;
-  position:relative;
 }
 
 /* Hamburger menu */
-#menuBtn {
-  position:fixed;
-  top:20px;
-  left:20px;
-  width:32px;
-  height:24px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  cursor:pointer;
-  z-index:150;
-  transition:opacity .3s, transform .3s;
-}
-#menuBtn span {
-  height:4px;
-  background:white;
-  border-radius:4px;
-}
+#menuBtn { position:fixed; top:20px; left:20px; width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; z-index:150; transition:opacity .3s, transform .3s; }
+#menuBtn span { height:4px; background:white; border-radius:4px; }
 body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
 
 /* Side panel */
-#sidePanel {
-  position:fixed;
-  top:0;
-  left:-300px;
-  width:260px;
-  height:100%;
-  background:rgba(12,25,55,.95);
-  backdrop-filter:blur(16px);
-  padding:20px;
-  box-sizing:border-box;
-  z-index:200;
-  transition:left .35s ease;
-  display:flex;
-  flex-direction:column;
-}
+#sidePanel { position:fixed; top:0; left:-300px; width:260px; height:100%; background:rgba(12,25,55,.95); backdrop-filter:blur(16px); padding:20px; box-sizing:border-box; z-index:200; transition:left .35s ease; display:flex; flex-direction:column; }
 body.menu-open #sidePanel { left:0; }
 
 /* Side panel header */
-#sidePanelHeader {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+#sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
 #sidePanelHeader h3 { margin:0 auto; }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
-
-/* Divider */
 .divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
-
-/* Search */
-#navSearch {
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  background:rgba(255,255,255,.08);
-  color:white;
-  margin-bottom:15px;
-}
-
-/* Tabs */
-.nav-tab {
-  padding:12px;
-  border-radius:10px;
-  cursor:pointer;
-  margin-bottom:8px;
-  font-weight:600;
-}
+#navSearch { padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,.08); color:white; margin-bottom:15px; }
+.nav-tab { padding:12px; border-radius:10px; cursor:pointer; margin-bottom:8px; font-weight:600; }
 .nav-tab.active { background:#4da3ff; color:black; }
 .nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
 
 /* Blur layer */
-.blur-layer {
-  position:absolute;
-  inset:0;
-  z-index:5;
-}
-body.menu-open .blur-layer {
-  backdrop-filter: blur(8px);
-  pointer-events:none;
-}
+.blur-layer { position:absolute; inset:0; z-index:5; }
+body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 
-/* Top-right PFP */
-#profilePic {
-  position:fixed;
-  top:20px;
-  right:20px;
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-weight:bold;
-  font-size:1.3rem;
-  color:white;
-  cursor:pointer;
-  user-select:none;
-  z-index:100;
-  background-size:cover;
-  background-position:center;
-}
+/* Profile picture top-right */
+#profilePic { position:fixed; top:20px; right:20px; width:50px; height:50px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:1.3rem; color:white; cursor:pointer; user-select:none; z-index:100; background-size:cover; background-position:center; }
 
 /* Profile panel */
-#profilePanel {
-  position:fixed;
-  top:80px;
-  right:20px;
-  width:180px;
-  background:rgba(12,25,55,.85);
-  backdrop-filter:blur(8px);
-  border-radius:14px;
-  display:none;
-  flex-direction:column;
-  padding:10px;
-  z-index:100;
-}
-#profilePanel h4 {
-  margin:0 0 8px 0;
-  font-size:1rem;
-  text-align:center;
-  border-bottom:1px solid rgba(255,255,255,0.2);
-  padding-bottom:5px;
-}
-#profilePanel button {
-  width:100%;
-  margin:5px 0;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  font-weight:600;
-  cursor:pointer;
-}
+#profilePanel { position:fixed; top:80px; right:20px; width:180px; background:rgba(12,25,55,.85); backdrop-filter:blur(8px); border-radius:14px; display:none; flex-direction:column; padding:10px; z-index:100; }
+#profilePanel h4 { margin:0 0 8px 0; font-size:1rem; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px; }
+#profilePanel button { width:100%; margin:5px 0; padding:10px; border:none; border-radius:10px; font-weight:600; cursor:pointer; }
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
 
 /* Chat container */
-#chatWrapper {
-  position:absolute;
-  top:0;
-  bottom:60px;
-  left:0;
-  right:0;
-  overflow-y:auto;
-  padding:80px 15px 0 15px;
-  box-sizing:border-box;
-}
-.chat-header {
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  background:rgba(12,25,55,.85);
-  backdrop-filter:blur(10px);
-  height:60px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:600;
-  font-size:1.2rem;
-  z-index:120;
-  border-bottom:1px solid rgba(255,255,255,0.2);
-}
+#chatWrapper { position:absolute; top:80px; bottom:70px; left:0; right:0; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
 
-/* Messages */
-.message {
-  display:flex;
-  align-items:flex-start;
-  margin-bottom:15px;
-}
+/* Chat message */
+.message { display:flex; gap:10px; align-items:flex-start; }
 .message.owner { flex-direction:row-reverse; }
-.message .msgContent {
-  max-width:70%;
-  background:rgba(12,25,55,.7);
-  padding:12px;
-  border-radius:12px;
-  position:relative;
-}
-.message.owner .msgContent { background:#4da3ff; color:black; }
-.msgContent .username { font-weight:600; font-size:0.85rem; margin-bottom:3px; }
-.msgContent .time { font-size:0.7rem; color:#ccc; margin-top:5px; }
-.msgContent .edited { font-size:0.65rem; color:#ffda6b; }
-.message .pfp { width:35px; height:35px; border-radius:50%; margin-right:8px; background-size:cover; background-position:center; flex-shrink:0; }
-.message.owner .pfp { margin-left:8px; margin-right:0; }
-.message .actions { display:flex; gap:5px; margin-top:5px; font-size:0.7rem; }
-.message .actions button { cursor:pointer; border:none; padding:2px 6px; border-radius:5px; font-size:0.7rem; }
-.message .replyPreview { font-size:0.75rem; color:#cfd8f0; background:rgba(255,255,255,0.1); padding:4px 6px; border-radius:6px; margin-bottom:3px; }
+.message .pfp { width:40px; height:40px; border-radius:50%; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; flex-shrink:0; }
+.msgContent { max-width:70%; background:rgba(12,25,55,.7); padding:10px; border-radius:12px; display:flex; flex-direction:column; }
+.msgContent .username { font-weight:600; font-size:0.85rem; }
+.msgContent .time { font-size:0.7rem; color:#aaa; margin-top:4px; }
+.msgContent .edited { font-size:0.65rem; color:#aaa; }
+.msgContent .replyPreview { font-size:0.75rem; color:#ccc; background:rgba(255,255,255,.05); padding:4px 6px; border-radius:6px; margin-bottom:4px; }
+.actions { display:flex; gap:5px; margin-top:4px; }
+.actions button { font-size:0.65rem; padding:2px 6px; border-radius:4px; cursor:pointer; background:rgba(255,255,255,.1); border:none; color:white; }
 
-/* Input bar */
-#chatInputWrapper {
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  display:flex;
-  padding:5px 10px;
-  background:rgba(12,25,55,.85);
-  backdrop-filter:blur(10px);
-  gap:5px;
-  z-index:100;
-}
-#replyPreview {
-  flex:1 1 100%;
-  background:rgba(255,255,255,0.1);
-  padding:5px 10px;
-  border-radius:8px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  font-size:0.8rem;
-  margin-bottom:5px;
-}
-#replyPreview span { font-size:0.8rem; }
-#cancelReply { cursor:pointer; font-weight:600; }
-#chatInput { flex:1; padding:10px; border-radius:10px; border:none; }
-#sendBtn { padding:0 12px; border-radius:10px; border:none; cursor:pointer; font-size:1.1rem; }
+/* Input area */
+#inputWrapper { position:fixed; bottom:0; left:0; right:0; display:flex; gap:6px; padding:10px; background:rgba(12,25,55,.95); backdrop-filter:blur(16px); }
+#replyPreview { display:none; background:rgba(255,255,255,.05); color:white; padding:4px 6px; border-radius:6px; font-size:0.8rem; width:100%; justify-content:space-between; align-items:center; display:flex; }
+#replyPreview button { background:#ff4c4c; border:none; padding:2px 6px; border-radius:4px; cursor:pointer; font-size:0.7rem; color:white; }
+#messageInput { flex:1; padding:10px; border-radius:12px; border:none; background:rgba(255,255,255,.08); color:white; }
+#sendBtn { padding:10px 12px; border-radius:12px; border:none; background:#4da3ff; color:black; cursor:pointer; font-weight:600; }
+
 </style>
 </head>
 <body>
 
-<!-- Menu -->
+<!-- Hamburger menu -->
 <div id="menuBtn"><span></span><span></span><span></span></div>
 <div id="sidePanel">
   <div id="sidePanelHeader"><div></div><h3>Navigation</h3><div id="closeMenu">✕</div></div>
@@ -250,31 +86,29 @@ body.menu-open .blur-layer {
 </div>
 <div class="blur-layer"></div>
 
-<!-- Profile pic -->
+<!-- Profile -->
 <div id="profilePic"></div>
-<div id="profilePanel">
-  <h4 id="profileName">Username</h4>
-  <button class="primary" onclick="location.href='settings.html'">Settings</button>
-  <button class="primary" onclick="confirmLogout()">Logout</button>
-</div>
+<div id="profilePanel"><h4 id="profileName">Username</h4><button class="primary" onclick="openSettings()">Settings</button><button class="primary" onclick="confirmLogout()">Logout</button></div>
 
 <!-- Chat header -->
-<div class="chat-header">Chat</div>
+<div class="card" style="position:fixed;top:80px;left:50%;transform:translateX(-50%);width:90%;max-width:420px;text-align:center;z-index:50;">Chat</div>
 
-<!-- Messages -->
+<!-- Chat messages -->
 <div id="chatWrapper"></div>
 
 <!-- Reply preview -->
-<div id="chatInputWrapper">
-  <div id="replyPreview" style="display:none;"><span id="replyText"></span><span id="cancelReply">✕</span></div>
-  <input type="text" id="chatInput" placeholder="Type here..">
+<div id="replyPreview"><span id="replyText"></span><button id="cancelReply">Cancel</button></div>
+
+<!-- Input -->
+<div id="inputWrapper">
+  <input id="messageInput" placeholder="Type here..">
   <button id="sendBtn">➤</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -282,131 +116,114 @@ const firebaseConfig = {
   authDomain: "login-34954.firebaseapp.com",
   projectId: "login-34954"
 };
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* Elements */
 const chatWrapper = document.getElementById("chatWrapper");
-const chatInput = document.getElementById("chatInput");
+const messageInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 const replyPreview = document.getElementById("replyPreview");
 const replyText = document.getElementById("replyText");
-const cancelReply = document.getElementById("cancelReply");
 let replyingTo = null;
-let canSend = true;
+let username="", pfp="", uid="";
 
-/* User info */
-let username="", pfp="";
-const profileNameEl = document.getElementById("profileName");
-const profilePicEl = document.getElementById("profilePic");
+function stringToColor(str){let h=0; for(let i=0;i<str.length;i++){ h=str.charCodeAt(i)+((h<<5)-h);} let color='#'; for(let i=0;i<3;i++){ color+=('00'+((h>>(i*8))&0xFF).toString(16)).slice(-2);} return color;}
 
-function stringToColor(str){
-  let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
-  let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
-  return color;
-}
-
-/* Auth & Firestore sync */
+// Auth + user info
 onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
+  uid = user.uid;
 
   // Username
-  const userSnap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
-  username = !userSnap.empty ? userSnap.docs[0].id : user.email.split("@")[0];
-  profileNameEl.textContent = username;
+  const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",uid)));
+  username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+  document.getElementById("profileName").textContent = username;
 
   // PFP
-  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
+  const pfpDoc = await getDoc(doc(db,"userPFPs",uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
     pfp = pfpDoc.data().data;
-    profilePicEl.style.backgroundImage = `url(${pfp})`;
-    profilePicEl.textContent="";
+    document.getElementById("profilePic").style.backgroundImage = `url(${pfp})`;
+    document.getElementById("profilePic").textContent = "";
   } else {
-    profilePicEl.style.backgroundImage="";
-    profilePicEl.textContent = username.charAt(0).toUpperCase();
-    profilePicEl.style.backgroundColor = stringToColor(username.toLowerCase());
+    pfp = null;
+    document.getElementById("profilePic").textContent = username.charAt(0).toUpperCase();
+    document.getElementById("profilePic").style.backgroundColor = stringToColor(username.toLowerCase());
   }
 
   loadMessages();
 });
 
-/* Menu logic */
+// Menu logic
 const menuBtn = document.getElementById("menuBtn");
 const closeMenu = document.getElementById("closeMenu");
 menuBtn.onclick = () => document.body.classList.add("menu-open");
 closeMenu.onclick = () => document.body.classList.remove("menu-open");
-document.getElementById("tabDashboard").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=> location.href="dashboard.html",350);}
-document.getElementById("tabSettings").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=> location.href="settings.html",350);}
+document.getElementById("tabDashboard").onclick = ()=>{ document.body.classList.remove("menu-open"); setTimeout(()=>location.href="dashboard.html",350);}
+document.getElementById("tabSettings").onclick = ()=>{ document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350);}
 
-/* Profile panel */
-let panelOpen=false;
-profilePicEl.addEventListener("click", ()=>{
-  panelOpen=!panelOpen;
-  document.getElementById("profilePanel").style.display=panelOpen?"flex":"none";
-});
-window.confirmLogout = ()=>{ if(confirm("Logout?")) auth.signOut().then(()=>location.href="login.html"); };
+// Logout/settings
+window.openSettings = ()=>location.href="settings.html";
+window.confirmLogout = ()=>{ if(confirm("Logout?")) signOut(auth).then(()=>location.href="login.html"); };
 
-/* Send message */
+// Send message
+let cooldown = false;
 sendBtn.onclick = async ()=>{
-  const text = chatInput.value.trim();
-  if(!text || !canSend) return;
-  canSend=false;
-  setTimeout(()=>canSend=true,2000);
-
-  const msgData = {
-    text,
-    uid:auth.currentUser.uid,
-    username,
-    pfp,
-    timestamp:new Date(),
-    replyTo: replyingTo ? replyingTo.id : null,
-    edited:false,
-    deleted:false
-  };
+  if(cooldown) return;
+  const text = messageInput.value.trim();
+  if(!text) return;
+  cooldown = true;
+  const msgData = { uid, username, text, timestamp:serverTimestamp() };
+  if(pfp) msgData.pfp = pfp;
+  if(replyingTo) msgData.replyTo = replyingTo.id;
   await addDoc(collection(db,"messages"), msgData);
-  chatInput.value="";
-  replyingTo=null;
-  replyPreview.style.display="none";
+  messageInput.value = "";
+  replyingTo = null;
+  replyPreview.style.display = "none";
+  setTimeout(()=>cooldown=false,2000);
 };
 
-/* Cancel reply */
-cancelReply.onclick = ()=>{ replyingTo=null; replyPreview.style.display="none"; };
+// Cancel reply
+document.getElementById("cancelReply").onclick = ()=>{ replyingTo=null; replyPreview.style.display="none"; };
 
-/* Load & render messages */
+// Load messages real-time
 function loadMessages(){
   const q = query(collection(db,"messages"), orderBy("timestamp"));
   onSnapshot(q, snapshot=>{
     chatWrapper.innerHTML="";
-    snapshot.forEach(docSnap=>{
+    snapshot.docs.forEach(docSnap=>{
       const data = docSnap.data();
-      const owner = data.uid === auth.currentUser.uid;
+      const owner = data.uid === uid;
       const msgEl = document.createElement("div");
-      msgEl.className="message"+(owner?" owner":"");
+      msgEl.className = "message"+(owner?" owner":"");
       msgEl.dataset.id = docSnap.id;
 
+      // PFP
       const pfpEl = document.createElement("div");
       pfpEl.className="pfp";
-      if(data.pfp) pfpEl.style.backgroundImage=`url(${data.pfp})`;
-      else { pfpEl.style.backgroundColor = stringToColor(data.username.toLowerCase()); pfpEl.textContent=data.username.charAt(0).toUpperCase();}
-      
+      if(data.pfp) pfpEl.style.backgroundImage = `url(${data.pfp})`;
+      else { pfpEl.style.backgroundColor = stringToColor(data.username.toLowerCase()); pfpEl.textContent = data.username.charAt(0).toUpperCase(); }
+
+      // Content
       const contentEl = document.createElement("div");
       contentEl.className="msgContent";
 
+      // Reply preview
       if(data.replyTo){
-        const replyData = snapshot.docs.find(d=>d.id===data.replyTo)?.data();
-        if(replyData){
+        const replyDoc = snapshot.docs.find(d => d.id === data.replyTo);
+        if(replyDoc){
+          const replyData = replyDoc.data();
           const replyEl = document.createElement("div");
           replyEl.className="replyPreview";
-          replyEl.textContent=`Replying to ${replyData.username}: ${replyData.text}`;
+          replyEl.textContent = `Replying to ${replyData.username}: ${replyData.text}`;
           contentEl.appendChild(replyEl);
         }
       }
 
       const unameEl = document.createElement("div");
       unameEl.className="username";
-      unameEl.textContent=data.username;
+      unameEl.textContent = data.username;
       contentEl.appendChild(unameEl);
 
       const textEl = document.createElement("div");
@@ -415,16 +232,19 @@ function loadMessages(){
 
       const timeEl = document.createElement("div");
       timeEl.className="time";
-      timeEl.textContent = new Date(data.timestamp.seconds*1000).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit'});
+      if(data.timestamp?.seconds){
+        timeEl.textContent = new Date(data.timestamp.seconds*1000).toLocaleTimeString('en-US', {timeZone:'America/New_York', hour:'2-digit', minute:'2-digit'});
+      }
       contentEl.appendChild(timeEl);
 
-      if(data.edited) {
+      if(data.edited){
         const editedEl = document.createElement("div");
         editedEl.className="edited";
-        editedEl.textContent="Edited";
+        editedEl.textContent = "Edited";
         contentEl.appendChild(editedEl);
       }
 
+      // Actions
       const actionsEl = document.createElement("div");
       actionsEl.className="actions";
       if(owner && !data.deleted){
@@ -445,9 +265,9 @@ function loadMessages(){
         const replyBtn = document.createElement("button");
         replyBtn.textContent="Reply";
         replyBtn.onclick = ()=>{
-          replyingTo={id:docSnap.id,text:data.text,username:data.username};
-          replyText.textContent=`Replying to ${data.username}: ${data.text}`;
-          replyPreview.style.display="flex";
+          replyingTo = {id:docSnap.id, text:data.text, username:data.username};
+          replyText.textContent = `Replying to ${data.username}: ${data.text}`;
+          replyPreview.style.display = "flex";
         };
         actionsEl.appendChild(replyBtn);
       }
@@ -456,11 +276,11 @@ function loadMessages(){
       msgEl.appendChild(pfpEl);
       msgEl.appendChild(contentEl);
       chatWrapper.appendChild(msgEl);
+
       chatWrapper.scrollTop = chatWrapper.scrollHeight;
     });
   });
 }
 </script>
-
 </body>
 </html>
