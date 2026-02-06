@@ -5,15 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Proxies</title>
 <link rel="icon" href="favicon.ico">
+
 <style>
 html, body { margin:0; padding:0; min-height:100%; font-family:system-ui,sans-serif; background:radial-gradient(circle at top,#0b2a55,#050b1a); color:#e6f0ff; overflow-x:hidden; }
-
-/* Hamburger menu */
 #menuBtn { position:fixed; top:20px; left:20px; width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; z-index:150; }
 #menuBtn span { height:4px; background:white; border-radius:4px; }
-body.menu-open #menuBtn { opacity:0; pointer-events:none; transition:.3s; }
-
-/* Side panel */
+body.menu-open #menuBtn { opacity:0; pointer-events:none; }
 #sidePanel { position:fixed; top:0; left:-300px; width:260px; height:100%; background:rgba(10,30,70,.95); backdrop-filter:blur(18px); padding:20px; box-sizing:border-box; z-index:200; transition:left .35s ease; display:flex; flex-direction:column; }
 body.menu-open #sidePanel { left:0; }
 #sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
@@ -21,33 +18,25 @@ body.menu-open #sidePanel { left:0; }
 .divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
 .nav-tab { padding:12px; border-radius:10px; cursor:pointer; margin-bottom:8px; font-weight:600; }
 .nav-tab.active { background:#4da3ff; color:black; }
-
-/* Blur layer */
 .blur-layer { position:absolute; inset:0; z-index:5; }
 body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 
-/* Profile pic */
 #profilePic { position:fixed; top:20px; right:20px; width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.3rem; color:white; cursor:pointer; z-index:100; background-size:cover; background-position:center; background-repeat:no-repeat; }
 #profilePanel { position:fixed; top:80px; right:20px; width:180px; background:rgba(12,25,55,.85); backdrop-filter:blur(10px); border-radius:14px; display:none; flex-direction:column; padding:10px; z-index:100; }
 #profilePanel h4 { text-align:center; margin:0 0 8px; }
 #profilePanel button { padding:10px; border:none; border-radius:10px; margin-top:5px; font-weight:600; cursor:pointer; }
 .primary { background:#4da3ff; color:black; }
 
-/* Content wrapper */
 #contentWrapper { min-height:90vh; display:flex; flex-direction:column; align-items:center; padding-top:100px; z-index:10; }
-
-/* Proxy generator panel */
-#proxyPanel { margin-top:20px; width:320px; text-align:center; z-index:10; position:relative; }
+#proxyPanel { margin-top:20px; width:320px; text-align:center; position:relative; }
 #proxyPanel h3 { margin-bottom:10px; }
 #proxySelect { width:100%; padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,.1); color:white; font-size:1rem; cursor:pointer; margin-bottom:15px; }
 #generateBtn { width:100%; padding:12px; font-size:1rem; border:none; border-radius:12px; background:#4da3ff; color:black; cursor:pointer; }
 
-/* Progress bar */
 #progressContainer { width:100%; background:rgba(255,255,255,.1); border-radius:12px; overflow:hidden; margin-top:20px; display:none; }
 #progressFill { width:0%; background:#4da3ff; height:28px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:bold; transition:width .2s; }
 #progressText { margin-top:10px; font-size:0.9rem; color:#cfd8f0; text-align:center; }
 
-/* Generated proxies list */
 #generatedListWrapper { margin-top:40px; width:90%; max-width:600px; text-align:center; }
 #generatedListWrapper h3 { margin-bottom:10px; }
 #generatedListWrapper .divider { margin-bottom:15px; }
@@ -105,15 +94,7 @@ body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
   <button class="primary" onclick="logout()">Logout</button>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-
-const app = initializeApp({ apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain:"login-34954.firebaseapp.com", projectId:"login-34954" });
-const auth = getAuth(app);
-const db = getFirestore(app);
-
+<script>
 const profilePic=document.getElementById("profilePic");
 const profilePanel=document.getElementById("profilePanel");
 const profileName=document.getElementById("profileName");
@@ -126,49 +107,42 @@ const generatedList=document.getElementById("generatedList");
 
 let cooldown=false;
 let clickedLinks=new Set();
-const proxyLinks={"Rammerhead":["link1","link2"],"Space":["link3"],"Shuttle":[],"Doge":["link4"],"Bolt":["link5"],"Shadow":["link6"],"Ghost":["link7"]};
 
-// Generate user PFP & name like dashboard
+// PFP and name exactly like dashboard
+function initProfile(){
+  let user = JSON.parse(localStorage.getItem("user")) || { name: "User", pfp:null };
+  profileName.textContent = user.name;
+  if(user.pfp){ profilePic.style.backgroundImage=`url(${user.pfp})`; profilePic.textContent=""; }
+  else { profilePic.style.backgroundImage=""; profilePic.textContent=user.name[0].toUpperCase(); profilePic.style.backgroundColor=stringToColor(user.name); }
+}
 function stringToColor(str){ let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h); return `hsl(${h%360},70%,50%)`; }
+initProfile();
 
-onAuthStateChanged(auth, async user=>{
-  if(!user) location.replace("login.html");
-  const uid=user.uid;
-  const usernameDoc=await getDoc(doc(db,"usernames",uid));
-  const username=usernameDoc.exists()?usernameDoc.id:user.email.split("@")[0];
-
-  profileName.textContent=username;
-  profilePic.textContent=username[0].toUpperCase();
-  profilePic.style.backgroundColor=stringToColor(username);
-  profilePic.style.backgroundImage="";
-
-  const pfpDoc=await getDoc(doc(db,"userPFPs",uid));
-  if(pfpDoc.exists() && pfpDoc.data().data){ profilePic.style.backgroundImage=`url(${pfpDoc.data().data})`; profilePic.textContent=""; }
-
-  loadGenerated();
-});
-
-profilePic.onclick=()=>{ profilePanel.style.display=profilePanel.style.display==="flex"?"none":"flex"; }
+// Side panel
 document.getElementById("menuBtn").onclick=()=>document.body.classList.add("menu-open");
 document.getElementById("closeMenu").onclick=()=>document.body.classList.remove("menu-open");
+profilePic.onclick=()=>{ profilePanel.style.display=profilePanel.style.display==="flex"?"none":"flex"; }
 window.navigateTo=(page)=>{ document.body.classList.remove("menu-open"); setTimeout(()=>location.href=page,300);}
-window.logout=async()=>{ await signOut(auth); location.href="login.html"; }
+window.logout=()=>{ localStorage.removeItem("user"); location.href="login.html"; }
 
-// Generated links logic
-async function loadGenerated(){
-  const user=auth.currentUser;
-  const snap=await getDoc(doc(db,"generatedProxies",user.uid));
-  if(snap.exists() && snap.data().list){
-    snap.data().list.reverse().forEach(item=>addGeneratedCard(item,false));
-  }
+// Load generated links from localStorage
+function loadGenerated(){
+  let list=JSON.parse(localStorage.getItem("generatedLinks")||"[]");
+  generatedList.innerHTML="";
+  list.reverse().forEach(item=>addGeneratedCard(item,false));
 }
+loadGenerated();
 
-async function saveList(){
-  const user=auth.currentUser;
-  const items=Array.from(generatedList.children).map(c=>{
-    return { proxy:c.querySelector("strong").textContent, link:c.querySelector("span").textContent, up:parseInt(c.querySelector(".thumbs-up .count").textContent), down:parseInt(c.querySelector(".thumbs-down .count").textContent) };
+function saveGenerated(){
+  let items=Array.from(generatedList.children).map(c=>{
+    return {
+      proxy:c.querySelector("strong").textContent,
+      link:c.querySelector("span").textContent,
+      up:parseInt(c.querySelector(".thumbs-up .count").textContent),
+      down:parseInt(c.querySelector(".thumbs-down .count").textContent)
+    };
   });
-  await setDoc(doc(db,"generatedProxies",user.uid),{list:items});
+  localStorage.setItem("generatedLinks",JSON.stringify(items.reverse()));
 }
 
 function addGeneratedCard(item,prepend=true){
@@ -182,46 +156,37 @@ function addGeneratedCard(item,prepend=true){
   const upBtn=card.querySelector(".thumbs-up");
   const downBtn=card.querySelector(".thumbs-down");
   const counts=card.querySelectorAll(".count");
-  upBtn.onclick=()=>{ if(clickedLinks.has(item.link)) return; item.up++; counts[0].textContent=item.up; clickedLinks.add(item.link); saveList();}
-  downBtn.onclick=()=>{ if(clickedLinks.has(item.link)) return; item.down++; counts[1].textContent=item.down; clickedLinks.add(item.link); saveList();}
+  upBtn.onclick=()=>{ if(clickedLinks.has(item.link)) return; item.up++; counts[0].textContent=item.up; clickedLinks.add(item.link); saveGenerated();}
+  downBtn.onclick=()=>{ if(clickedLinks.has(item.link)) return; item.down++; counts[1].textContent=item.down; clickedLinks.add(item.link); saveGenerated();}
   if(prepend) generatedList.prepend(card); else generatedList.appendChild(card);
 }
 
-// Generate button
+// Fake proxy links
+const proxyLinks={"Rammerhead":["link1","link2"],"Space":["link3"],"Shuttle":[],"Doge":["link4"],"Bolt":["link5"],"Shadow":["link6"],"Ghost":["link7"]};
+
+// Generate button logic
 generateBtn.onclick=()=>{
-  if(cooldown){ alert("Wait 10 seconds before generating again"); return; }
+  if(cooldown){ alert("Wait 10 seconds"); return; }
   cooldown=true; setTimeout(()=>cooldown=false,10000);
-
   progressContainer.style.display="block";
-  progressFill.style.width="0%"; progressFill.textContent="0%";
-  progressText.textContent="Starting...";
-
+  progressFill.style.width="0%"; progressFill.textContent="0%"; progressText.textContent="Starting...";
   const selected=proxySelect.value;
   const fakeLogs=["Searching for proxies","Clearing cookies and data","reaching-13.zaq","shrjw.aj","loading..."];
   let percent=0;
-
   const interval=setInterval(()=>{
     if(percent>=100){
       clearInterval(interval);
       const links=proxyLinks[selected];
       if(!links || links.length===0){ progressText.textContent="Failed to generate: no stock"; progressFill.style.backgroundColor="#ff4c4c"; }
-      else{
-        const link=links[Math.floor(Math.random()*links.length)];
-        progressText.textContent="Successfully generated";
-        progressFill.style.backgroundColor="#4da3ff";
-        addGeneratedCard({proxy:selected,link,up:0,down:0});
-        saveList();
-      }
+      else{ const link=links[Math.floor(Math.random()*links.length)]; progressText.textContent="Successfully generated"; progressFill.style.backgroundColor="#4da3ff"; addGeneratedCard({proxy:selected,link,up:0,down:0}); saveGenerated(); }
       return;
     }
     percent+=Math.floor(Math.random()*5)+2;
     if(percent>100) percent=100;
-    progressFill.style.width=percent+"%";
-    progressFill.textContent=percent+"%";
+    progressFill.style.width=percent+"%"; progressFill.textContent=percent+"%";
     progressText.textContent=fakeLogs[Math.floor(Math.random()*fakeLogs.length)];
   },250);
 }
 </script>
-
 </body>
 </html>
