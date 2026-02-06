@@ -12,6 +12,7 @@ body{
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   font-family:system-ui,sans-serif;
   color:#e6f0ff;
+  position:relative;
 }
 
 /* Card */
@@ -27,6 +28,90 @@ body{
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
+  z-index:10;
+}
+
+/* Hamburger menu */
+#menuBtn {
+  position:fixed;
+  top:20px;
+  left:20px;
+  width:32px;
+  height:24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  cursor:pointer;
+  z-index:150;
+  transition:opacity .3s, transform .3s;
+}
+#menuBtn span {
+  height:4px;
+  background:white;
+  border-radius:4px;
+}
+body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
+
+/* Side panel */
+#sidePanel {
+  position:fixed;
+  top:0;
+  left:-300px;
+  width:260px;
+  height:100%;
+  background:rgba(12,25,55,.95);
+  backdrop-filter:blur(16px);
+  padding:20px;
+  box-sizing:border-box;
+  z-index:200;
+  transition:left .35s ease;
+  display:flex;
+  flex-direction:column;
+}
+body.menu-open #sidePanel { left:0; }
+
+/* Side panel header */
+#sidePanelHeader {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+#sidePanelHeader h3 { margin:0 auto; }
+#closeMenu { cursor:pointer; font-size:1.4rem; }
+
+/* Divider */
+.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
+
+/* Search */
+#navSearch {
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,.08);
+  color:white;
+  margin-bottom:15px;
+}
+
+/* Tabs */
+.nav-tab {
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  margin-bottom:8px;
+  font-weight:600;
+}
+.nav-tab.active { background:#4da3ff; color:black; }
+.nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
+
+/* Blur layer */
+.blur-layer {
+  position:absolute;
+  inset:0;
+  z-index:5;
+}
+body.menu-open .blur-layer {
+  backdrop-filter: blur(8px);
+  pointer-events:none;
 }
 
 /* Top-right PFP */
@@ -153,6 +238,27 @@ button{
 
 <body>
 
+<!-- Menu -->
+<div id="menuBtn">
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+
+<div id="sidePanel">
+  <div id="sidePanelHeader">
+    <div></div>
+    <h3>Navigation</h3>
+    <div id="closeMenu">✕</div>
+  </div>
+  <div class="divider"></div>
+  <input id="navSearch" placeholder="Search...">
+  <div class="nav-tab" id="tabDashboard">Dashboard</div>
+  <div class="nav-tab active" id="tabSettings">Settings</div>
+</div>
+<div class="blur-layer"></div>
+
+<!-- Profile Picture -->
 <div id="profilePic"></div>
 
 <div id="profilePanel">
@@ -346,6 +452,23 @@ confirmRemoveBtn.onclick=async()=>{
 
 /* Logout */
 logoutBtn.onclick=()=>{ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); };
+
+/* Slide-in Menu Logic */
+const menuBtn = document.getElementById("menuBtn");
+const closeMenu = document.getElementById("closeMenu");
+const sidePanel = document.getElementById("sidePanel");
+
+menuBtn.onclick = () => document.body.classList.add("menu-open");
+closeMenu.onclick = () => document.body.classList.remove("menu-open");
+
+// Tabs with animated close + redirect
+document.getElementById("tabDashboard").onclick = () => {
+  document.body.classList.remove("menu-open");
+  setTimeout(()=> location.href="dashboard.html", 350);
+};
+document.getElementById("tabSettings").onclick = () => {
+  document.body.classList.remove("menu-open");
+};
 </script>
 
 </body>
