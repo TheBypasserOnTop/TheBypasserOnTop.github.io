@@ -36,8 +36,9 @@ input, button {
   padding:15px;
   margin-bottom:12px;
   border-radius:14px;
-  border:none;
+  border:2px solid transparent;
   font-size:1rem;
+  box-sizing:border-box;
 }
 
 input { background:rgba(255,255,255,.08); color:white; }
@@ -73,8 +74,7 @@ button { font-weight:600; cursor:pointer; }
   text-align:center;
 }
 .close { float:right; cursor:pointer; }
-.checkmark { color:#4da3ff; margin-left:6px; }
-.xmark { color:#ff6b6b; margin-left:6px; }
+.error-msg { color:#ff6b6b; font-size:0.9rem; margin-top:-10px; margin-bottom:10px; text-align:left; }
 </style>
 </head>
 <body>
@@ -82,11 +82,11 @@ button { font-weight:600; cursor:pointer; }
 <div class="card">
   <h2>Login</h2>
 
-  <input id="emailPhone" placeholder="Email / Phone">
-  <input id="password" type="password" placeholder="Password (for email)">
+  <input id="emailUsername" placeholder="Email / Username">
+  <input id="password" type="password" placeholder="Password">
   <div class="error" id="error"></div>
 
-  <button class="primary" onclick="emailOrPhoneLogin()">Login</button>
+  <button class="primary" onclick="login()">Login</button>
   <button class="alt" onclick="googleLogin()">Continue with Google</button>
 
   <p id="createAccountText" onclick="openSignup()">Create Account</p>
@@ -96,13 +96,14 @@ button { font-weight:600; cursor:pointer; }
 <div class="overlay" id="signupOverlay">
   <div class="popup">
     <span class="close" onclick="closeSignup()">✕</span>
-    <h2 id="signupTitle">Sign Up</h2>
+    <h2>Sign Up</h2>
 
     <div id="signupForm">
-      <input id="suEmailPhone" placeholder="Email / Phone">
+      <input id="suEmail" placeholder="Email">
       <input id="suUsername" placeholder="Username">
-      <span id="usernameCheck"></span>
+      <div id="usernameCheck" class="error-msg"></div>
       <input id="suPassword" type="password" placeholder="Password (min 8 chars)">
+      <input id="suPasswordRepeat" type="password" placeholder="Repeat Password">
       <div class="error" id="signupError"></div>
       <button class="primary" onclick="signup()">Sign Up</button>
     </div>
@@ -120,7 +121,7 @@ button { font-weight:600; cursor:pointer; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -149,31 +150,40 @@ const verifyEmail = document.getElementById("verifyEmail");
 const usernameInput = document.getElementById("suUsername");
 const usernameCheck = document.getElementById("usernameCheck");
 
-/* Realtime username check */
+/* Username check */
 usernameInput.addEventListener("input", async () => {
   const val = usernameInput.value.trim();
-  if (!val) { usernameCheck.textContent=""; return; }
-  const usernameRef = doc(db, "usernames", val);
-  const snap = await getDoc(usernameRef);
-  usernameCheck.innerHTML = snap.exists() ? '<span class="xmark">❌</span>' : '<span class="checkmark">✅</span>';
+  usernameCheck.textContent="";
+  usernameInput.style.borderColor="transparent";
+  if (!val) return;
+  const snap = await getDoc(doc(db,"usernames",val));
+  if(snap.exists()){
+    usernameInput.style.borderColor="#ff4c4c";
+    usernameCheck.textContent="Username in use";
+  } else {
+    usernameInput.style.borderColor="#4caf50";
+  }
 });
 
-/* Email/Phone login */
-window.emailOrPhoneLogin = async () => {
-  const input = document.getElementById("emailPhone").value.trim();
+/* Login with email or username */
+window.login = async () => {
+  const input = document.getElementById("emailUsername").value.trim();
   const pass = document.getElementById("password").value;
-  document.getElementById("error").textContent = "";
+  document.getElementById("error").textContent="";
 
   try {
-    if(input.includes("@")) {
-      await signInWithEmailAndPassword(auth, input, pass);
-      location.replace("dashboard.html");
-    } else {
-      document.getElementById("error").textContent="Phone login not implemented yet";
+    let emailToUse = input;
+    // If input doesn't contain "@", treat as username
+    if(!input.includes("@")){
+      const q = await getDoc(doc(db,"usernames",input));
+      if(q.exists()) emailToUse = q.data().email;
+      else { document.getElementById("error").textContent="Username not found"; return; }
     }
-  } catch(e) {
+    await signInWithEmailAndPassword(auth,emailToUse,pass);
+    location.replace("dashboard.html");
+  } catch(e){
     console.error(e);
-    document.getElementById("error").textContent=e.message;
+    document.getElementById("error").textContent="Incorrect email/username or password";
   }
 };
 
@@ -182,45 +192,42 @@ window.googleLogin = async () => {
   try {
     await signInWithPopup(auth, provider);
     location.replace("dashboard.html");
-  } catch(e) {
+  } catch(e){
     console.error(e);
     document.getElementById("error").textContent=e.message;
   }
 };
 
-/* Sign Up popup */
+/* Popups */
 window.openSignup = () => signupOverlay.style.display="flex";
 window.closeSignup = () => signupOverlay.style.display="none";
 
-/* Sign Up flow */
+/* Sign Up */
 window.signup = async () => {
-  const input = document.getElementById("suEmailPhone").value.trim();
+  const email = document.getElementById("suEmail").value.trim();
   const username = document.getElementById("suUsername").value.trim();
   const pass = document.getElementById("suPassword").value;
+  const passRepeat = document.getElementById("suPasswordRepeat").value;
   const signupError = document.getElementById("signupError");
 
-  signupError.textContent = "";
+  signupError.textContent="";
 
-  if (!input || !username || !pass) { signupError.textContent="Fill all fields"; return; }
-  if (pass.length<8) { signupError.textContent="Password must be 8+ chars"; return; }
+  if(!email || !username || !pass || !passRepeat) { signupError.textContent="Fill all fields"; return; }
+  if(pass.length<8){ signupError.textContent="Password must be 8+ chars"; return; }
+  if(pass!==passRepeat){ signupError.textContent="Passwords do not match"; return; }
 
   try {
-    // Username check
-    const usernameRef = doc(db, "usernames", username);
-    const snap = await getDoc(usernameRef);
-    if(snap.exists()) { signupError.textContent="Username taken"; return; }
+    const snap = await getDoc(doc(db,"usernames",username));
+    if(snap.exists()){ signupError.textContent="Username in use"; return; }
 
-    if(input.includes("@")) {
-      const cred = await createUserWithEmailAndPassword(auth, input, pass);
-      await setDoc(usernameRef, {uid: cred.user.uid});
-      await sendEmailVerification(cred.user);
-      signupForm.style.display="none";
-      verifyBox.style.display="block";
-      verifyEmail.textContent=input;
-    } else {
-      signupError.textContent="Phone signup not implemented yet";
-    }
-  } catch(e) {
+    const cred = await createUserWithEmailAndPassword(auth,email,pass);
+    await setDoc(doc(db,"usernames",username),{uid:cred.user.uid,email});
+    await sendEmailVerification(cred.user);
+
+    signupForm.style.display="none";
+    verifyBox.style.display="block";
+    verifyEmail.textContent=email;
+  } catch(e){
     console.error(e);
     signupError.textContent=e.message;
   }
