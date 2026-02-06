@@ -13,23 +13,26 @@ body {
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   font-family:system-ui,sans-serif;
   color:#e6f0ff;
-  position:relative;
+  overflow-x:hidden;
 }
 
+/* CARD */
 .card {
-  width:95vw;
-  max-width:500px;
-  padding:40px;
+  width:90%;
+  max-width:380px;
+  padding:30px;
   background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
-  border-radius:20px;
-  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  border-radius:16px;
+  box-shadow:0 15px 40px rgba(0,0,0,.4);
   text-align:center;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
 }
 
-h2 { margin-bottom:20px; }
-
-/* Profile pic */
+/* PROFILE PICTURE */
 #profilePic {
   position:fixed;
   top:20px;
@@ -41,43 +44,38 @@ h2 { margin-bottom:20px; }
   justify-content:center;
   align-items:center;
   font-weight:bold;
-  font-size:1.3rem;
-  color:white;
+  font-size:1.2rem;
   cursor:pointer;
-  user-select:none;
-  z-index:100;
+  color:white;
 }
 
-/* Profile panel */
+/* PANEL UNDER PROFILE */
 #profilePanel {
   position:fixed;
   top:80px;
   right:20px;
-  width:160px;
-  background:rgba(0,0,0,0.85);
-  backdrop-filter:blur(10px);
+  background:rgba(12,25,55,0.85);
+  backdrop-filter:blur(12px);
   border-radius:14px;
   display:none;
   flex-direction:column;
   padding:10px;
-  z-index:100;
+  width:150px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
-
 #profilePanel button {
-  width:100%;
   margin:5px 0;
   padding:10px;
   border:none;
   border-radius:10px;
-  font-weight:600;
+  font-weight:bold;
   cursor:pointer;
 }
+#profilePanel .primary { background:#4da3ff; color:black; }
+#profilePanel .remove { background:#ff4c4c; color:white; }
+#profilePanel .settings { background:#888cff; color:black; }
 
-.primary { background:#4da3ff; color:black; }
-.remove { background:#ff4c4c; color:white; }
-.settings { background:#555555; color:white; }
-
-/* Popups */
+/* OVERLAYS */
 .overlay {
   position:fixed;
   inset:0;
@@ -86,11 +84,10 @@ h2 { margin-bottom:20px; }
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:200;
 }
 .popup {
   width:90vw;
-  max-width:400px;
+  max-width:380px;
   background:#0c1937;
   padding:30px;
   border-radius:20px;
@@ -106,12 +103,14 @@ h2 { margin-bottom:20px; }
   <h2 id="welcomeText">Welcome</h2>
 </div>
 
-<!-- Profile pic and panel -->
+<!-- PROFILE PIC -->
 <div id="profilePic"></div>
+
+<!-- PANEL -->
 <div id="profilePanel">
-  <button class="settings" onclick="goToSettings()">Settings</button>
-  <button class="primary" onclick="openLogoutConfirm()">Logout</button>
-  <button class="remove" onclick="openRemoveAccount()">Remove Account</button>
+  <button class="primary" id="logoutBtn">Logout</button>
+  <button class="remove" id="removeBtn">Remove Account</button>
+  <button class="settings" id="settingsBtn">Settings</button>
 </div>
 
 <!-- REMOVE ACCOUNT POPUP -->
@@ -126,14 +125,14 @@ h2 { margin-bottom:20px; }
   </div>
 </div>
 
-<!-- LOGOUT CONFIRM POPUP -->
+<!-- LOGOUT CONFIRMATION -->
 <div class="overlay" id="logoutOverlay">
   <div class="popup">
-    <span class="close" onclick="closeLogoutConfirm()">✕</span>
-    <h2>Confirm Logout</h2>
+    <span class="close" onclick="closeLogout()">✕</span>
+    <h2>Logout</h2>
     <p>Are you sure you want to logout?</p>
-    <button class="primary" onclick="logout()">Yes</button>
-    <button class="remove" onclick="closeLogoutConfirm()">No</button>
+    <button class="primary" onclick="confirmLogout()">Yes</button>
+    <button class="remove" onclick="closeLogout()">No</button>
   </div>
 </div>
 
@@ -141,7 +140,7 @@ h2 { margin-bottom:20px; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
 import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, query, collection, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, deleteDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -164,24 +163,17 @@ const db = getFirestore(app);
 const welcomeText = document.getElementById("welcomeText");
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
+
 const removeOverlay = document.getElementById("removeOverlay");
 const removePassword = document.getElementById("removePassword");
 const removeError = document.getElementById("removeError");
+
 const logoutOverlay = document.getElementById("logoutOverlay");
 
-/* Generate consistent color per user */
-function stringToColor(str){
-  let hash = 0;
-  for(let i=0;i<str.length;i++){ hash = str.charCodeAt(i) + ((hash<<5)-hash); }
-  let color = '#';
-  for(let i=0;i<3;i++){
-    const value = (hash >> (i*8)) & 0xFF;
-    color += ('00'+value.toString(16)).slice(-2);
-  }
-  return color;
-}
+/* PROFILE PANEL TOGGLE */
+profilePic.addEventListener("click", ()=>{ profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex"; });
 
-/* Auth check */
+/* AUTH STATE */
 auth.onAuthStateChanged(async (user)=>{
   if(!user) location.replace("login.html");
 
@@ -192,41 +184,34 @@ auth.onAuthStateChanged(async (user)=>{
     if(!snap.empty) username = snap.docs[0].id;
     else username = user.email.split("@")[0];
   }
-
   welcomeText.textContent = `Welcome, ${username}`;
-  profilePic.textContent = username[0].toUpperCase();
-  profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
+
+  // Set profile pic initial and consistent color
+  const firstLetter = username.charAt(0).toUpperCase();
+  profilePic.textContent = firstLetter;
+
+  // Color based on username hash
+  let hash = 0;
+  for(let i=0;i<username.length;i++) hash = username.charCodeAt(i) + ((hash<<5)-hash);
+  const color = `hsl(${hash%360}, 65%, 50%)`;
+  profilePic.style.background=color;
 });
 
-/* Toggle profile panel */
-let panelOpen = false;
-profilePic.addEventListener("click", ()=>{
-  panelOpen = !panelOpen;
-  profilePanel.style.display = panelOpen ? "flex" : "none";
-});
+/* LOGOUT */
+document.getElementById("logoutBtn").onclick = ()=>{ logoutOverlay.style.display="flex"; };
+function closeLogout(){ logoutOverlay.style.display="none"; }
+async function confirmLogout(){ await signOut(auth); location.replace("login.html"); }
 
-/* Buttons */
-window.goToSettings = () => location.href="settings.html";
-
-window.openRemoveAccount = () => { removeOverlay.style.display="flex"; removePassword.value=""; removeError.textContent=""; };
-window.closeRemoveAccount = () => removeOverlay.style.display="none";
-
-window.openLogoutConfirm = () => { logoutOverlay.style.display="flex"; };
-window.closeLogoutConfirm = () => logoutOverlay.style.display="none";
-
-window.logout = async () => {
-  await signOut(auth);
-  location.replace("login.html");
-};
-
-/* Remove Account */
-window.removeAccount = async ()=>{
+/* REMOVE ACCOUNT */
+document.getElementById("removeBtn").onclick = ()=>{ removeOverlay.style.display="flex"; removePassword.value=""; removeError.textContent=""; };
+function closeRemoveAccount(){ removeOverlay.style.display="none"; }
+async function removeAccount(){
   const pass = removePassword.value;
   removeError.textContent="";
-  if(!pass){ removeError.textContent="Enter password"; return; }
   const user = auth.currentUser;
   if(!user){ removeError.textContent="No user logged in"; return; }
-  try{
+  if(!pass){ removeError.textContent="Enter password"; return; }
+  try {
     if(user.email){
       const cred = EmailAuthProvider.credential(user.email, pass);
       await reauthenticateWithCredential(user,cred);
@@ -236,8 +221,12 @@ window.removeAccount = async ()=>{
     snap.forEach(async d => await deleteDoc(doc(db,"usernames",d.id)));
     await deleteUser(user);
     location.replace("login.html");
-  }catch(e){ console.error(e); removeError.textContent=e.message; }
-};
+  } catch(e){ removeError.textContent=e.message; console.error(e); }
+}
+
+/* SETTINGS BUTTON */
+document.getElementById("settingsBtn").onclick = ()=>{ location.replace("settings.html"); };
 </script>
+
 </body>
 </html>
