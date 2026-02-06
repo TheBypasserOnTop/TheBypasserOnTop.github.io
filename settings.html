@@ -19,7 +19,7 @@ body {
 /* Card */
 .card {
   width:90%;
-  max-width:500px;
+  max-width:400px;
   padding:25px;
   background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
@@ -188,7 +188,8 @@ button { cursor:pointer; border:none; border-radius:8px; padding:8px; margin-top
   </div>
 </div>
 
-<!-- Remove Account Popup -->
+<!-- Popups -->
+<!-- Remove Account -->
 <div class="overlay" id="removeOverlay">
   <div class="popup">
     <span class="close" onclick="closeRemove()">✕</span>
@@ -200,7 +201,7 @@ button { cursor:pointer; border:none; border-radius:8px; padding:8px; margin-top
   </div>
 </div>
 
-<!-- Logout Popup -->
+<!-- Logout -->
 <div class="overlay" id="logoutOverlay">
   <div class="popup">
     <span class="close" onclick="closeLogout()">✕</span>
@@ -211,10 +212,37 @@ button { cursor:pointer; border:none; border-radius:8px; padding:8px; margin-top
   </div>
 </div>
 
+<!-- Change Username -->
+<div class="overlay" id="usernameOverlay">
+  <div class="popup">
+    <span class="close" onclick="closeUsername()">✕</span>
+    <h2>Change Username</h2>
+    <input type="text" id="newUsername" placeholder="New Username">
+    <div class="error" id="usernameError"></div>
+    <button id="saveUsername" class="primary">Save</button>
+  </div>
+</div>
+
+<!-- Change Password -->
+<div class="overlay" id="passwordOverlay">
+  <div class="popup">
+    <span class="close" onclick="closePassword()">✕</span>
+    <h2>Change Password</h2>
+    <input type="password" id="currentPassword" placeholder="Current Password">
+    <input type="password" id="newPassword" placeholder="New Password (8+ chars)">
+    <input type="password" id="confirmPassword" placeholder="Confirm New Password">
+    <div class="error" id="passwordError"></div>
+    <button id="savePassword" class="primary">Save</button>
+  </div>
+</div>
+
+<!-- Change PFP -->
+<input type="file" id="pfpFile" accept="image/*" style="display:none">
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getAuth, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getFirestore, doc, getDocs, setDoc, deleteDoc, collection, query, where } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -254,11 +282,25 @@ const changeUsernameBtn = document.getElementById("changeUsernameBtn");
 const passwordDisplay = document.getElementById("passwordDisplay");
 const changePasswordBtn = document.getElementById("changePasswordBtn");
 const removeAccountBtn = document.getElementById("removeAccountBtn");
+const usernameOverlay = document.getElementById("usernameOverlay");
+const passwordOverlay = document.getElementById("passwordOverlay");
+const newUsername = document.getElementById("newUsername");
+const usernameError = document.getElementById("usernameError");
+const saveUsername = document.getElementById("saveUsername");
+const currentPassword = document.getElementById("currentPassword");
+const newPassword = document.getElementById("newPassword");
+const confirmPassword = document.getElementById("confirmPassword");
+const passwordError = document.getElementById("passwordError");
+const savePassword = document.getElementById("savePassword");
+const pfpFile = document.getElementById("pfpFile");
 
 let currentUser;
 let username = "";
 
-// Auth check
+// Helper for consistent color
+function getColorFromName(name){ const hash = name.split("").reduce((a,c)=>a+c.charCodeAt(0)+(a<<5),0); return `hsl(${hash%360},65%,50%)`; }
+
+/* Auth */
 onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
   currentUser = user;
@@ -272,42 +314,106 @@ onAuthStateChanged(auth, async user=>{
 
   const firstLetter = username.charAt(0).toUpperCase();
   profilePic.textContent = firstLetter;
-  const hash = username.split("").reduce((a,c)=>a+c.charCodeAt(0)+(a<<5),0);
-  profilePic.style.background = `hsl(${hash%360},65%,50%)`;
+  profilePic.style.background = getColorFromName(username);
   pfpPreview.textContent = firstLetter;
   pfpPreview.style.background = profilePic.style.background;
 });
 
-/* Profile panel toggle */
+/* Profile Panel toggle */
 profilePic.addEventListener("click", ()=>profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex");
-
-/* Dashboard btn */
 dashboardBtn.addEventListener("click", ()=>location.replace("dashboard.html"));
-
-/* Logout popup */
 logoutBtn.addEventListener("click", ()=>logoutOverlay.style.display="flex");
 function closeLogout(){ logoutOverlay.style.display="none"; }
 async function confirmLogout(){ await signOut(auth); location.replace("login.html"); }
 
-/* PFP panel toggle */
+/* PFP Panel toggle */
 pfpPreview.addEventListener("click", ()=>pfpPanel.style.display = pfpPanel.style.display==="flex"?"none":"flex");
 
 /* PFP buttons */
-changePfpBtn.addEventListener("click", ()=>alert("File picker + cropping here"));
-removePfpBtn.addEventListener("click", ()=>alert("Revert to default PFP"));
-viewPfpBtn.addEventListener("click", ()=>alert("Open PFP in new tab"));
+changePfpBtn.addEventListener("click", ()=>pfpFile.click());
+removePfpBtn.addEventListener("click", ()=>{
+  pfpPreview.textContent = username.charAt(0).toUpperCase();
+  pfpPreview.style.background = getColorFromName(username);
+});
+viewPfpBtn.addEventListener("click", ()=>{
+  alert("View PFP in new tab (placeholder)");
+});
 
-/* Change username */
-changeUsernameBtn.addEventListener("click", ()=>alert("Change username popup here"));
+/* File picker */
+pfpFile.addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    pfpPreview.style.backgroundImage = `url(${ev.target.result})`;
+    pfpPreview.style.backgroundSize = "cover";
+    pfpPreview.textContent = "";
+  };
+  reader.readAsDataURL(file);
+});
 
-/* Change password */
-changePasswordBtn.addEventListener("click", ()=>alert("Change password popup here"));
+/* Change Username */
+changeUsernameBtn.addEventListener("click", ()=>usernameOverlay.style.display="flex");
+function closeUsername(){ usernameOverlay.style.display="none"; usernameError.textContent=""; newUsername.value=""; }
+saveUsername.addEventListener("click", async ()=>{
+  const newName = newUsername.value.trim().toLowerCase();
+  if(!newName){ usernameError.textContent="Enter username"; return; }
+  if(newName===username.toLowerCase()){ usernameError.textContent="Same username"; return; }
+  const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",currentUser.uid)));
+  if(!snap.empty){
+    const oldDoc = snap.docs[0].id;
+    const checkSnap = await getDocs(query(collection(db,"usernames"), where("uid","!=",currentUser.uid)));
+    // check if taken
+    const check = await getDocs(doc(db,"usernames",newName));
+    if(check.exists()){ usernameError.textContent="Username taken"; return; }
+    await deleteDoc(doc(db,"usernames",oldDoc));
+    await setDoc(doc(db,"usernames",newName),{uid:currentUser.uid,email:currentUser.email});
+    username = newName;
+    usernameDisplay.textContent = username;
+    panelUsername.textContent = username;
+    profilePic.textContent = username.charAt(0).toUpperCase();
+    profilePic.style.background = getColorFromName(username);
+    pfpPreview.textContent = username.charAt(0).toUpperCase();
+    pfpPreview.style.background = getColorFromName(username);
+    closeUsername();
+  }
+});
 
-/* Remove account */
+/* Change Password */
+changePasswordBtn.addEventListener("click", ()=>passwordOverlay.style.display="flex");
+function closePassword(){ passwordOverlay.style.display="none"; passwordError.textContent=""; currentPassword.value=""; newPassword.value=""; confirmPassword.value=""; }
+savePassword.addEventListener("click", async ()=>{
+  const cur = currentPassword.value;
+  const np = newPassword.value;
+  const cp = confirmPassword.value;
+  if(!cur||!np||!cp){ passwordError.textContent="Fill all fields"; return; }
+  if(np.length<8){ passwordError.textContent="New password must be 8+ chars"; return; }
+  if(np!==cp){ passwordError.textContent="Passwords do not match"; return; }
+  try{
+    const cred = EmailAuthProvider.credential(currentUser.email,cur);
+    await reauthenticateWithCredential(currentUser,cred);
+    await updatePassword(currentUser,np);
+    passwordError.textContent="";
+    closePassword();
+    alert("Password updated successfully");
+  }catch(e){ console.error(e); passwordError.textContent=e.message; }
+});
+
+/* Remove Account */
 removeAccountBtn.addEventListener("click", ()=>removeOverlay.style.display="flex");
-function closeRemove(){ removeOverlay.style.display="none"; }
-confirmRemoveBtn.addEventListener("click", ()=>alert("Remove account logic here"));
-
+function closeRemove(){ removeOverlay.style.display="none"; removePassword.value=""; removeError.textContent=""; }
+confirmRemoveBtn.addEventListener("click", async ()=>{
+  const pw = removePassword.value;
+  if(!pw){ removeError.textContent="Enter password"; return; }
+  try{
+    const cred = EmailAuthProvider.credential(currentUser.email,pw);
+    await reauthenticateWithCredential(currentUser,cred);
+    const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",currentUser.uid)));
+    snap.forEach(async d=>await deleteDoc(doc(db,"usernames",d.id)));
+    await deleteUser(currentUser);
+    location.replace("login.html");
+  }catch(e){ console.error(e); removeError.textContent=e.message; }
+});
 </script>
 </body>
 </html>
