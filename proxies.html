@@ -11,7 +11,7 @@ html, body {
   padding:0;
   min-height:100%;
   font-family:system-ui,sans-serif;
-  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
+  background:radial-gradient(circle at top,#0b2a55,#050b1a);
   color:#e6f0ff;
   overflow-x:hidden;
 }
@@ -34,7 +34,7 @@ html, body {
   background:white;
   border-radius:4px;
 }
-body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
+body.menu-open #menuBtn { opacity:0; pointer-events:none; }
 
 /* Side panel */
 #sidePanel {
@@ -43,8 +43,8 @@ body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); 
   left:-300px;
   width:260px;
   height:100%;
-  background:rgba(12,25,55,.95);
-  backdrop-filter:blur(16px);
+  background:rgba(10,30,70,.95);
+  backdrop-filter:blur(18px);
   padding:20px;
   box-sizing:border-box;
   z-index:200;
@@ -54,38 +54,25 @@ body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); 
 }
 body.menu-open #sidePanel { left:0; }
 
-#sidePanelHeader {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-#sidePanelHeader h3 { margin:0 auto; }
+#sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
 
-/* Tabs */
+.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
+
 .nav-tab {
   padding:12px;
   border-radius:10px;
   cursor:pointer;
   margin-bottom:8px;
   font-weight:600;
-  text-align:center;
 }
 .nav-tab.active { background:#4da3ff; color:black; }
-.nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
 
 /* Blur layer */
-.blur-layer {
-  position:absolute;
-  inset:0;
-  z-index:5;
-}
-body.menu-open .blur-layer {
-  backdrop-filter: blur(8px);
-  pointer-events:none;
-}
+.blur-layer { position:absolute; inset:0; z-index:5; }
+body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 
-/* Profile pic top-right */
+/* Profile pic */
 #profilePic {
   position:fixed;
   top:20px;
@@ -94,17 +81,16 @@ body.menu-open .blur-layer {
   height:50px;
   border-radius:50%;
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
   font-weight:bold;
   font-size:1.3rem;
   color:white;
   cursor:pointer;
-  user-select:none;
   z-index:100;
-  background-size:cover;
-  background-position:center;
+  background-size:contain;
   background-repeat:no-repeat;
+  background-position:center;
 }
 
 /* Profile panel */
@@ -114,205 +100,112 @@ body.menu-open .blur-layer {
   right:20px;
   width:180px;
   background:rgba(12,25,55,.85);
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(10px);
   border-radius:14px;
   display:none;
   flex-direction:column;
   padding:10px;
   z-index:100;
 }
-#profilePanel h4 {
-  margin:0 0 8px 0;
-  font-size:1rem;
-  text-align:center;
-  border-bottom:1px solid rgba(255,255,255,0.2);
-  padding-bottom:5px;
-}
-#profilePanel button {
-  width:100%;
-  margin:5px 0;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  font-weight:600;
-  cursor:pointer;
-}
+#profilePanel h4 { text-align:center; margin:0 0 8px; }
+#profilePanel button { padding:10px; border:none; border-radius:10px; margin-top:5px; font-weight:600; cursor:pointer; }
 .primary { background:#4da3ff; color:black; }
-.remove { background:#ff4c4c; color:white; }
 
-/* Main proxy container */
-#proxyContainer {
-  max-width:500px;
-  margin:120px auto 40px auto;
+/* Page content */
+#mainContent {
+  min-height:100vh;
   display:flex;
   flex-direction:column;
   align-items:center;
-  text-align:center;
-  z-index:10;
-  position:relative;
+  justify-content:flex-start;
+  padding-top:120px;
 }
 
-/* Card */
-.card {
-  width:100%;
-  background:rgba(20,40,80,.8);
-  backdrop-filter:blur(12px);
-  border-radius:20px;
-  box-shadow:0 25px 50px rgba(0,0,0,.6);
-  padding:25px;
-  margin-bottom:20px;
-  color:#e6f0ff;
-}
-.card h2 { text-shadow:0 0 6px #4da3ff; }
-
-/* Dropdown */
-select {
-  width:70%;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  margin:10px 0;
-  font-size:1rem;
-  text-align:center;
-}
-
-/* Button */
-button {
-  padding:10px 20px;
-  margin-top:10px;
-  border:none;
-  border-radius:10px;
-  background:#4da3ff;
-  color:black;
-  font-weight:600;
-  cursor:pointer;
-}
+/* Proxy selector */
+#proxySection { text-align:center; margin-bottom:40px; width:90%; max-width:400px; }
+#proxySection h2 { margin-bottom:15px; }
+#proxySelect { padding:10px 15px; font-size:1rem; border-radius:10px; border:none; width:100%; background:rgba(12,25,55,.8); color:white; cursor:pointer; }
+#generateBtn { margin-top:15px; padding:12px 20px; font-weight:600; border:none; border-radius:12px; cursor:pointer; background:#4da3ff; color:black; }
 
 /* Progress bar */
-#progressWrapper {
-  width:80%;
-  margin-top:20px;
-  display:none;
-  flex-direction:column;
-  align-items:center;
-}
-#progressBarContainer {
-  width:100%;
-  height:20px;
-  background:rgba(255,255,255,0.2);
-  border-radius:10px;
-  overflow:hidden;
-  position:relative;
-}
-#progressBar {
-  width:0%;
-  height:100%;
-  background:#4da3ff;
-  border-radius:10px;
-  transition:width 0.1s linear;
-}
-#progressText {
-  margin-right:10px;
-  font-weight:bold;
-}
-#progressStatus {
-  margin-top:10px;
-  font-size:0.9rem;
-  opacity:0;
-  transition:opacity 0.3s;
-}
+#progressContainer { margin-top:20px; width:90%; max-width:400px; height:24px; background:rgba(12,25,55,.5); border-radius:12px; overflow:hidden; display:none; position:relative; }
+#progressBar { height:100%; width:0%; background:#4da3ff; transition:width 0.3s; }
+#progressText { position:absolute; left:8px; top:0; font-size:0.85rem; line-height:24px; color:white; }
 
-/* Generated proxies */
-#generatedProxies { max-width:500px; margin:20px auto; }
-.generatedCard {
-  width:100%;
-  background:rgba(20,40,80,.8);
-  backdrop-filter:blur(12px);
-  border-radius:15px;
-  padding:15px;
-  margin-bottom:10px;
-}
-.generatedCard h4 { margin:0 0 5px 0; text-shadow:0 0 4px #4da3ff; }
-.voteButtons { display:flex; justify-content:flex-start; gap:10px; margin-top:5px; }
-.voteButtons button { padding:5px 10px; border-radius:6px; border:none; cursor:pointer; }
-.up { background:#4caf50; color:white; }
+/* Progress messages */
+#progressMessages { margin-top:10px; font-size:0.9rem; text-align:left; width:90%; max-width:400px; min-height:24px; }
+
+/* Generated proxies section */
+#generatedSection { width:90%; max-width:480px; margin-top:40px; }
+#generatedSection h3 { text-align:center; margin-bottom:10px; }
+.proxyCard { background:rgba(12,25,55,.7); padding:12px 15px; border-radius:12px; margin-bottom:15px; }
+.proxyCard h4 { margin:0 0 5px; }
+.proxyCard .divider { height:1px; background:rgba(255,255,255,.2); margin:5px 0; }
+.voteButtons { display:flex; gap:12px; margin-top:6px; }
+.voteButtons button { border:none; border-radius:8px; padding:6px 12px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:6px; }
+.up { background:#4CAF50; color:white; }
 .down { background:#f44336; color:white; }
-.voteCount { margin-left:5px; }
+.voteCount { min-width:20px; text-align:center; }
 </style>
 </head>
 <body>
 
-<!-- Hamburger and Side Panel -->
 <div id="menuBtn"><span></span><span></span><span></span></div>
 <div id="sidePanel">
-  <div id="sidePanelHeader">
-    <div></div>
-    <h3>Navigation</h3>
-    <div id="closeMenu">✕</div>
-  </div>
+  <div id="sidePanelHeader"><div></div><h3>Navigation</h3><div id="closeMenu">✕</div></div>
   <div class="divider"></div>
-  <div class="nav-tab" id="tabDashboard">Dashboard</div>
-  <div class="nav-tab active" id="tabProxies">Proxies</div>
-  <div class="nav-tab" id="tabSettings">Settings</div>
+  <div class="nav-tab" onclick="navigateTo('dashboard.html')">Dashboard</div>
+  <div class="nav-tab active">Proxies</div>
+  <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
 </div>
 <div class="blur-layer"></div>
 
-<!-- Profile pic -->
 <div id="profilePic"></div>
 <div id="profilePanel">
-  <h4 id="profileName">Username</h4>
-  <button class="primary" onclick="openDashboard()">Dashboard</button>
-  <button class="primary" onclick="openSettings()">Settings</button>
-  <button class="primary" onclick="confirmLogout()">Logout</button>
+  <h4 id="profileName"></h4>
+  <button class="primary" onclick="navigateTo('settings.html')">Settings</button>
+  <button class="primary" onclick="logout()">Logout</button>
 </div>
 
-<!-- Proxy generator -->
-<div id="proxyContainer">
-  <div class="card">
+<div id="mainContent">
+  <div id="proxySection">
     <h2>Select a proxy</h2>
     <select id="proxySelect">
-      <option value="">-- Choose Proxy --</option>
-      <option>Rammerhead</option>
-      <option>Space</option>
-      <option>Shuttle</option>
-      <option>Doge</option>
-      <option>Bolt</option>
-      <option>Shadow</option>
-      <option>Ghost</option>
+      <option value="Rammerhead">Rammerhead</option>
+      <option value="Space">Space</option>
+      <option value="Shuttle">Shuttle</option>
+      <option value="Doge">Doge</option>
+      <option value="Bolt">Bolt</option>
+      <option value="Shadow">Shadow</option>
+      <option value="Ghost">Ghost</option>
     </select>
     <button id="generateBtn">Generate link</button>
 
-    <div id="progressWrapper">
-      <div style="display:flex; width:100%; justify-content:flex-start; align-items:center;">
-        <div id="progressText">0%</div>
-        <div id="progressBarContainer">
-          <div id="progressBar"></div>
-        </div>
-      </div>
-      <div id="progressStatus">Status</div>
+    <div id="progressContainer">
+      <div id="progressBar"></div>
+      <div id="progressText">0%</div>
     </div>
+    <div id="progressMessages"></div>
   </div>
-</div>
 
-<!-- Generated proxies section -->
-<div id="generatedProxies">
-  <h2>Generated Proxies</h2>
-  <div class="divider"></div>
+  <div id="generatedSection">
+    <h3>Generated Proxies</h3>
+    <div class="divider"></div>
+    <div id="generatedList"></div>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase */
-const firebaseConfig = {
+const app = initializeApp({
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app"
-};
-const app = initializeApp(firebaseConfig);
+  projectId: "login-34954"
+});
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -320,29 +213,27 @@ const db = getFirestore(app);
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
-const menuBtn = document.getElementById("menuBtn");
-const closeMenu = document.getElementById("closeMenu");
-const sidePanel = document.getElementById("sidePanel");
+const proxySelect = document.getElementById("proxySelect");
+const generateBtn = document.getElementById("generateBtn");
+const progressContainer = document.getElementById("progressContainer");
+const progressBar = document.getElementById("progressBar");
+const progressText = document.getElementById("progressText");
+const progressMessages = document.getElementById("progressMessages");
+const generatedList = document.getElementById("generatedList");
 
-/* Profile pic letter color */
-function stringToColor(str){
-  let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
-  let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
-  return color;
-}
+/* Profile pic / username */
+function stringToColor(str){ let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h); return `hsl(${h%360},70%,50%)`; }
 
-/* Auth check */
 onAuthStateChanged(auth, async user=>{
-  if(!user) location.replace("login.html");
+  if(!user) location.href="login.html";
 
-  let username = user.displayName;
-  if(!username){
-    const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
-    username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
-  }
-  profileName.textContent=username;
-  profilePic.textContent=username[0].toUpperCase();
+  const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
+  const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+  profileName.textContent = username;
+
+  profilePic.textContent = username[0].toUpperCase();
   profilePic.style.backgroundColor = stringToColor(username);
+  profilePic.style.backgroundImage = "";
 
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
@@ -351,100 +242,105 @@ onAuthStateChanged(auth, async user=>{
   }
 });
 
-/* Menu toggle */
-let menuOpen=false;
-menuBtn.onclick=()=>{ menuOpen=!menuOpen; document.body.classList.toggle("menu-open"); };
-closeMenu.onclick=()=>{ menuOpen=false; document.body.classList.remove("menu-open"); };
-
 /* Profile panel toggle */
-let panelOpen=false;
-profilePic.onclick=()=>{ panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none"; };
+profilePic.onclick = () => { profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex"; };
 
-/* Tabs */
-document.getElementById("tabDashboard").onclick=()=>{ closePanelAndRedirect('dashboard.html'); };
-document.getElementById("tabSettings").onclick=()=>{ closePanelAndRedirect('settings.html'); };
-function closePanelAndRedirect(url){
-  document.body.classList.remove("menu-open");
-  setTimeout(()=> location.href=url, 300);
+/* Menu logic */
+const menuBtn = document.getElementById("menuBtn");
+const closeMenu = document.getElementById("closeMenu");
+menuBtn.onclick = () => document.body.classList.add("menu-open");
+closeMenu.onclick = () => document.body.classList.remove("menu-open");
+window.navigateTo = (page)=>{ document.body.classList.remove("menu-open"); setTimeout(()=>location.href=page,350); };
+window.logout = async ()=>{ await signOut(auth); location.href="login.html"; };
+
+/* Load previous generated proxies from localStorage */
+let storedData = JSON.parse(localStorage.getItem("proxiesData")) || [];
+let lastGeneratedTime = parseInt(localStorage.getItem("lastGenerated")||0);
+
+function rebuildGeneratedList(){
+  generatedList.innerHTML="";
+  storedData.forEach(item=>{
+    addGeneratedCard(item.proxy, item.link, item.up, item.down, false);
+  });
 }
-function openDashboard(){ location.href='dashboard.html'; }
-function openSettings(){ location.href='settings.html'; }
 
-/* Logout */
-window.confirmLogout=()=>{ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); };
+/* Helper to add card */
+function addGeneratedCard(proxy, link, up=0, down=0, save=true){
+  const card = document.createElement("div");
+  card.className="proxyCard";
+  card.innerHTML = `<h4>${proxy}</h4><div class="divider"></div>
+    <div>${link}</div>
+    <div class="voteButtons">
+      <button class="up">👍 <span class="voteCount">${up}</span></button>
+      <button class="down">👎 <span class="voteCount">${down}</span></button>
+    </div>`;
+  const upBtn = card.querySelector(".up");
+  const downBtn = card.querySelector(".down");
+  const upCount = card.querySelector(".up .voteCount");
+  const downCount = card.querySelector(".down .voteCount");
 
-/* Proxy generator */
-const proxySelect = document.getElementById("proxySelect");
-const generateBtn = document.getElementById("generateBtn");
-const progressWrapper = document.getElementById("progressWrapper");
-const progressBar = document.getElementById("progressBar");
-const progressText = document.getElementById("progressText");
-const progressStatus = document.getElementById("progressStatus");
-const generatedProxies = document.getElementById("generatedProxies");
+  upBtn.onclick = () => { upCount.textContent = parseInt(upCount.textContent)+1; };
+  downBtn.onclick = () => { downCount.textContent = parseInt(downCount.textContent)+1; };
 
-const proxyLinks = {
-  Rammerhead: ["link1","link2"],
-  Space: ["link3"],
-  Shuttle: [],
-  Doge: ["link4","link5"],
-  Bolt: ["link6"],
-  Shadow: ["link7","link8"],
-  Ghost: []
+  generatedList.prepend(card);
+  if(save){
+    storedData.unshift({proxy, link, up, down});
+    localStorage.setItem("proxiesData", JSON.stringify(storedData));
+  }
+}
+
+rebuildGeneratedList();
+
+/* Fake links for proxies */
+const proxyStock = {
+  "Rammerhead":["link1","link2"],
+  "Space":["linkA","linkB"],
+  "Shuttle":["s1","s2","s3"],
+  "Doge":["d1","d2"],
+  "Bolt":["b1"],
+  "Shadow":[],
+  "Ghost":["g1"]
 };
 
+/* Generate link logic */
 generateBtn.onclick = async ()=>{
-  const selected = proxySelect.value;
-  if(!selected) return alert("Select a proxy");
+  const now = Date.now();
+  if(now-lastGeneratedTime<10000){ alert("Please wait before generating another link."); return; }
 
-  progressWrapper.style.display="flex";
+  const selected = proxySelect.value;
+  const stock = proxyStock[selected] || [];
+  progressContainer.style.display="block";
   progressBar.style.width="0%";
   progressText.textContent="0%";
-  progressStatus.style.opacity=0;
-  progressStatus.textContent="";
+  progressMessages.textContent="";
+  lastGeneratedTime = now;
+  localStorage.setItem("lastGenerated", lastGeneratedTime);
 
-  let progress=0;
-  const statuses=["Searching for proxies","Clearing cookies and data"];
-  const randomStatus=["reaching-13.zaq","shrjw.aj","checking-x1","fetching..."];
+  let percent=0;
+  let interval = setInterval(()=>{
+    percent += Math.floor(Math.random()*8+3);
+    if(percent>100) percent=100;
+    progressBar.style.width=percent+"%";
+    progressText.textContent=percent+"%";
 
-  function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+    // Animate messages
+    if(percent<30) progressMessages.textContent="Searching for proxies...";
+    else if(percent<60) progressMessages.textContent="Clearing cookies and data...";
+    else if(percent<90) progressMessages.textContent="Reaching-13.zaq...";
+    else progressMessages.textContent="Checking final links...";
 
-  while(progress<100){
-    await sleep(100);
-    progress += Math.floor(Math.random()*5)+2;
-    if(progress>100) progress=100;
-    progressBar.style.width=progress+"%";
-    progressText.textContent=progress+"%";
-
-    if(progress<50) progressStatus.textContent=statuses[Math.floor(Math.random()*statuses.length)];
-    else progressStatus.textContent=randomStatus[Math.floor(Math.random()*randomStatus.length)];
-    progressStatus.style.opacity=1;
-  }
-
-  // Handle success/failure
-  const links = proxyLinks[selected] || [];
-  let resultText="", generatedLink="";
-  if(links.length===0){ resultText="Failed to generate: no stock"; }
-  else{ 
-    generatedLink = links[Math.floor(Math.random()*links.length)];
-    resultText="Successfully generated"; 
-  }
-
-  // Add card
-  const card = document.createElement("div");
-  card.classList.add("generatedCard");
-  card.innerHTML=`
-    <h4>${selected}</h4>
-    <div class="divider"></div>
-    <div>${generatedLink || "-"}</div>
-    <div class="voteButtons">
-      <button class="up">👍 <span class="voteCount">0</span></button>
-      <button class="down">👎 <span class="voteCount">0</span></button>
-    </div>
-    <div style="margin-top:5px;font-size:0.9rem;color:#cfd8f0;">${resultText}</div>
-  `;
-  generatedProxies.appendChild(card);
+    if(percent>=100){
+      clearInterval(interval);
+      let link = stock.length===0 ? null : stock[Math.floor(Math.random()*stock.length)];
+      if(!link){
+        progressMessages.textContent="Failed to generate: no stock";
+      } else {
+        progressMessages.textContent="Successfully generated";
+        addGeneratedCard(selected, link);
+      }
+    }
+  },300);
 };
 </script>
-
 </body>
 </html>
