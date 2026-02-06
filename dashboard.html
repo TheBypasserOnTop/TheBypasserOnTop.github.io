@@ -28,28 +28,13 @@ body {
   border-radius:20px;
   box-shadow:0 20px 60px rgba(0,0,0,.4);
   text-align:center;
-  position:relative;
 }
 
 h2 { margin-bottom:20px; }
 
-button {
-  width:100%;
-  padding:15px;
-  margin-bottom:12px;
-  border-radius:14px;
-  border:none;
-  font-weight:600;
-  cursor:pointer;
-  font-size:1rem;
-}
-
-.primary { background:#4da3ff; color:black; }
-.remove { background:#ff4c4c; color:white; }
-
 /* Profile pic */
 #profilePic {
-  position:absolute;
+  position:fixed;
   top:20px;
   right:20px;
   width:50px;
@@ -63,11 +48,12 @@ button {
   color:white;
   cursor:pointer;
   user-select:none;
+  z-index:100;
 }
 
 /* Profile panel */
 #profilePanel {
-  position:absolute;
+  position:fixed;
   top:80px;
   right:20px;
   width:160px;
@@ -77,13 +63,21 @@ button {
   display:none;
   flex-direction:column;
   padding:10px;
-  z-index:10;
+  z-index:100;
 }
 
 #profilePanel button {
   width:100%;
   margin:5px 0;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
 }
+
+.primary { background:#4da3ff; color:black; }
+.remove { background:#ff4c4c; color:white; }
 
 /* REMOVE ACCOUNT POPUP */
 .overlay {
@@ -111,15 +105,13 @@ button {
 
 <div class="card">
   <h2 id="welcomeText">Welcome</h2>
+</div>
 
+<!-- Profile pic -->
+<div id="profilePic"></div>
+<div id="profilePanel">
   <button class="primary" onclick="logout()">Logout</button>
   <button class="remove" onclick="openRemoveAccount()">Remove Account</button>
-
-  <div id="profilePic"></div>
-  <div id="profilePanel">
-    <button class="primary" onclick="logout()">Logout</button>
-    <button class="remove" onclick="openRemoveAccount()">Remove Account</button>
-  </div>
 </div>
 
 <!-- REMOVE ACCOUNT POPUP -->
@@ -138,7 +130,7 @@ button {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
 import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, deleteDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, query, collection, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -183,7 +175,6 @@ auth.onAuthStateChanged(async (user) => {
 
   let username = user.displayName;
   if(!username){
-    // If email login, find username from Firestore
     const q = query(collection(db,"usernames"), where("uid","==",user.uid));
     const snap = await getDocs(q);
     if(!snap.empty) username = snap.docs[0].id;
@@ -197,7 +188,7 @@ auth.onAuthStateChanged(async (user) => {
   profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
 });
 
-/* Profile pic click toggle panel */
+/* Toggle profile panel */
 let panelOpen = false;
 profilePic.addEventListener("click", ()=>{
   panelOpen = !panelOpen;
@@ -233,7 +224,6 @@ window.removeAccount = async () => {
       await reauthenticateWithCredential(user,cred);
     }
 
-    // Delete username doc if exists
     const q = query(collection(db,"usernames"), where("uid","==",user.uid));
     const snap = await getDocs(q);
     snap.forEach(async d => await deleteDoc(doc(db,"usernames",d.id)));
@@ -246,6 +236,5 @@ window.removeAccount = async () => {
   }
 };
 </script>
-
 </body>
 </html>
