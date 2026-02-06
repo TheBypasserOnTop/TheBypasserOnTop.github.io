@@ -133,7 +133,7 @@ button { font-weight:600; cursor:pointer; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, setPersistence, browserSessionPersistence, onAuthStateChanged, reload } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase config */
 const firebaseConfig = {
@@ -170,9 +170,9 @@ const passwordRepeatCheck = document.getElementById("passwordRepeatCheck");
 const resendCountdown = document.getElementById("resendCountdown");
 const verifySuccess = document.getElementById("verifySuccess");
 
-/* Username check */
+/* Username check (case-insensitive) */
 usernameInput.addEventListener("input", async () => {
-  const val = usernameInput.value.trim();
+  const val = usernameInput.value.trim().toLowerCase();
   usernameCheck.textContent="";
   usernameInput.style.borderColor="transparent";
   if(!val) return;
@@ -210,7 +210,7 @@ passwordRepeatInput.addEventListener("input", () => {
   else { passwordRepeatInput.style.borderColor="#ff4c4c"; passwordRepeatCheck.textContent="Passwords do not match"; }
 });
 
-/* Login with email/username */
+/* Login with email/username (case-insensitive) */
 window.login = async () => {
   const input = document.getElementById("emailUsername").value.trim();
   const pass = document.getElementById("password").value;
@@ -219,8 +219,8 @@ window.login = async () => {
   try{
     let emailToUse = input;
     if(!input.includes("@")){
-      const q = await getDoc(doc(db,"usernames",input));
-      if(q.exists()) emailToUse = q.data().email;
+      const snap = await getDoc(doc(db,"usernames",input.toLowerCase()));
+      if(snap.exists()) emailToUse = snap.data().email;
       else { document.getElementById("error").textContent="Username not found"; return; }
     }
     await signInWithEmailAndPassword(auth,emailToUse,pass);
@@ -245,7 +245,7 @@ window.closeSignup = () => signupOverlay.style.display="none";
 let resendInterval;
 window.signup = async () => {
   const email = emailInput.value.trim();
-  const username = usernameInput.value.trim();
+  const username = usernameInput.value.trim().toLowerCase(); // store lowercase
   const pass = passwordInput.value;
   const passRepeat = passwordRepeatInput.value;
   const signupError = document.getElementById("signupError");
@@ -266,7 +266,7 @@ window.signup = async () => {
     verifyBox.style.display="block";
     verifyEmail.textContent=email;
 
-    /* Start countdown */
+    /* Countdown */
     let timeLeft=30;
     resendCountdown.classList.remove("clickable");
     resendCountdown.textContent=`Resend email in ${timeLeft}s`;
@@ -298,7 +298,7 @@ window.signup = async () => {
       },1000);
     };
 
-    /* Auto login once email verified */
+    /* Auto login when verified */
     const checkEmailVerified = setInterval(async ()=>{
       await reload(auth.currentUser);
       if(auth.currentUser.emailVerified){
