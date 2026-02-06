@@ -44,7 +44,7 @@ body.menu-open #menuBtn {opacity:0;pointer-events:none;}
   left:-300px;
   width:260px;
   height:100%;
-  background:rgba(10,30,70,.95);
+  background:#0a1e46; /* fully opaque */
   padding:20px;
   box-sizing:border-box;
   z-index:200;
@@ -52,14 +52,15 @@ body.menu-open #menuBtn {opacity:0;pointer-events:none;}
 }
 body.menu-open #sidePanel { left:0; }
 
+/* Background blur when menu open */
+body.menu-open #blurLayer { backdrop-filter:blur(8px); pointer-events:auto; }
+
 #sidePanelHeader {
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
-
-.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
 
 .nav-tab {
   padding:12px;
@@ -71,12 +72,11 @@ body.menu-open #sidePanel { left:0; }
 .nav-tab.active { background:#4da3ff; color:black; }
 
 /* Blur layer */
-.blur-layer {
+#blurLayer {
   position:absolute;
   inset:0;
   z-index:5;
 }
-body.menu-open .blur-layer { pointer-events:none; }
 
 /* Profile pic */
 #profilePic {
@@ -105,7 +105,7 @@ body.menu-open .blur-layer { pointer-events:none; }
   top:80px;
   right:20px;
   width:180px;
-  background:rgba(12,25,55,.85);
+  background:rgba(12,25,55,0.85);
   border-radius:14px;
   display:none;
   flex-direction:column;
@@ -166,7 +166,7 @@ body.menu-open .blur-layer { pointer-events:none; }
   transition:width .1s linear;
 }
 
-/* Fake progress text */
+/* Progress text */
 #progressText {
   margin-top:10px;
   font-family:monospace;
@@ -187,12 +187,42 @@ body.menu-open .blur-layer { pointer-events:none; }
   padding:15px;
   margin-top:12px;
   border-radius:14px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  position:relative;
 }
-.generated-card .link-text { flex:1; margin-right:10px; word-break:break-all; }
-.generated-card button { padding:5px 10px; border:none; border-radius:8px; cursor:pointer; font-weight:600; background:red; color:white; }
+.generated-card h4 {
+  margin:0;
+}
+.generated-card .divider {
+  height:1px;
+  background:rgba(255,255,255,.2);
+  margin:8px 0;
+}
+.generated-card .link-text {
+  word-break:break-all;
+  margin-bottom:8px;
+}
+.generated-card .vote-buttons button {
+  margin-right:8px;
+  padding:5px 10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  background:#4da3ff;
+  color:black;
+}
+.generated-card .delete-btn {
+  position:absolute;
+  top:15px;
+  right:15px;
+  padding:5px 10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  background:red;
+  color:white;
+}
 #confirmOverlay {
   display:none;
   position:fixed;
@@ -201,6 +231,7 @@ body.menu-open .blur-layer { pointer-events:none; }
   z-index:500;
   justify-content:center;
   align-items:center;
+  display:flex;
 }
 #confirmOverlay .popup {
   background:#0c1937;
@@ -208,7 +239,14 @@ body.menu-open .blur-layer { pointer-events:none; }
   border-radius:18px;
   text-align:center;
 }
-#confirmOverlay button { margin:10px; padding:10px 15px; border:none; border-radius:10px; cursor:pointer; font-weight:600; }
+#confirmOverlay button {
+  margin:10px;
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
 #confirmOverlay .yesBtn { background:green; color:white; }
 #confirmOverlay .noBtn { background:red; color:white; }
 </style>
@@ -229,7 +267,7 @@ body.menu-open .blur-layer { pointer-events:none; }
   <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
 </div>
 
-<div class="blur-layer"></div>
+<div id="blurLayer"></div>
 
 <div id="profilePic"></div>
 <div id="profilePanel">
@@ -297,14 +335,19 @@ const generatedLinksContainer = document.getElementById("generatedLinksContainer
 const confirmOverlay = document.getElementById("confirmOverlay");
 const yesBtn = confirmOverlay.querySelector(".yesBtn");
 const noBtn = confirmOverlay.querySelector(".noBtn");
+const blurLayer = document.getElementById("blurLayer");
 
 let cooldown = 0;
+let generatedLinks = JSON.parse(localStorage.getItem("generatedLinks")||"[]");
 
-// ==== PFP & Name EXACT dashboard logic ====
+function saveLinks(){localStorage.setItem("generatedLinks",JSON.stringify(generatedLinks));}
+
 function stringToColor(str){
   let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
   return `hsl(${h%360},70%,50%)`;
 }
+
+// ==== PFP & Name ====
 onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
   const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
@@ -331,19 +374,29 @@ closeMenu.onclick=()=>document.body.classList.remove("menu-open");
 window.navigateTo=page=>{document.body.classList.remove("menu-open"); setTimeout(()=>location.href=page,350);}
 window.logout=async()=>{await signOut(auth); location.href="login.html";}
 
-// LocalStorage links
-let generatedLinks = JSON.parse(localStorage.getItem("generatedLinks")||"[]");
-
-function saveLinks(){localStorage.setItem("generatedLinks",JSON.stringify(generatedLinks));}
-
+// Render generated cards
 function renderLinks(){
   generatedLinksContainer.innerHTML="";
   generatedLinks.forEach((item,index)=>{
     const card=document.createElement("div");
     card.className="generated-card";
-    card.innerHTML=`<div class="link-text">${item.proxy} - ${item.link}</div><button>Delete</button>`;
-    const btn=card.querySelector("button");
-    btn.onclick=()=>{
+    card.innerHTML=`
+      <h4>${item.proxy}</h4>
+      <div class="divider"></div>
+      <div class="link-text">${item.link}</div>
+      <div class="vote-buttons">
+        <button data-type="up" ${item.voted?"disabled":""}>👍 ${item.up||0}</button>
+        <button data-type="down" ${item.voted?"disabled":""}>👎 ${item.down||0}</button>
+      </div>
+      <button class="delete-btn">Delete</button>
+    `;
+    // vote buttons
+    const upBtn = card.querySelector("button[data-type='up']");
+    const downBtn = card.querySelector("button[data-type='down']");
+    upBtn.onclick=()=>vote(item,"up");
+    downBtn.onclick=()=>vote(item,"down");
+    // delete button
+    card.querySelector(".delete-btn").onclick=()=>{
       confirmOverlay.style.display="flex";
       yesBtn.onclick=()=>{
         generatedLinks.splice(index,1);
@@ -357,6 +410,15 @@ function renderLinks(){
   });
 }
 renderLinks();
+
+function vote(item,type){
+  if(item.voted) return;
+  if(type==="up") item.up=(item.up||0)+1;
+  else item.down=(item.down||0)+1;
+  item.voted=true;
+  saveLinks();
+  renderLinks();
+}
 
 // Generate logic with 20s cooldown
 function updateCooldown(){
@@ -375,7 +437,6 @@ generateBtn.onclick=()=>{
   if(cooldown>0) return;
   if(!proxySelect.value) return alert("Select a proxy");
 
-  // Fake progress
   progressContainer.style.display="block";
   progressBar.style.width="0%";
   progressText.textContent="Generating...";
@@ -393,7 +454,6 @@ generateBtn.onclick=()=>{
     }
   },100);
 
-  // Start cooldown
   cooldown=20;
   updateCooldown();
   const cdInterval=setInterval(()=>{
