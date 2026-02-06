@@ -17,8 +17,23 @@ body {
   justify-content:center;
   align-items:center;
   position:relative;
+  overflow:hidden;
 }
 
+/* Blur when menu open */
+body.menu-open .blur-layer {
+  backdrop-filter: blur(8px);
+  pointer-events:none;
+}
+
+/* Main blur wrapper */
+.blur-layer {
+  position:absolute;
+  inset:0;
+  z-index:1;
+}
+
+/* Card */
 .card {
   width:90vw;
   max-width:400px;
@@ -28,6 +43,8 @@ body {
   border-radius:20px;
   box-shadow:0 20px 60px rgba(0,0,0,.4);
   text-align:center;
+  position:relative;
+  z-index:2;
 }
 
 /* Profile pic */
@@ -81,9 +98,100 @@ body {
   cursor:pointer;
 }
 .primary { background:#4da3ff; color:black; }
-.remove { background:#ff4c4c; color:white; }
 
-/* Overlay */
+/* HAMBURGER MENU */
+#menuBtn {
+  position:fixed;
+  top:22px;
+  left:20px;
+  width:32px;
+  height:24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  cursor:pointer;
+  z-index:150;
+  transition:opacity .3s, transform .3s;
+}
+#menuBtn span {
+  height:4px;
+  background:white;
+  border-radius:4px;
+}
+body.menu-open #menuBtn {
+  opacity:0;
+  pointer-events:none;
+  transform:scale(0.8);
+}
+
+/* SIDE PANEL */
+#sidePanel {
+  position:fixed;
+  top:0;
+  left:-300px;
+  width:260px;
+  height:100%;
+  background:rgba(12,25,55,.95);
+  backdrop-filter:blur(16px);
+  padding:20px;
+  box-sizing:border-box;
+  z-index:200;
+  transition:left .35s ease;
+  display:flex;
+  flex-direction:column;
+}
+body.menu-open #sidePanel {
+  left:0;
+}
+
+/* Side panel header */
+#sidePanelHeader {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+#sidePanelHeader h3 {
+  margin:0 auto;
+}
+#closeMenu {
+  cursor:pointer;
+  font-size:1.4rem;
+}
+
+/* Divider */
+.divider {
+  height:1px;
+  background:rgba(255,255,255,.2);
+  margin:15px 0;
+}
+
+/* Search */
+#navSearch {
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,.08);
+  color:white;
+  margin-bottom:15px;
+}
+
+/* Tabs */
+.nav-tab {
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  margin-bottom:8px;
+  font-weight:600;
+}
+.nav-tab.active {
+  background:#4da3ff;
+  color:black;
+}
+.nav-tab:not(.active):hover {
+  background:rgba(255,255,255,.1);
+}
+
+/* Logout popup */
 .overlay {
   position:fixed;
   inset:0;
@@ -92,7 +200,7 @@ body {
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:200;
+  z-index:300;
 }
 .popup {
   width:90vw;
@@ -113,6 +221,29 @@ body {
 
 <body>
 
+<div id="menuBtn">
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+
+<div id="sidePanel">
+  <div id="sidePanelHeader">
+    <div></div>
+    <h3>Navigation</h3>
+    <div id="closeMenu">✕</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <input id="navSearch" placeholder="Search...">
+
+  <div class="nav-tab active">Dashboard</div>
+  <div class="nav-tab" onclick="location.replace('settings.html')">Settings</div>
+</div>
+
+<div class="blur-layer"></div>
+
 <div class="card">
   <h2 id="welcomeText">Welcome</h2>
 </div>
@@ -130,7 +261,7 @@ body {
     <span class="close" onclick="closeLogout()">✕</span>
     <h2>Confirm Logout</h2>
     <button class="primary" onclick="logout()">Yes</button>
-    <button class="remove" onclick="closeLogout()">No</button>
+    <button class="primary" onclick="closeLogout()">No</button>
   </div>
 </div>
 
@@ -148,14 +279,12 @@ const app = initializeApp({
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* Elements */
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
 const welcomeText = document.getElementById("welcomeText");
 const logoutOverlay = document.getElementById("logoutOverlay");
 
-/* Color */
 function stringToColor(str){
   let h=0;
   for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
@@ -173,11 +302,9 @@ onAuthStateChanged(auth, async user=>{
   welcomeText.textContent = `Welcome, ${username}`;
   profileName.textContent = username;
 
-  // Default letter
   profilePic.textContent = username[0].toUpperCase();
   profilePic.style.backgroundColor = stringToColor(username);
 
-  // Load saved PFP
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
     profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
@@ -185,12 +312,19 @@ onAuthStateChanged(auth, async user=>{
   }
 });
 
-/* Panel toggle */
-let open=false;
+/* Profile panel */
+let pOpen=false;
 profilePic.onclick=()=>{
-  open=!open;
-  profilePanel.style.display=open?"flex":"none";
+  pOpen=!pOpen;
+  profilePanel.style.display=pOpen?"flex":"none";
 };
+
+/* Menu */
+const menuBtn=document.getElementById("menuBtn");
+const closeMenu=document.getElementById("closeMenu");
+
+menuBtn.onclick=()=>document.body.classList.add("menu-open");
+closeMenu.onclick=()=>document.body.classList.remove("menu-open");
 
 /* Logout */
 window.confirmLogout=()=>logoutOverlay.style.display="flex";
@@ -199,7 +333,6 @@ window.logout=async()=>{
   await signOut(auth);
   location.replace("login.html");
 };
-
 window.openSettings=()=>location.replace("settings.html");
 </script>
 
