@@ -5,14 +5,78 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chat</title>
 <style>
-body { margin:0; font-family:system-ui,sans-serif; background:#0b1e3d; color:#e6f0ff; }
-#chatWrapper { max-width:600px; margin:100px auto 80px auto; display:flex; flex-direction:column; gap:10px; }
-.message { display:flex; gap:10px; align-items:flex-start; background:rgba(12,25,55,.7); padding:10px; border-radius:12px; }
-.message .pfp { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; background:#4da3ff; }
-.message .content { display:flex; flex-direction:column; }
-#chatInputWrapper { position:fixed; bottom:0; left:0; width:100%; display:flex; gap:10px; padding:10px; background:rgba(12,25,55,.85); }
-#chatInput { flex:1; padding:12px; border-radius:12px; border:none; font-size:1rem; }
-#sendBtn { padding:12px 16px; border:none; border-radius:12px; background:#4da3ff; color:black; cursor:pointer; font-weight:bold; }
+html, body {
+  margin:0;
+  padding:0;
+  min-height:100%;
+  font-family:system-ui,sans-serif;
+  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
+  color:#e6f0ff;
+}
+#chatWrapper {
+  max-width:600px;
+  width:90%;
+  margin:50px auto 80px auto;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.message {
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  background:rgba(12,25,55,.7);
+  padding:10px;
+  border-radius:15px;
+  word-wrap:break-word;
+}
+.message .pfp {
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  flex-shrink:0;
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  color:white;
+}
+.message .content {
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.message .username { font-weight:600; }
+#chatInputWrapper {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  display:flex;
+  gap:10px;
+  padding:10px;
+  background:rgba(12,25,55,.85);
+}
+#chatInput {
+  flex:1;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  font-size:1rem;
+  outline:none;
+}
+#sendBtn {
+  padding:12px 16px;
+  border:none;
+  border-radius:12px;
+  background:#4da3ff;
+  color:black;
+  cursor:pointer;
+  font-size:1.2rem;
+  font-weight:bold;
+}
 </style>
 </head>
 <body>
@@ -20,23 +84,22 @@ body { margin:0; font-family:system-ui,sans-serif; background:#0b1e3d; color:#e6
 <div id="chatWrapper"></div>
 
 <div id="chatInputWrapper">
-  <input type="text" id="chatInput" placeholder="Type here..">
-  <button id="sendBtn">Send</button>
+  <input type="text" id="chatInput" placeholder="Type a message...">
+  <button id="sendBtn">➤</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-/* Firebase config */
 const firebaseConfig = {
-  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app",
-  messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41"
+  apiKey: "AIzaSyCShLuRlublVM7uQFjz_PBkccfUYtZtqX4",
+  authDomain: "chat-73bb5.firebaseapp.com",
+  projectId: "chat-73bb5",
+  storageBucket: "chat-73bb5.firebasestorage.app",
+  messagingSenderId: "51044229369",
+  appId: "1:51044229369:web:31f1266910379d05684228",
+  measurementId: "G-H8FM4F0MSQ"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -46,49 +109,46 @@ const chatWrapper = document.getElementById("chatWrapper");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
 
-/* Helper for PFP color */
+let username = prompt("Enter your name") || "Guest";
+
 function stringToColor(str){
   let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
   let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
   return color;
 }
 
-/* Chat sending */
-let username = "Guest";
-sendBtn.onclick = async ()=>{
+async function sendMessage() {
   const text = chatInput.value.trim();
   if(!text) return;
-  chatInput.value="";
-  await addDoc(collection(db,"chat"),{
+  chatInput.value = "";
+  await addDoc(collection(db,"messages"),{
     user: username,
     message: text,
-    pfp: "", // leave empty or put a URL
+    pfp: ""
   });
-};
+}
 
-/* Real-time messages without timestamp */
-onSnapshot(collection(db,"chat"), snap=>{
-  chatWrapper.innerHTML="";
-  snap.docs.forEach(d=>{
-    const data = d.data();
+sendBtn.onclick = sendMessage;
+chatInput.addEventListener("keypress", e => { if(e.key==="Enter") sendMessage(); });
+
+const q = query(collection(db,"messages"), orderBy("user")); // simple ordering
+onSnapshot(q, snapshot => {
+  chatWrapper.innerHTML = "";
+  snapshot.docs.forEach(doc => {
+    const data = doc.data();
     const msgDiv = document.createElement("div");
     msgDiv.className = "message";
-
     const pfpDiv = document.createElement("div");
     pfpDiv.className = "pfp";
-    if(data.pfp) pfpDiv.style.backgroundImage = `url(${data.pfp})`;
-    else { pfpDiv.textContent = data.user.charAt(0).toUpperCase(); pfpDiv.style.backgroundColor = stringToColor(data.user); }
-
+    pfpDiv.textContent = data.user.charAt(0).toUpperCase();
+    pfpDiv.style.backgroundColor = stringToColor(data.user.toLowerCase());
     const contentDiv = document.createElement("div");
     contentDiv.className = "content";
-
     const userDiv = document.createElement("div");
+    userDiv.className = "username";
     userDiv.textContent = data.user;
-    userDiv.style.fontWeight="bold";
-
     const textDiv = document.createElement("div");
     textDiv.textContent = data.message;
-
     contentDiv.append(userDiv, textDiv);
     msgDiv.append(pfpDiv, contentDiv);
     chatWrapper.appendChild(msgDiv);
