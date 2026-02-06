@@ -39,7 +39,7 @@ html, body {
   left:-300px;
   width:260px;
   height:100%;
-  background:#0c1937; /* non-transparent */
+  background:#0c1937;
   padding:20px;
   box-sizing:border-box;
   z-index:200;
@@ -415,12 +415,51 @@ noBtn.onclick=()=>{
   confirmOverlay.style.display="none";
 };
 
-// Generate logic with 20s cooldown
+// ==== Proxy tables ====
+const proxyLinks = {
+  Rammerhead: [
+    "https://rammerhead1.com",
+    "https://rammerhead2.com",
+    "https://rammerhead3.com"
+  ],
+  Space: [
+    "https://space1.com",
+    "https://space2.com"
+  ],
+  Shuttle: [
+    "https://shuttle1.com",
+    "https://shuttle2.com",
+    "https://shuttle3.com"
+  ],
+  Doge: [
+    "https://doge1.com",
+    "https://doge2.com"
+  ],
+  Bolt: [
+    "https://bolt1.com",
+    "https://bolt2.com"
+  ],
+  Shadow: [
+    "https://shadow1.com",
+    "https://shadow2.com"
+  ],
+  Ghost: [
+    "https://ghost1.com",
+    "https://ghost2.com"
+  ]
+};
+
+// Generate logic with random selection
 generateBtn.onclick = ()=>{
   const now = Date.now();
   if(cooldown>0) return;
   const selected = proxySelect.value;
   if(!selected) return alert("Select a proxy");
+
+  if(!proxyLinks[selected] || proxyLinks[selected].length===0){
+    alert("No links available for this proxy");
+    return;
+  }
 
   cooldown = 20;
   generateBtn.disabled=true;
@@ -461,21 +500,12 @@ generateBtn.onclick = ()=>{
     }
     if(progress>=100){
       clearInterval(interval);
-      const stockLinks = [
-        "https://proxy1.com/"+selected,
-        "https://proxy2.com/"+selected,
-        "https://proxy3.com/"+selected
-      ];
-      const inStock = Math.random()>0.3;
-      if(!inStock){
-        progressText.textContent="Failed to generate: no stock";
-      } else {
-        progressText.textContent="Successfully generated";
-        const link = stockLinks[Math.floor(Math.random()*stockLinks.length)];
-        generatedLinks.unshift({proxy:selected,link:link});
-        saveLinks();
-        renderGeneratedLinks();
-      }
+      const linksArray = proxyLinks[selected];
+      const link = linksArray[Math.floor(Math.random()*linksArray.length)];
+      progressText.textContent="Successfully generated";
+      generatedLinks.unshift({proxy:selected,link:link});
+      saveLinks();
+      renderGeneratedLinks();
     }
   },200);
 };
