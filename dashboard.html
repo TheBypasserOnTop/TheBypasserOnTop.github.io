@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 <link rel="icon" href="favicon.ico">
-
 <style>
 body {
   margin:0;
@@ -13,30 +12,28 @@ body {
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   font-family:system-ui,sans-serif;
   color:#e6f0ff;
-  overflow-x:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
 }
-
-/* CARD */
 .card {
-  width:90%;
+  width:90vw;
   max-width:400px;
-  padding:25px;
+  padding:30px;
   background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
-  border-radius:16px;
-  box-shadow:0 15px 40px rgba(0,0,0,.4);
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
   text-align:center;
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
 }
+h2 { margin-bottom:20px; }
 
-/* PROFILE PICTURE */
+/* Profile pic top-right */
 #profilePic {
   position:fixed;
-  top:15px;
-  right:15px;
+  top:20px;
+  right:20px;
   width:50px;
   height:50px;
   border-radius:50%;
@@ -44,39 +41,49 @@ body {
   justify-content:center;
   align-items:center;
   font-weight:bold;
-  font-size:1.2rem;
-  cursor:pointer;
+  font-size:1.3rem;
   color:white;
+  cursor:pointer;
+  user-select:none;
+  z-index:100;
+  background-size:cover;
+  background-position:center;
 }
 
-/* PROFILE PANEL */
+/* Profile panel */
 #profilePanel {
   position:fixed;
-  top:75px;
-  right:15px;
-  background:rgba(12,25,55,0.85);
-  backdrop-filter:blur(12px);
+  top:80px;
+  right:20px;
+  width:180px;
+  background:rgba(12,25,55,.85);
+  backdrop-filter:blur(8px);
   border-radius:14px;
   display:none;
   flex-direction:column;
   padding:10px;
-  width:180px;
-  box-shadow:0 10px 30px rgba(0,0,0,.3);
-  z-index:10;
+  z-index:100;
 }
-#profilePanel .accountName { font-weight:bold; padding:5px 0; text-align:center; border-bottom:1px solid rgba(255,255,255,.2); margin-bottom:5px; }
+#profilePanel h4 {
+  margin:0 0 8px 0;
+  font-size:1rem;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+  padding-bottom:5px;
+}
 #profilePanel button {
+  width:100%;
   margin:5px 0;
-  padding:8px;
+  padding:10px;
   border:none;
   border-radius:10px;
-  font-weight:bold;
+  font-weight:600;
   cursor:pointer;
 }
-#profilePanel .primary { background:#4da3ff; color:black; }
-#profilePanel .settings { background:#888cff; color:black; }
+.primary { background:#4da3ff; color:black; }
+.remove { background:#ff4c4c; color:white; }
 
-/* LOGOUT POPUP */
+/* Overlay popups */
 .overlay {
   position:fixed;
   inset:0;
@@ -85,7 +92,7 @@ body {
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:20;
+  z-index:200;
 }
 .popup {
   width:90vw;
@@ -94,37 +101,45 @@ body {
   padding:30px;
   border-radius:20px;
   text-align:center;
+  position:relative;
 }
-.close { float:right; cursor:pointer; }
-button { cursor:pointer; font-weight:bold; border:none; border-radius:10px; padding:10px; margin-top:10px; }
-button.primary { background:#4da3ff; color:black; }
-button.remove { background:#ff4c4c; color:white; }
+.close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.2rem; }
+.error { color:#ff6b6b; margin-top:10px; min-height:1.2em; text-align:left; }
 </style>
 </head>
 <body>
 
-<!-- Profile Picture -->
-<div id="profilePic"></div>
-
-<!-- Card -->
 <div class="card">
   <h2 id="welcomeText">Welcome</h2>
 </div>
 
-<!-- Profile Panel -->
+<!-- Profile pic top-right -->
+<div id="profilePic"></div>
 <div id="profilePanel">
-  <div class="accountName" id="panelUsername"></div>
-  <button class="primary" id="logoutBtn">Logout</button>
-  <button class="settings" id="settingsBtn">Settings</button>
+  <h4 id="profileName">Username</h4>
+  <button class="primary" onclick="openSettings()">Settings</button>
+  <button class="primary" onclick="confirmLogout()">Logout</button>
 </div>
 
-<!-- Logout Popup -->
+<!-- REMOVE ACCOUNT POPUP -->
+<div class="overlay" id="removeOverlay">
+  <div class="popup">
+    <span class="close" onclick="closeRemoveAccount()">✕</span>
+    <h2>Remove Account</h2>
+    <p>Enter your password to confirm:</p>
+    <input type="password" id="removePassword" placeholder="Password">
+    <div class="error" id="removeError"></div>
+    <button class="remove" onclick="removeAccount()">Yes, Remove</button>
+  </div>
+</div>
+
+<!-- LOGOUT CONFIRM POPUP -->
 <div class="overlay" id="logoutOverlay">
   <div class="popup">
     <span class="close" onclick="closeLogout()">✕</span>
-    <h2>Logout</h2>
+    <h2>Confirm Logout</h2>
     <p>Are you sure you want to logout?</p>
-    <button class="primary" onclick="confirmLogout()">Yes</button>
+    <button class="primary" onclick="logout()">Yes</button>
     <button class="remove" onclick="closeLogout()">No</button>
   </div>
 </div>
@@ -132,9 +147,10 @@ button.remove { background:#ff4c4c; color:white; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, query, collection, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
+/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
   authDomain: "login-34954.firebaseapp.com",
@@ -145,54 +161,104 @@ const firebaseConfig = {
   measurementId: "G-1MMT3C4M7K"
 };
 
+/* Init Firebase */
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* Elements */
+const welcomeText = document.getElementById("welcomeText");
+const removeOverlay = document.getElementById("removeOverlay");
+const removePassword = document.getElementById("removePassword");
+const removeError = document.getElementById("removeError");
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
-const panelUsername = document.getElementById("panelUsername");
-const welcomeText = document.getElementById("welcomeText");
+const profileName = document.getElementById("profileName");
 const logoutOverlay = document.getElementById("logoutOverlay");
-const logoutBtn = document.getElementById("logoutBtn");
-const settingsBtn = document.getElementById("settingsBtn");
 
-let currentUser;
-let username = "";
+/* Consistent color for user letter */
+function stringToColor(str){
+  let hash=0;
+  for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash); }
+  let color='#';
+  for(let i=0;i<3;i++){
+    const value=(hash>>(i*8))&0xFF;
+    color+=('00'+value.toString(16)).slice(-2);
+  }
+  return color;
+}
 
-/* Load user */
+/* Auth check */
 onAuthStateChanged(auth, async (user)=>{
   if(!user) location.replace("login.html");
-  currentUser = user;
+  let username = user.displayName;
+  if(!username){
+    const q=query(collection(db,"usernames"),where("uid","==",user.uid));
+    const snap=await getDocs(q);
+    if(!snap.empty) username=snap.docs[0].id;
+    else username=user.email.split("@")[0];
+  }
+  welcomeText.textContent=`Welcome, ${username}`;
+  profileName.textContent=username;
 
-  // Get username from Firestore if not displayName
-  const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",user.uid)));
-  if(!snap.empty) username = snap.docs[0].id;
-  else username = user.displayName || user.email.split("@")[0];
-
-  welcomeText.textContent = `Welcome, ${username}`;
-  panelUsername.textContent = username;
-
-  // PFP: first letter + color
-  const firstLetter = username.charAt(0).toUpperCase();
-  profilePic.textContent = firstLetter;
-  const hash = username.split("").reduce((a,c)=>a+c.charCodeAt(0)+(a<<5),0);
-  profilePic.style.background = `hsl(${hash%360},65%,50%)`;
+  // Load PFP if saved
+  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
+  if(pfpDoc.exists() && pfpDoc.data().data){
+    const pfpData = pfpDoc.data().data;
+    profilePic.style.backgroundImage = `url(${pfpData})`;
+    profilePic.textContent = "";
+  } else {
+    profilePic.style.backgroundImage = "";
+    profilePic.textContent = username.charAt(0).toUpperCase();
+    profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
+  }
 });
 
 /* Toggle profile panel */
-profilePic.addEventListener("click", ()=>profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex");
+let panelOpen=false;
+profilePic.addEventListener("click", ()=>{
+  panelOpen=!panelOpen;
+  profilePanel.style.display=panelOpen?"flex":"none";
+});
 
-/* Logout popup */
-logoutBtn.addEventListener("click", ()=>logoutOverlay.style.display="flex");
-function closeLogout(){ logoutOverlay.style.display="none"; }
-async function confirmLogout(){ await signOut(auth); location.replace("login.html"); }
+/* Logout */
+window.confirmLogout=()=>{ logoutOverlay.style.display="flex"; };
+window.closeLogout=()=>{ logoutOverlay.style.display="none"; };
+window.logout=async ()=>{
+  await signOut(auth);
+  location.replace("login.html");
+};
 
-/* Settings button */
-settingsBtn.addEventListener("click", ()=>location.replace("settings.html"));
+/* Remove Account */
+window.openRemoveAccount=()=>{
+  removeOverlay.style.display="flex";
+  removePassword.value="";
+  removeError.textContent="";
+};
+window.closeRemoveAccount=()=>{ removeOverlay.style.display="none"; };
+window.removeAccount=async ()=>{
+  const pass=removePassword.value;
+  removeError.textContent="";
+  if(!pass){ removeError.textContent="Enter password"; return; }
+  const user = auth.currentUser;
+  if(!user){ removeError.textContent="No user logged in"; return; }
+  try{
+    const cred = EmailAuthProvider.credential(user.email, pass);
+    await reauthenticateWithCredential(user,cred);
+
+    const q=query(collection(db,"usernames"),where("uid","==",user.uid));
+    const snap=await getDocs(q);
+    snap.forEach(async d=>await deleteDoc(doc(db,"usernames",d.id)));
+
+    await deleteUser(user);
+    location.replace("login.html");
+  }catch(e){ console.error(e); removeError.textContent=e.message; }
+};
+
+/* Open settings */
+window.openSettings=()=>{ location.replace("settings.html"); };
+
 </script>
-
 </body>
 </html>
