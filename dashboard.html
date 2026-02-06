@@ -18,10 +18,8 @@
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        /* Page Exit Animation */
         body.leaving { opacity: 0; transform: translateY(-20px); }
 
-        /* Slow Gradient Title */
         .gradient-text {
             background: linear-gradient(to right, #ffffff 0%, #a855f7 25%, #3b82f6 50%, #a855f7 75%, #ffffff 100%);
             background-size: 200% auto;
@@ -35,14 +33,14 @@
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 12px white; } }
 
-        /* Sidebar - Clean & Minimal */
+        /* Sidebar - Glassy & Refined */
         #sidePanel {
             position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
-            background: rgba(5, 5, 20, 0.95);
-            backdrop-filter: blur(40px);
+            background: rgba(10, 10, 25, 0.75); /* Transparent */
+            backdrop-filter: blur(35px); /* Blurred */
             border-right: 1px solid var(--border);
             z-index: 200;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             padding: 2.5rem;
         }
         body.menu-open #sidePanel { transform: translateX(320px); }
@@ -51,32 +49,39 @@
             padding: 1rem; border-radius: 12px; margin-bottom: 0.5rem;
             transition: 0.3s; color: rgba(255,255,255,0.4);
             cursor: pointer; font-size: 0.9rem; font-weight: 600;
-            letter-spacing: 0.05em;
         }
         .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
         .nav-item.active { color: white; background: var(--accent); }
 
-        /* Scroll Animations Fix */
+        /* Scroll Animations */
         .scroll-card {
             opacity: 0;
             transform: translateY(30px);
-            transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-            will-change: opacity, transform;
+            transition: opacity 1s ease, transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .scroll-card.revealed {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
+        .scroll-card.revealed { opacity: 1; transform: translateY(0); }
+
+        /* Floating Scroll Hint */
+        .scroll-hint {
+            position: absolute; bottom: 40px; left: 50%;
+            transform: translateX(-50%);
+            animation: bounceUpDown 2s ease-in-out infinite;
+        }
+        @keyframes bounceUpDown {
+            0%, 100% { transform: translate(-50%, 0); opacity: 0.3; }
+            50% { transform: translate(-50%, -15px); opacity: 0.7; }
         }
 
         /* Profile Dropdown */
         #profileDropdown {
-            position: absolute; top: 80px; right: 0; width: 200px;
+            position: absolute; top: 70px; right: 0; width: 220px;
             display: none; flex-direction: column; z-index: 100;
             background: rgba(10, 10, 25, 0.9);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 0.5rem;
+            border-radius: 20px;
+            padding: 1rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
         .overlay-bg {
@@ -98,7 +103,12 @@
     
     <div class="relative">
         <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center"></div>
+        
         <div id="profileDropdown">
+            <div class="px-3 pb-3 mb-3 border-b border-white/5">
+                <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">---</p>
+                <p class="text-[8px] text-white/20 font-bold tracking-widest uppercase">Verified Access</p>
+            </div>
             <button onclick="animateNav('settings.html')" class="w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition">Settings</button>
             <button onclick="confirmLogout()" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold transition">Logout</button>
         </div>
@@ -106,10 +116,9 @@
 </nav>
 
 <aside id="sidePanel" class="flex flex-col">
-    <div class="flex justify-between items-center mb-12">
+    <div class="mb-8">
         <h1 class="text-xl font-black gradient-text tracking-widest">COSMIC</h1>
-        <button onclick="toggleMenu()" class="text-white/20 hover:text-white text-xl">✕</button>
-    </div>
+        <div class="h-px w-full bg-white/5 mt-4"></div> </div>
     
     <nav class="flex-1">
         <div class="nav-item active">Dashboard</div>
@@ -117,19 +126,20 @@
         <div class="nav-item" onclick="animateNav('settings.html')">Settings</div>
     </nav>
     
-    <div class="mt-auto border-t border-white/5 pt-6">
+    <div class="mt-auto pt-6 border-t border-white/5">
         <button onclick="confirmLogout()" class="w-full text-left p-4 text-red-500/60 hover:text-red-500 text-xs font-bold uppercase tracking-widest transition">Logout System</button>
     </div>
+    
+    <button onclick="toggleMenu()" class="absolute top-8 right-8 text-white/20 hover:text-white transition">✕</button>
 </aside>
 
 <section class="h-screen flex flex-col items-center justify-center text-center">
     <div class="p-12 max-w-2xl">
         <h2 id="welcomeText" class="text-6xl md:text-7xl font-black mb-6 tracking-tighter uppercase">Welcome</h2>
-        <div class="h-px w-32 bg-white/10 mx-auto mb-6"></div>
-        <p class="text-white/20 uppercase tracking-[0.6em] text-[10px] font-bold">Terminal Identity Synchronized</p>
+        <div class="h-px w-32 bg-white/10 mx-auto mb-6"></div> <p class="text-white/20 uppercase tracking-[0.6em] text-[10px] font-bold">Terminal Identity Synchronized</p>
     </div>
     
-    <div class="absolute bottom-12 w-full flex flex-col items-center opacity-30">
+    <div class="scroll-hint flex flex-col items-center">
         <p class="text-[9px] uppercase tracking-[0.4em] font-bold mb-4">Explore Terminal</p>
         <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
     </div>
@@ -171,20 +181,27 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Sync PFP and Username with Firebase
     onAuthStateChanged(auth, async user => {
         if (!user) location.replace("login.html");
+        
+        // Fetch custom username
         const snap = await getDocs(query(collection(db, "usernames"), where("uid", "==", user.uid)));
-        const username = !snap.empty ? snap.docs[0].id : "User";
+        const username = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
+        
         document.getElementById("welcomeText").textContent = `Welcome, ${username}`;
+        document.getElementById("profileUserText").textContent = username;
         
         const pfp = document.getElementById("profilePic");
-        pfp.textContent = username[0].toUpperCase();
-        pfp.style.backgroundColor = `hsl(${username.length * 50}, 40%, 30%)`;
-
+        
+        // Fetch custom PFP from Firestore
         const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
-        if(pfpDoc.exists()) {
+        if(pfpDoc.exists() && pfpDoc.data().data) {
             pfp.style.backgroundImage = `url(${pfpDoc.data().data})`;
             pfp.textContent = "";
+        } else {
+            pfp.textContent = username[0].toUpperCase();
+            pfp.style.backgroundColor = `hsl(${username.length * 50}, 40%, 30%)`;
         }
     });
 
@@ -208,21 +225,19 @@
         location.href = "login.html";
     };
 
-    // --- NAVIGATION ANIMATION ---
+    // Tab Animation & Redirect
     window.animateNav = (url) => {
-        document.body.classList.remove("menu-open");
-        document.body.classList.add("leaving");
+        document.body.classList.remove("menu-open"); // Close menu UI
+        document.body.classList.add("leaving"); // Slide/Fade out effect
         setTimeout(() => { location.href = url; }, 500);
     };
 
-    // --- SCROLL ANIMATIONS (FIXED) ---
+    // Intersection Observer for Card Fades
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("revealed");
-            }
+            if (entry.isIntersecting) entry.target.classList.add("revealed");
         });
-    }, { threshold: 0.2 });
+    }, { threshold: 0.1 });
 
     document.querySelectorAll(".scroll-card").forEach(card => observer.observe(card));
 
@@ -231,8 +246,7 @@
     for (let i = 0; i < 150; i++) {
         const star = document.createElement('div');
         star.className = 'star';
-        const size = Math.random() * 2 + 1;
-        star.style.width = star.style.height = `${size}px`;
+        star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
         star.style.left = `${Math.random() * 100}%`; 
         star.style.top = `${Math.random() * 100}%`;
         star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
