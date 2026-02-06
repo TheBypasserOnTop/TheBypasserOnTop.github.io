@@ -30,12 +30,7 @@ html, body {
   cursor:pointer;
   z-index:150;
 }
-#menuBtn span {
-  height:4px;
-  background:white;
-  border-radius:4px;
-}
-body.menu-open #menuBtn {opacity:0;pointer-events:none;}
+#menuBtn span { height:4px; background:white; border-radius:4px; }
 
 /* Side panel */
 #sidePanel {
@@ -44,17 +39,17 @@ body.menu-open #menuBtn {opacity:0;pointer-events:none;}
   left:-300px;
   width:260px;
   height:100%;
-  background:#0a1e46; /* fully opaque */
+  background:#0c1937; /* non-transparent */
   padding:20px;
   box-sizing:border-box;
   z-index:200;
   transition:left .35s ease;
+  display:flex;
+  flex-direction:column;
 }
 body.menu-open #sidePanel { left:0; }
 
-/* Background blur when menu open */
-body.menu-open #blurLayer { backdrop-filter:blur(8px); pointer-events:auto; }
-
+/* Side panel header */
 #sidePanelHeader {
   display:flex;
   justify-content:space-between;
@@ -62,6 +57,10 @@ body.menu-open #blurLayer { backdrop-filter:blur(8px); pointer-events:auto; }
 }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
 
+/* Divider */
+.divider { height:1px; background:rgba(255,255,255,.2); margin:10px 0; }
+
+/* Tabs */
 .nav-tab {
   padding:12px;
   border-radius:10px;
@@ -70,13 +69,15 @@ body.menu-open #blurLayer { backdrop-filter:blur(8px); pointer-events:auto; }
   font-weight:600;
 }
 .nav-tab.active { background:#4da3ff; color:black; }
+.nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
 
 /* Blur layer */
-#blurLayer {
+.blur-layer {
   position:absolute;
   inset:0;
   z-index:5;
 }
+body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 
 /* Profile pic */
 #profilePic {
@@ -105,7 +106,7 @@ body.menu-open #blurLayer { backdrop-filter:blur(8px); pointer-events:auto; }
   top:80px;
   right:20px;
   width:180px;
-  background:rgba(12,25,55,0.85);
+  background:#0c1937;
   border-radius:14px;
   display:none;
   flex-direction:column;
@@ -166,7 +167,7 @@ body.menu-open #blurLayer { backdrop-filter:blur(8px); pointer-events:auto; }
   transition:width .1s linear;
 }
 
-/* Progress text */
+/* Fake progress text */
 #progressText {
   margin-top:10px;
   font-family:monospace;
@@ -176,12 +177,8 @@ body.menu-open #blurLayer { backdrop-filter:blur(8px); pointer-events:auto; }
 }
 
 /* Generated links */
-#generatedSection {
-  margin-top:30px;
-}
-#generatedSection h3 {
-  margin-bottom:5px;
-}
+#generatedSection { margin-top:30px; }
+#generatedSection h3 { margin-bottom:5px; }
 .generated-card {
   background:rgba(12,25,55,.7);
   padding:15px;
@@ -189,66 +186,38 @@ body.menu-open #blurLayer { backdrop-filter:blur(8px); pointer-events:auto; }
   border-radius:14px;
   position:relative;
 }
-.generated-card h4 {
-  margin:0;
-}
-.generated-card .divider {
-  height:1px;
-  background:rgba(255,255,255,.2);
-  margin:8px 0;
-}
-.generated-card .link-text {
-  word-break:break-all;
-  margin-bottom:8px;
-}
-.generated-card .vote-buttons button {
-  margin-right:8px;
-  padding:5px 10px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:600;
-  background:#4da3ff;
-  color:black;
-}
-.generated-card .delete-btn {
-  position:absolute;
-  top:15px;
-  right:15px;
-  padding:5px 10px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:600;
-  background:red;
-  color:white;
-}
+.generated-card .divider { margin:10px 0; height:1px; background:rgba(255,255,255,.2); }
+.generated-card .link-text { word-break: break-all; margin-bottom:8px; }
+.generated-card .vote-buttons { margin-top:5px; }
+.generated-card .vote-buttons button { margin-right:8px; padding:5px 10px; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
+.generated-card .delete-btn { position:absolute; top:10px; right:10px; padding:5px 10px; border:none; border-radius:8px; cursor:pointer; background:#ff4c4c; color:white; font-weight:600; }
+
+/* Confirm overlay */
 #confirmOverlay {
-  display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.6);
-  z-index:500;
+  background:rgba(0,0,0,.45);
+  display:none;
   justify-content:center;
   align-items:center;
-  display:flex;
+  z-index:300;
 }
-#confirmOverlay .popup {
+#confirmBox {
   background:#0c1937;
   padding:25px;
   border-radius:18px;
   text-align:center;
 }
-#confirmOverlay button {
-  margin:10px;
-  padding:10px 15px;
+#confirmBox button {
+  margin:10px 8px 0 8px;
+  padding:8px 14px;
   border:none;
   border-radius:10px;
   cursor:pointer;
   font-weight:600;
 }
-#confirmOverlay .yesBtn { background:green; color:white; }
-#confirmOverlay .noBtn { background:red; color:white; }
+#confirmBox .yes { background:#4da3ff; color:black; }
+#confirmBox .no { background:#ff4c4c; color:white; }
 </style>
 </head>
 <body>
@@ -267,7 +236,7 @@ body.menu-open #blurLayer { backdrop-filter:blur(8px); pointer-events:auto; }
   <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
 </div>
 
-<div id="blurLayer"></div>
+<div class="blur-layer"></div>
 
 <div id="profilePic"></div>
 <div id="profilePanel">
@@ -302,11 +271,12 @@ body.menu-open #blurLayer { backdrop-filter:blur(8px); pointer-events:auto; }
   </div>
 </div>
 
+<!-- Confirm delete overlay -->
 <div id="confirmOverlay">
-  <div class="popup">
-    <p>Are you sure you want to permanently delete this link?</p>
-    <button class="yesBtn">Yes</button>
-    <button class="noBtn">No</button>
+  <div id="confirmBox">
+    <div>Are you sure you want to delete this link?</div>
+    <button class="yes">Yes</button>
+    <button class="no">No</button>
   </div>
 </div>
 
@@ -316,12 +286,12 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain:"login-34954.firebaseapp.com",
-  projectId:"login-34954"
+  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain: "login-34954.firebaseapp.com",
+  projectId: "login-34954"
 });
-const auth=getAuth(app);
-const db=getFirestore(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
@@ -332,53 +302,69 @@ const progressContainer = document.getElementById("progressContainer");
 const progressBar = document.getElementById("progressBar");
 const progressText = document.getElementById("progressText");
 const generatedLinksContainer = document.getElementById("generatedLinksContainer");
+
 const confirmOverlay = document.getElementById("confirmOverlay");
-const yesBtn = confirmOverlay.querySelector(".yesBtn");
-const noBtn = confirmOverlay.querySelector(".noBtn");
-const blurLayer = document.getElementById("blurLayer");
-
-let cooldown = 0;
-let generatedLinks = JSON.parse(localStorage.getItem("generatedLinks")||"[]");
-
-function saveLinks(){localStorage.setItem("generatedLinks",JSON.stringify(generatedLinks));}
+const yesBtn = confirmOverlay.querySelector(".yes");
+const noBtn = confirmOverlay.querySelector(".no");
 
 function stringToColor(str){
   let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
   return `hsl(${h%360},70%,50%)`;
 }
 
-// ==== PFP & Name ====
+// ==== PFP & Name logic ====
 onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
+
   const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
   const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
-  profileName.textContent=username;
-  profilePic.textContent=username[0].toUpperCase();
-  profilePic.style.backgroundColor=stringToColor(username);
-  profilePic.style.backgroundImage="";
+
+  profileName.textContent = username;
+  profilePic.textContent = username[0].toUpperCase();
+  profilePic.style.backgroundColor = stringToColor(username);
+  profilePic.style.backgroundImage = "";
+
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
-    profilePic.style.backgroundImage=`url(${pfpDoc.data().data})`;
-    profilePic.textContent="";
+    profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
+    profilePic.textContent = "";
   }
 });
 
 // Profile panel toggle
-profilePic.onclick=()=>profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex";
+profilePic.onclick = () => {
+  profilePanel.style.display =
+    profilePanel.style.display === "flex" ? "none" : "flex";
+};
 
-// Menu toggle
-menuBtn.onclick=()=>document.body.classList.add("menu-open");
-closeMenu.onclick=()=>document.body.classList.remove("menu-open");
+// Menu open/close
+menuBtn.onclick = () => document.body.classList.add("menu-open");
+closeMenu.onclick = () => document.body.classList.remove("menu-open");
 
-// Navigation & logout
-window.navigateTo=page=>{document.body.classList.remove("menu-open"); setTimeout(()=>location.href=page,350);}
-window.logout=async()=>{await signOut(auth); location.href="login.html";}
+// Navigation
+window.navigateTo = page => {
+  document.body.classList.remove("menu-open");
+  setTimeout(()=>location.href=page,350);
+};
+window.logout = async () => { await signOut(auth); location.href="login.html"; };
 
-// Render generated cards
-function renderLinks(){
+// LocalStorage for generated links and cooldown
+let generatedLinks = JSON.parse(localStorage.getItem("generatedLinks")||"[]");
+let lastGenerated = parseInt(localStorage.getItem("lastGenerated")||0);
+
+let cooldown = 0;
+let cooldownInterval = null;
+
+function saveLinks() {
+  localStorage.setItem("generatedLinks", JSON.stringify(generatedLinks));
+}
+
+let deleteIndex = null;
+
+function renderGeneratedLinks(){
   generatedLinksContainer.innerHTML="";
   generatedLinks.forEach((item,index)=>{
-    const card=document.createElement("div");
+    const card = document.createElement("div");
     card.className="generated-card";
     card.innerHTML=`
       <h4>${item.proxy}</h4>
@@ -390,26 +376,20 @@ function renderLinks(){
       </div>
       <button class="delete-btn">Delete</button>
     `;
-    // vote buttons
     const upBtn = card.querySelector("button[data-type='up']");
     const downBtn = card.querySelector("button[data-type='down']");
-    upBtn.onclick=()=>vote(item,"up");
-    downBtn.onclick=()=>vote(item,"down");
-    // delete button
+    upBtn.onclick = ()=>vote(item,"up");
+    downBtn.onclick = ()=>vote(item,"down");
+
     card.querySelector(".delete-btn").onclick=()=>{
+      deleteIndex=index;
       confirmOverlay.style.display="flex";
-      yesBtn.onclick=()=>{
-        generatedLinks.splice(index,1);
-        saveLinks();
-        renderLinks();
-        confirmOverlay.style.display="none";
-      }
-      noBtn.onclick=()=>confirmOverlay.style.display="none";
     };
+
     generatedLinksContainer.appendChild(card);
   });
 }
-renderLinks();
+renderGeneratedLinks();
 
 function vote(item,type){
   if(item.voted) return;
@@ -417,51 +397,89 @@ function vote(item,type){
   else item.down=(item.down||0)+1;
   item.voted=true;
   saveLinks();
-  renderLinks();
+  renderGeneratedLinks();
 }
+
+// Confirm delete overlay
+yesBtn.onclick=()=>{
+  if(deleteIndex!==null){
+    generatedLinks.splice(deleteIndex,1);
+    saveLinks();
+    renderGeneratedLinks();
+    deleteIndex=null;
+  }
+  confirmOverlay.style.display="none";
+};
+noBtn.onclick=()=>{
+  deleteIndex=null;
+  confirmOverlay.style.display="none";
+};
 
 // Generate logic with 20s cooldown
-function updateCooldown(){
-  if(cooldown>0){
-    generateBtn.textContent=`Cooldown (${cooldown}s)`;
-    generateBtn.style.background="gray";
-    generateBtn.disabled=true;
-  }else{
-    generateBtn.textContent="Generate link";
-    generateBtn.style.background="#4da3ff";
-    generateBtn.disabled=false;
-  }
-}
-
-generateBtn.onclick=()=>{
+generateBtn.onclick = ()=>{
+  const now = Date.now();
   if(cooldown>0) return;
-  if(!proxySelect.value) return alert("Select a proxy");
+  const selected = proxySelect.value;
+  if(!selected) return alert("Select a proxy");
+
+  cooldown = 20;
+  generateBtn.disabled=true;
+  generateBtn.style.background="#777";
+  generateBtn.textContent=`Cooldown (${cooldown})`;
+  cooldownInterval = setInterval(()=>{
+    cooldown--;
+    if(cooldown>0){
+      generateBtn.textContent=`Cooldown (${cooldown})`;
+    } else {
+      clearInterval(cooldownInterval);
+      generateBtn.disabled=false;
+      generateBtn.style.background="#4da3ff";
+      generateBtn.textContent="Generate link";
+    }
+  },1000);
 
   progressContainer.style.display="block";
   progressBar.style.width="0%";
-  progressText.textContent="Generating...";
+  progressText.textContent="";
+  const fakeTexts = [
+    "Searching for proxies...",
+    "Clearing cookies and data...",
+    "Connecting to server...",
+    "Initializing...",
+    "Reaching-13.zaq...",
+    "shrjw.aj...",
+  ];
   let progress=0;
-  const interval=setInterval(()=>{
-    progress+=Math.random()*15;
+  let textIndex=0;
+  const interval = setInterval(()=>{
+    progress+=Math.random()*5;
     if(progress>100) progress=100;
     progressBar.style.width=progress+"%";
-    if(progress>=100){ clearInterval(interval);
-      const link=`https://fakeproxy.com/${proxySelect.value.toLowerCase()}-${Date.now()}`;
-      generatedLinks.unshift({proxy:proxySelect.value,link:link});
-      saveLinks();
-      renderLinks();
-      progressText.textContent="Successfully generated";
+    if(progress>=textIndex*20 && textIndex<fakeTexts.length){
+      progressText.textContent=fakeTexts[textIndex];
+      textIndex++;
     }
-  },100);
-
-  cooldown=20;
-  updateCooldown();
-  const cdInterval=setInterval(()=>{
-    cooldown--;
-    updateCooldown();
-    if(cooldown<=0) clearInterval(cdInterval);
-  },1000);
-}
+    if(progress>=100){
+      clearInterval(interval);
+      const stockLinks = [
+        "https://proxy1.com/"+selected,
+        "https://proxy2.com/"+selected,
+        "https://proxy3.com/"+selected
+      ];
+      const inStock = Math.random()>0.3;
+      if(!inStock){
+        progressText.textContent="Failed to generate: no stock";
+      } else {
+        progressText.textContent="Successfully generated";
+        const link = stockLinks[Math.floor(Math.random()*stockLinks.length)];
+        generatedLinks.unshift({proxy:selected,link:link});
+        saveLinks();
+        renderGeneratedLinks();
+      }
+    }
+  },200);
+};
 </script>
+
 </body>
 </html>
