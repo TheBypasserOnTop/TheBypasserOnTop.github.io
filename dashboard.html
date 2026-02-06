@@ -13,15 +13,11 @@
             background: radial-gradient(circle at top, #1e1b4b, #020617);
             color: #e6f0ff;
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
+            min-height: 200vh; /* Extra height for scrolling */
             overflow-x: hidden;
-            opacity: 0;
-            animation: pageLoad 1s ease-out forwards;
         }
 
-        @keyframes pageLoad { to { opacity: 1; } }
-
-        /* Slow Gradient Title matching Login */
+        /* Seamless Slow Gradient Title */
         .gradient-text {
             background: linear-gradient(to right, #ffffff 0%, #a855f7 25%, #3b82f6 50%, #a855f7 75%, #ffffff 100%);
             background-size: 200% auto;
@@ -36,53 +32,69 @@
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 12px white; } }
 
-        /* Sidebar Glass Effect */
+        /* Centered Welcome Section */
+        #hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Scroll Hint Animation */
+        .scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: float 2s ease-in-out infinite;
+            opacity: 0.6;
+        }
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, 0); opacity: 0.3; }
+            50% { transform: translate(-50%, -15px); opacity: 0.8; }
+        }
+
+        /* Scroll-triggered Cards */
+        .scroll-card {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .scroll-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Sidebar & Modals */
         #sidePanel {
             position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
-            background: rgba(10, 10, 30, 0.8);
+            background: rgba(10, 10, 30, 0.9);
             backdrop-filter: blur(40px);
             border-right: 1px solid var(--border);
             z-index: 200;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 2rem;
         }
         body.menu-open #sidePanel { transform: translateX(300px); }
 
-        .nav-tab {
-            padding: 1rem; border-radius: 12px; cursor: pointer;
-            margin-bottom: 0.5rem; transition: all 0.3s ease;
-            border: 1px solid transparent; color: rgba(255,255,255,0.6);
+        #logoutModal {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            z-index: 300;
+            align-items: center; justify-content: center;
         }
-        .nav-tab:hover { background: rgba(255,255,255,0.05); color: white; }
-        .nav-tab.active { background: var(--accent); color: white; box-shadow: 0 10px 20px rgba(168, 85, 247, 0.2); }
-
-        /* Card System */
-        .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-        }
-
-        /* Profile Bubble */
-        #profilePic {
-            width: 45px; height: 45px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; cursor: pointer; z-index: 100;
-            border: 2px solid var(--border); transition: transform 0.3s ease;
-            background-size: cover;
-        }
-        #profilePic:hover { transform: scale(1.1); border-color: var(--accent); }
-
-        /* Floating Scroll Animation */
-        .scroll-card {
-            opacity: 0; transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .scroll-card.show { opacity: 1; transform: translateY(0); }
-
-        #menuBtn { cursor: pointer; z-index: 150; }
-        #menuBtn div { width: 24px; height: 2px; background: white; margin: 5px 0; border-radius: 2px; transition: 0.3s; }
     </style>
 </head>
 <body>
@@ -90,147 +102,123 @@
 <div class="stars-container" id="starField"></div>
 
 <nav class="fixed top-0 w-full px-8 py-6 flex justify-between items-center z-50">
-    <div id="menuBtn" onclick="toggleMenu()">
-        <div></div><div></div><div></div>
-    </div>
-    
-    <div class="flex items-center gap-4">
-        <div id="profilePic"></div>
-    </div>
+    <button onclick="toggleMenu()" class="hover:scale-110 transition-transform">
+        <div class="w-6 h-0.5 bg-white mb-1.5"></div>
+        <div class="w-4 h-0.5 bg-white mb-1.5"></div>
+        <div class="w-6 h-0.5 bg-white"></div>
+    </button>
+    <div id="profilePic" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/20 bg-cover"></div>
 </nav>
 
-<div id="sidePanel">
-    <div class="flex justify-between items-center mb-10">
-        <h3 class="text-xl font-black gradient-text">COSMIC</h3>
-        <button onclick="toggleMenu()" class="text-white/40 hover:text-white">✕</button>
+<div id="sidePanel" class="p-8 flex flex-col">
+    <h3 class="text-2xl font-black gradient-text mb-10">COSMIC</h3>
+    <div class="space-y-2">
+        <div class="p-4 rounded-xl bg-purple-600 text-white font-bold cursor-pointer">Dashboard</div>
+        <div class="p-4 rounded-xl hover:bg-white/5 cursor-pointer text-white/60 hover:text-white transition">Proxies</div>
+        <div class="p-4 rounded-xl hover:bg-white/5 cursor-pointer text-white/60 hover:text-white transition">Settings</div>
     </div>
-    <div class="nav-tab active">Dashboard</div>
-    <div class="nav-tab" onclick="navigateTo('proxies.html')">Proxies</div>
-    <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
-    <div class="mt-auto pt-10 border-t border-white/10">
-        <div class="nav-tab text-red-400 hover:bg-red-500/10" onclick="logout()">Logout</div>
-    </div>
+    <button onclick="confirmLogout()" class="mt-auto p-4 rounded-xl text-red-400 hover:bg-red-500/10 transition text-left">Logout System</button>
 </div>
 
-<div id="profilePanel" class="fixed top-20 right-8 w-56 glass-card p-4 hidden flex-col z-50">
-    <h4 id="profileName" class="text-center font-bold text-purple-300 mb-4"></h4>
-    <button class="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl mb-2 transition" onclick="navigateTo('settings.html')">Account Settings</button>
-    <button class="w-full py-2 bg-red-500/20 text-red-300 hover:bg-red-500/40 rounded-xl transition" onclick="logout()">Logout</button>
-</div>
-
-<main id="welcomeWrapper" class="pt-32 px-6 flex flex-col items-center">
-    <div class="glass-card p-12 max-w-2xl w-full text-center mb-20">
-        <h2 id="welcomeText" class="text-4xl md:text-5xl font-black mb-2">Welcome</h2>
-        <p class="text-white/40 uppercase tracking-[0.4em] text-[10px] font-bold">Session Initialized</p>
+<section id="hero">
+    <div class="glass-card p-12 md:p-20 max-w-2xl w-[90%] mx-auto">
+        <h2 id="welcomeText" class="text-4xl md:text-6xl font-black mb-4 uppercase tracking-tighter">Welcome</h2>
+        <p class="text-white/40 uppercase tracking-[0.5em] text-[10px] font-bold">Authorized Session Active</p>
     </div>
+    
+    <div class="scroll-hint text-center">
+        <p class="text-[10px] uppercase tracking-[0.3em] font-bold text-white/50 mb-2">Scroll to explore</p>
+        <div class="text-2xl">↓</div>
+    </div>
+</section>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mb-20">
-        <div class="scroll-card glass-card p-8 flex flex-col items-center">
-            <span class="text-3xl mb-4">🛰️</span>
-            <p class="font-bold text-sm tracking-widest text-white/60">SYSTEM STATUS</p>
-            <p class="text-green-400 text-xs mt-2 font-mono">ALL SYSTEMS NOMINAL</p>
+<main class="max-w-6xl mx-auto px-6 pb-40">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="scroll-card glass-card p-10 flex flex-col items-center text-center">
+            <span class="text-4xl mb-6">🛰️</span>
+            <h4 class="font-bold tracking-widest text-xs text-purple-400 mb-2">NETWORK</h4>
+            <p class="text-white/60 text-sm">Global proxy backbone active and operational.</p>
         </div>
-        <div class="scroll-card glass-card p-8 flex flex-col items-center">
-            <span class="text-3xl mb-4">🔒</span>
-            <p class="font-bold text-sm tracking-widest text-white/60">SECURITY</p>
-            <p class="text-purple-400 text-xs mt-2 font-mono">FIREBASE PROTECTED</p>
+        <div class="scroll-card glass-card p-10 flex flex-col items-center text-center">
+            <span class="text-4xl mb-6">🔒</span>
+            <h4 class="font-bold tracking-widest text-xs text-purple-400 mb-2">ENCRYPTION</h4>
+            <p class="text-white/60 text-sm">End-to-end identity shielding engaged.</p>
         </div>
-        <div class="scroll-card glass-card p-8 flex flex-col items-center">
-            <span class="text-3xl mb-4">🚀</span>
-            <p class="font-bold text-sm tracking-widest text-white/60">LATENCY</p>
-            <p class="text-blue-400 text-xs mt-2 font-mono">12ms TO HUB</p>
+        <div class="scroll-card glass-card p-10 flex flex-col items-center text-center">
+            <span class="text-4xl mb-6">⚡</span>
+            <h4 class="font-bold tracking-widest text-xs text-purple-400 mb-2">PERFORMANCE</h4>
+            <p class="text-white/60 text-sm">Optimized for high-speed terminal requests.</p>
         </div>
     </div>
 </main>
 
+<div id="logoutModal">
+    <div class="glass-card p-10 max-w-sm w-full mx-4 text-center">
+        <h3 class="text-xl font-bold mb-2">Terminate Session?</h3>
+        <p class="text-white/50 text-sm mb-8">Are you sure you want to log out of the Cosmic terminal?</p>
+        <div class="flex gap-4">
+            <button onclick="closeLogout()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition font-bold">Cancel</button>
+            <button onclick="executeLogout()" class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 transition font-bold shadow-lg shadow-red-600/20">Logout</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-    authDomain: "login-34954.firebaseapp.com",
-    projectId: "login-34954"
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+    const app = initializeApp({ apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954" });
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-const profilePic = document.getElementById("profilePic");
-const profilePanel = document.getElementById("profilePanel");
-const profileName = document.getElementById("profileName");
-const welcomeText = document.getElementById("welcomeText");
+    // --- Auth Logic ---
+    onAuthStateChanged(auth, async user => {
+        if (!user) location.replace("login.html");
+        
+        const snap = await getDocs(query(collection(db, "usernames"), where("uid", "==", user.uid)));
+        const username = !snap.empty ? snap.docs[0].id : "User";
+        document.getElementById("welcomeText").textContent = `Welcome, ${username.toUpperCase()}`;
+        
+        const pic = document.getElementById("profilePic");
+        pic.textContent = username[0].toUpperCase();
+        pic.style.backgroundColor = `hsl(${username.length * 40}, 60%, 60%)`;
+    });
 
-// Theme-matching HSL Color Generator
-function stringToColor(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    return `hsl(${hash % 360}, 60%, 65%)`;
-}
+    // --- UI Controls ---
+    window.toggleMenu = () => document.body.classList.toggle("menu-open");
+    
+    window.confirmLogout = () => document.getElementById("logoutModal").style.display = "flex";
+    window.closeLogout = () => document.getElementById("logoutModal").style.display = "none";
+    
+    window.executeLogout = async () => {
+        await signOut(auth);
+        location.href = "login.html";
+    };
 
-onAuthStateChanged(auth, async user => {
-    if (!user) location.replace("login.html");
+    // --- Scroll Animations ---
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add("show");
+            }
+        });
+    }, { threshold: 0.1 });
 
-    const snap = await getDocs(query(collection(db, "usernames"), where("uid", "==", user.uid)));
-    const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+    document.querySelectorAll(".scroll-card").forEach(card => observer.observe(card));
 
-    welcomeText.textContent = `Welcome, ${username.toUpperCase()}`;
-    profileName.textContent = `@${username}`;
-
-    profilePic.textContent = username[0].toUpperCase();
-    profilePic.style.backgroundColor = stringToColor(username);
-
-    const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
-    if (pfpDoc.exists() && pfpDoc.data().data) {
-        profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
-        profilePic.textContent = "";
+    // --- Star Field ---
+    const starField = document.getElementById('starField');
+    for (let i = 0; i < 150; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 2 + 1;
+        star.style.width = star.style.height = `${size}px`;
+        star.style.left = `${Math.random() * 100}%`; 
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
+        starField.appendChild(star);
     }
-});
-
-// UI Controls
-window.toggleMenu = () => document.body.classList.toggle("menu-open");
-
-profilePic.onclick = (e) => {
-    e.stopPropagation();
-    profilePanel.classList.toggle("hidden");
-    profilePanel.classList.toggle("flex");
-};
-
-document.addEventListener('click', () => {
-    profilePanel.classList.add("hidden");
-    profilePanel.classList.remove("flex");
-});
-
-window.navigateTo = (page) => {
-    document.body.style.opacity = "0";
-    setTimeout(() => location.href = page, 400);
-};
-
-window.logout = async () => {
-    await signOut(auth);
-    location.href = "login.html";
-};
-
-// Shimmery Stars
-const starField = document.getElementById('starField');
-for (let i = 0; i < 120; i++) {
-    const star = document.createElement('div');
-    star.className = 'star';
-    const size = Math.random() * 2 + 1;
-    star.style.width = star.style.height = `${size}px`;
-    star.style.left = `${Math.random() * 100}%`; 
-    star.style.top = `${Math.random() * 100}%`;
-    star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
-    starField.appendChild(star);
-}
-
-// Scroll Intersection Observer
-const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("show"); });
-}, { threshold: 0.2 });
-
-document.querySelectorAll(".scroll-card").forEach(c => observer.observe(c));
 </script>
 
 </body>
