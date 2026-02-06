@@ -5,53 +5,183 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chat</title>
 <link rel="icon" href="favicon.ico">
+
 <style>
-html, body { margin:0; padding:0; font-family:system-ui,sans-serif; background:#050b1a; color:#e6f0ff; overflow-x:hidden; }
-/* Hamburger menu */
-#menuBtn { position:fixed; top:20px; left:20px; width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; z-index:150; transition:opacity .3s, transform .3s; }
+/* --- General --- */
+body {
+  margin:0;
+  min-height:100vh;
+  font-family:system-ui,sans-serif;
+  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
+  color:#e6f0ff;
+  overflow-x:hidden;
+  position:relative;
+}
+
+/* --- Hamburger menu --- */
+#menuBtn {
+  position:fixed;
+  top:20px;
+  left:20px;
+  width:32px;
+  height:24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  cursor:pointer;
+  z-index:150;
+}
 #menuBtn span { height:4px; background:white; border-radius:4px; }
 body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
-/* Side panel */
-#sidePanel { position:fixed; top:0; left:-300px; width:260px; height:100%; background:#0c1937; padding:20px; box-sizing:border-box; z-index:200; transition:left .35s ease; display:flex; flex-direction:column; }
+
+#sidePanel {
+  position:fixed;
+  top:0;
+  left:-300px;
+  width:260px;
+  height:100%;
+  background:rgba(12,25,55,.95);
+  backdrop-filter:blur(16px);
+  padding:20px;
+  box-sizing:border-box;
+  z-index:200;
+  transition:left .35s ease;
+  display:flex;
+  flex-direction:column;
+}
 body.menu-open #sidePanel { left:0; }
-/* Side panel header */
+
 #sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
 #sidePanelHeader h3 { margin:0 auto; }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
-/* Divider */
+
 .divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
-/* Tabs */
+
+#navSearch { padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,.08); color:white; margin-bottom:15px; }
+
 .nav-tab { padding:12px; border-radius:10px; cursor:pointer; margin-bottom:8px; font-weight:600; }
 .nav-tab.active { background:#4da3ff; color:black; }
 .nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
-/* Top-right PFP */
-#profilePic { position:fixed; top:20px; right:20px; width:50px; height:50px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:1.3rem; color:white; cursor:pointer; user-select:none; z-index:100; background-size:cover; background-position:center; }
-/* Profile panel */
-#profilePanel { position:fixed; top:80px; right:20px; width:180px; background:#0c1937; border-radius:14px; display:none; flex-direction:column; padding:10px; z-index:100; }
-#profilePanel h4 { margin:0 0 8px 0; font-size:1rem; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px; }
-#profilePanel button { width:100%; margin:5px 0; padding:10px; border:none; border-radius:10px; font-weight:600; cursor:pointer; }
-.primary { background:#4da3ff; color:black; }
-.remove { background:#ff4c4c; color:white; }
-/* Chat header island */
-#chatHeader { width:90%; max-width:600px; margin:100px auto 0 auto; background:#0c1937; padding:12px 20px; border-radius:15px; font-weight:bold; font-size:1.2rem; text-align:center; }
-/* Chat wrapper */
-#chatWrapper { max-width:600px; width:90%; margin:10px auto 80px auto; display:flex; flex-direction:column; gap:12px; }
-/* Messages */
-.message { display:flex; gap:10px; align-items:flex-start; background:#0c1937; padding:10px; border-radius:15px; max-width:100%; word-wrap:break-word; position:relative; }
-.message .pfp { width:40px; height:40px; border-radius:50%; flex-shrink:0; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; }
-.message .content { display:flex; flex-direction:column; gap:3px; }
-.message .username { font-weight:600; }
-.message .time { font-size:0.7rem; color:#cfd8f0; }
-.message .edited { font-size:0.7rem; color:#ffb74d; }
-/* Replies */
-.reply { margin-left:50px; background:rgba(255,255,255,0.05); padding:6px 10px; border-radius:12px; font-size:0.9rem; }
-/* Chat input fixed bottom */
-#chatInputWrapper { position:fixed; bottom:0; left:0; width:100%; display:flex; gap:10px; padding:10px; box-sizing:border-box; background:#0c1937; z-index:100; }
-#chatInput { flex:1; padding:12px; border-radius:12px; border:none; font-size:1rem; outline:none; }
-#sendBtn { padding:12px 16px; border:none; border-radius:12px; background:#4da3ff; color:black; cursor:pointer; font-size:1.2rem; font-weight:bold; }
-/* Message buttons */
-.msg-btn { font-size:0.7rem; cursor:pointer; background:rgba(255,255,255,.2); padding:2px 5px; border-radius:5px; color:white; margin-left:5px; display:inline-block; }
-.msg-btn-container { margin-top:5px; display:flex; gap:5px; }
+
+.blur-layer { position:absolute; inset:0; z-index:5; }
+body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
+
+/* --- Top chat header --- */
+#chatHeader {
+  width:100%;
+  padding:15px 20px;
+  background:rgba(12,25,55,.85);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:center;
+  gap:12px;
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+
+#chatHeader .userProfilePic {
+  width:40px; height:40px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  color:white;
+  background-size:cover;
+  background-position:center;
+}
+
+#chatHeader .usernameLabel { font-weight:600; font-size:1rem; }
+
+/* --- Messages --- */
+#chatMessages {
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.chatMessage {
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+
+.chatMessage .userProfilePic {
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  font-size:0.9rem;
+  background-size:cover;
+  background-position:center;
+}
+
+.chatMessage .messageContent {
+  background:rgba(12,25,55,.7);
+  padding:10px 14px;
+  border-radius:14px;
+  max-width:70%;
+  position:relative;
+  word-wrap:break-word;
+}
+
+.messageContent .usernameLabel {
+  font-weight:600;
+  margin-bottom:3px;
+  display:block;
+}
+
+.messageContent .editedTag {
+  font-size:0.7rem;
+  opacity:0.6;
+  margin-top:2px;
+}
+
+/* Reply feature */
+.messageContent .replyBox {
+  background:rgba(255,255,255,0.08);
+  padding:5px 8px;
+  border-left:2px solid #4da3ff;
+  margin-bottom:5px;
+  border-radius:8px;
+  font-size:0.85rem;
+  color:#cfd8f0;
+}
+
+/* Input area */
+#chatInputWrapper {
+  position:fixed;
+  bottom:0; left:0;
+  width:100%;
+  display:flex;
+  padding:10px 20px;
+  gap:10px;
+  background:rgba(12,25,55,.85);
+  backdrop-filter:blur(8px);
+}
+#chatInputWrapper input {
+  flex:1;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  background:rgba(255,255,255,.08);
+  color:white;
+}
+#chatInputWrapper button {
+  padding:12px 20px;
+  border-radius:12px;
+  border:none;
+  font-weight:600;
+  cursor:pointer;
+  background:#4da3ff;
+  color:black;
+}
 </style>
 </head>
 <body>
@@ -65,177 +195,113 @@ body.menu-open #sidePanel { left:0; }
     <div id="closeMenu">✕</div>
   </div>
   <div class="divider"></div>
+  <input id="navSearch" placeholder="Search...">
   <div class="nav-tab" id="tabDashboard">Dashboard</div>
   <div class="nav-tab active" id="tabCommunicate">Communicate</div>
   <div class="nav-tab" id="tabSettings">Settings</div>
 </div>
 <div class="blur-layer"></div>
 
-<!-- Chat header -->
-<div id="chatHeader">💬 Chat</div>
-
-<!-- Chat messages -->
-<div id="chatWrapper"></div>
-
-<!-- Chat input -->
-<div id="chatInputWrapper">
-  <input type="text" id="chatInput" placeholder="Type a message...">
-  <button id="sendBtn">➤</button>
+<!-- Top Chat Header -->
+<div id="chatHeader">
+  <div class="userProfilePic"></div>
+  <span class="usernameLabel"></span>
 </div>
 
-<!-- Profile pic top-right -->
-<div id="profilePic"></div>
-<div id="profilePanel">
-  <h4 id="profileName">Username</h4>
-  <button class="primary" onclick="openSettings()">Settings</button>
-  <button class="primary" onclick="confirmLogout()">Logout</button>
+<!-- Chat Messages -->
+<div id="chatMessages">
+  <!-- Example message -->
+  <div class="chatMessage">
+    <div class="userProfilePic"></div>
+    <div class="messageContent">
+      <span class="usernameLabel"></span>
+      <div class="replyBox">Replied to someone</div>
+      <p>Hello, this is a test message!</p>
+      <div class="editedTag"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Input -->
+<div id="chatInputWrapper">
+  <input placeholder="Type a message..." id="chatInput">
+  <button id="sendBtn">Send</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain: "login-34954.firebaseapp.com",
-  projectId: "login-34954",
-  storageBucket: "login-34954.firebasestorage.app",
-  messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41",
-  measurementId: "G-1MMT3C4M7K"
-};
+const app = initializeApp({
+  apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain:"login-34954.firebaseapp.com",
+  projectId:"login-34954"
+});
 
-const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const chatWrapper = document.getElementById("chatWrapper");
-const chatInput = document.getElementById("chatInput");
-const sendBtn = document.getElementById("sendBtn");
-const profilePic = document.getElementById("profilePic");
-const profilePanel = document.getElementById("profilePanel");
-const profileName = document.getElementById("profileName");
-
-let username = "";
-let userPfp = "";
-
-function stringToColor(str){
-  let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
-  let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
-  return color;
+function colorFrom(str){
+  let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
+  return `hsl(${h%360},70%,50%)`;
 }
 
-onAuthStateChanged(auth, async user=>{
-  if(user){
-    username = user.displayName || user.email.split("@")[0];
-    userPfp = user.photoURL || "";
-    profileName.textContent=username;
+// Elements
+const chatHeaderPic = document.querySelector("#chatHeader .userProfilePic");
+const chatHeaderUsername = document.querySelector("#chatHeader .usernameLabel");
+const allUserPics = document.querySelectorAll(".userProfilePic");
+const allUsernames = document.querySelectorAll(".usernameLabel");
 
-    if(userPfp){
-      profilePic.style.backgroundImage=`url(${userPfp})`;
-      profilePic.textContent="";
-    } else {
-      profilePic.textContent=username.charAt(0).toUpperCase();
-      profilePic.style.backgroundColor=stringToColor(username.toLowerCase());
-    }
+// Auth check
+onAuthStateChanged(auth, async user => {
+  if(!user) location.href="login.html";
+
+  // Username
+  const snap = await getDocs(query(collection(db,"usernames"), where("uid","==", user.uid)));
+  const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+
+  // PFP
+  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
+  let pfpURL = "";
+  if(pfpDoc.exists() && pfpDoc.data().data) pfpURL = pfpDoc.data().data;
+
+  // Header
+  if(pfpURL){
+    chatHeaderPic.style.backgroundImage = `url(${pfpURL})`;
+    chatHeaderPic.textContent="";
   } else {
-    location.href="login.html";
+    chatHeaderPic.style.backgroundImage = "";
+    chatHeaderPic.textContent = username[0].toUpperCase();
+    chatHeaderPic.style.backgroundColor = colorFrom(username);
   }
-});
+  chatHeaderUsername.textContent = username;
 
-let panelOpen=false;
-profilePic.addEventListener("click", ()=>{ panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none"; });
-
-document.getElementById("menuBtn").onclick = ()=>document.body.classList.add("menu-open");
-document.getElementById("closeMenu").onclick = ()=>document.body.classList.remove("menu-open");
-document.getElementById("tabSettings").onclick = ()=>location.href="settings.html";
-document.getElementById("tabDashboard").onclick = ()=>location.href="dashboard.html";
-
-/* Send message */
-sendBtn.onclick = async ()=>{
-  const text = chatInput.value.trim();
-  if(!text) return;
-  chatInput.value="";
-  await addDoc(collection(db,"messages"),{
-    user: username,
-    message: text,
-    pfp: userPfp,
-    edited: false,
-    timestamp: serverTimestamp(),
-    replies: []
-  });
-};
-
-/* Render messages */
-const q=query(collection(db,"messages"), orderBy("timestamp"));
-onSnapshot(q,snap=>{
-  chatWrapper.innerHTML="";
-  snap.docs.forEach(docSnap=>{
-    const data=docSnap.data();
-    const msgDiv=document.createElement("div");
-    msgDiv.className="message";
-
-    const pfpDiv=document.createElement("div");
-    pfpDiv.className="pfp";
-    if(data.pfp) pfpDiv.style.backgroundImage=`url(${data.pfp})`;
-    else { pfpDiv.textContent=data.user.charAt(0).toUpperCase(); pfpDiv.style.backgroundColor=stringToColor(data.user.toLowerCase()); }
-
-    const contentDiv=document.createElement("div");
-    contentDiv.className="content";
-    const userDiv=document.createElement("div"); userDiv.className="username"; userDiv.textContent=data.user;
-    const textDiv=document.createElement("div"); textDiv.textContent=data.message;
-    const timeDiv=document.createElement("div"); timeDiv.className="time";
-    if(data.timestamp) timeDiv.textContent=new Date(data.timestamp.seconds*1000).toLocaleString("en-US",{hour12:true,hour:"2-digit",minute:"2-digit"});
-    const editedDiv=document.createElement("div"); editedDiv.className="edited"; 
-    if(data.edited && data.message!=="[deleted]") editedDiv.textContent="(edited)";
-
-    contentDiv.append(userDiv,textDiv,timeDiv,editedDiv);
-
-    const btnContainer=document.createElement("div"); btnContainer.className="msg-btn-container";
-
-    if(data.user===username){
-      const editBtn=document.createElement("span"); editBtn.className="msg-btn"; editBtn.textContent="Edit";
-      editBtn.onclick=async ()=>{
-        const newMsg=prompt("Edit message:",data.message);
-        if(newMsg) await updateDoc(doc(db,"messages",docSnap.id),{message:newMsg,edited:true});
-      };
-      const delBtn=document.createElement("span"); delBtn.className="msg-btn"; delBtn.textContent="Delete";
-      delBtn.onclick=async ()=>{
-        if(confirm("Delete this message?")) await updateDoc(doc(db,"messages",docSnap.id),{message:"[deleted]",edited:false});
-      };
-      btnContainer.append(editBtn,delBtn);
+  // All messages
+  allUserPics.forEach(el=>{
+    if(pfpURL){
+      el.style.backgroundImage = `url(${pfpURL})`;
+      el.textContent="";
     } else {
-      const replyBtn=document.createElement("span"); replyBtn.className="msg-btn"; replyBtn.textContent="Reply";
-      replyBtn.onclick=async ()=>{
-        const replyText=prompt("Reply to "+data.user+":");
-        if(replyText){
-          await updateDoc(doc(db,"messages",docSnap.id),{
-            replies: arrayUnion({user:username,message:replyText,pfp:userPfp})
-          });
-        }
-      };
-      btnContainer.append(replyBtn);
+      el.style.backgroundImage = "";
+      el.textContent = username[0].toUpperCase();
+      el.style.backgroundColor = colorFrom(username);
     }
-
-    if(data.replies){
-      data.replies.forEach(r=>{
-        const replyDiv=document.createElement("div");
-        replyDiv.className="reply";
-        const rPfp=r.pfp ? `<span style="width:20px;height:20px;background:url(${r.pfp});background-size:cover;border-radius:50%;display:inline-block;margin-right:5px;"></span>` : "";
-        replyDiv.innerHTML=`${rPfp}<strong>${r.user}:</strong> ${r.message}`;
-        contentDiv.appendChild(replyDiv);
-      });
-    }
-
-    msgDiv.append(pfpDiv,contentDiv,btnContainer);
-    chatWrapper.appendChild(msgDiv);
   });
-  chatWrapper.scrollTop=chatWrapper.scrollHeight;
+
+  allUsernames.forEach(el=> el.textContent = username);
 });
 
-window.openSettings=()=>location.href="settings.html";
-window.confirmLogout=()=>{ if(confirm("Logout?")) signOut(auth).then(()=>location.href="login.html"); };
+/* Menu logic */
+const menuBtn = document.getElementById("menuBtn");
+const closeMenu = document.getElementById("closeMenu");
+
+menuBtn.onclick = () => document.body.classList.add("menu-open");
+closeMenu.onclick = () => document.body.classList.remove("menu-open");
+
+document.getElementById("tabDashboard").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="dashboard.html",350); };
+document.getElementById("tabSettings").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350); };
 </script>
+
 </body>
 </html>
