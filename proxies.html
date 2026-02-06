@@ -1,1 +1,416 @@
-ns db
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proxies</title>
+
+<style>
+html, body {
+  margin:0;
+  padding:0;
+  min-height:100%;
+  font-family:system-ui,sans-serif;
+  background:radial-gradient(circle at top,#0b2a55,#050b1a);
+  color:#e6f0ff;
+  overflow-x:hidden;
+}
+
+/* ===== MENU ===== */
+#menuBtn {
+  position:fixed;
+  top:20px;
+  left:20px;
+  width:32px;
+  height:24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  cursor:pointer;
+  z-index:150;
+}
+#menuBtn span {
+  height:4px;
+  background:white;
+  border-radius:4px;
+}
+body.menu-open #menuBtn {
+  opacity:0;
+  pointer-events:none;
+}
+
+#sidePanel {
+  position:fixed;
+  top:0;
+  left:-300px;
+  width:260px;
+  height:100%;
+  background:rgba(10,30,70,.95);
+  backdrop-filter:blur(18px);
+  padding:20px;
+  box-sizing:border-box;
+  z-index:200;
+  transition:left .35s ease;
+}
+body.menu-open #sidePanel { left:0; }
+
+#sidePanelHeader {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+#closeMenu { cursor:pointer; font-size:1.4rem; }
+
+.divider {
+  height:1px;
+  background:rgba(255,255,255,.2);
+  margin:15px 0;
+}
+
+.nav-tab {
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  margin-bottom:8px;
+  font-weight:600;
+}
+.nav-tab.active { background:#4da3ff; color:black; }
+
+/* ===== BLUR ===== */
+.blur-layer {
+  position:absolute;
+  inset:0;
+  z-index:5;
+}
+body.menu-open .blur-layer {
+  backdrop-filter: blur(8px);
+  pointer-events:none;
+}
+
+/* ===== PROFILE ===== */
+#profilePic {
+  position:fixed;
+  top:20px;
+  right:20px;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  font-size:1.3rem;
+  color:white;
+  cursor:pointer;
+  z-index:100;
+  background-size:contain;
+  background-repeat:no-repeat;
+  background-position:center;
+}
+
+#profilePanel {
+  position:fixed;
+  top:80px;
+  right:20px;
+  width:180px;
+  background:rgba(12,25,55,.85);
+  backdrop-filter:blur(10px);
+  border-radius:14px;
+  display:none;
+  flex-direction:column;
+  padding:10px;
+  z-index:100;
+}
+#profilePanel h4 {
+  text-align:center;
+  margin:0 0 8px;
+}
+#profilePanel button {
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  margin-top:5px;
+  font-weight:600;
+  cursor:pointer;
+}
+.primary { background:#4da3ff; color:black; }
+
+/* ===== MAIN CARD ===== */
+.wrapper {
+  min-height:85vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:10;
+}
+
+.card {
+  width:92%;
+  max-width:560px;
+  background:rgba(80,140,255,0.15);
+  backdrop-filter:blur(26px);
+  padding:38px;
+  border-radius:24px;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.6),
+    0 0 35px rgba(90,150,255,.35);
+  text-align:center;
+}
+
+.card h2 {
+  margin-bottom:20px;
+  text-shadow:0 0 12px rgba(120,180,255,.6);
+}
+
+/* ===== DROPDOWN ===== */
+select {
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  font-size:1rem;
+  margin-bottom:15px;
+}
+
+/* ===== BUTTON ===== */
+button.generate {
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:14px;
+  background:#4da3ff;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* ===== PROGRESS ===== */
+#progressWrap {
+  display:none;
+  margin-top:20px;
+}
+
+#progressText {
+  text-align:left;
+  font-size:0.9rem;
+  margin-bottom:5px;
+}
+
+.progressBar {
+  width:100%;
+  height:12px;
+  background:rgba(255,255,255,.15);
+  border-radius:10px;
+  overflow:hidden;
+}
+.progressFill {
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#4da3ff,#7fb8ff);
+  transition:width .25s;
+}
+
+#statusText {
+  margin-top:10px;
+  font-size:0.9rem;
+  opacity:0;
+  transition:opacity .5s;
+}
+
+/* ===== GENERATED ===== */
+#generatedSection {
+  width:92%;
+  max-width:560px;
+  margin:40px auto;
+}
+
+.gen-card {
+  background:rgba(12,25,55,.7);
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:15px;
+}
+
+.gen-card h4 {
+  margin:0;
+}
+.voteRow {
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+.vote {
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  cursor:pointer;
+  text-align:center;
+}
+.up { background:#2ecc71; color:black; }
+.down { background:#e74c3c; color:white; }
+</style>
+</head>
+
+<body>
+
+<div id="menuBtn"><span></span><span></span><span></span></div>
+
+<div id="sidePanel">
+  <div id="sidePanelHeader">
+    <div></div>
+    <h3>Navigation</h3>
+    <div id="closeMenu">✕</div>
+  </div>
+  <div class="divider"></div>
+  <div class="nav-tab" onclick="navigateTo('dashboard.html')">Dashboard</div>
+  <div class="nav-tab active">Proxies</div>
+  <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
+</div>
+
+<div class="blur-layer"></div>
+
+<div id="profilePic"></div>
+
+<div id="profilePanel">
+  <h4 id="profileName"></h4>
+  <button class="primary" onclick="navigateTo('settings.html')">Settings</button>
+  <button class="primary" onclick="logout()">Logout</button>
+</div>
+
+<div class="wrapper">
+  <div class="card">
+    <h2>Select a proxy</h2>
+
+    <select id="proxySelect">
+      <option value="">-- Choose --</option>
+      <option>Rammerhead</option>
+      <option>Space</option>
+      <option>Shuttle</option>
+      <option>Doge</option>
+      <option>Bolt</option>
+      <option>Shadow</option>
+      <option>Ghost</option>
+    </select>
+
+    <button class="generate" onclick="generate()">Generate link</button>
+
+    <div id="progressWrap">
+      <div id="progressText">0%</div>
+      <div class="progressBar">
+        <div class="progressFill" id="progressFill"></div>
+      </div>
+      <div id="statusText"></div>
+    </div>
+  </div>
+</div>
+
+<div id="generatedSection">
+  <h3>Generated Proxies</h3>
+  <div class="divider"></div>
+  <div id="generatedList"></div>
+</div>
+
+<script type="module">
+/* ===== PROXY TABLE ===== */
+const proxyTable = {
+  Rammerhead: ["https://ram1.example","https://ram2.example"],
+  Space: [],
+  Shuttle: ["https://shuttle.a","https://shuttle.b"],
+  Doge: ["https://doge.proxy"],
+  Bolt: [],
+  Shadow: ["https://shadow.one"],
+  Ghost: []
+};
+
+/* ===== PROGRESS LOGIC ===== */
+const progressFill = document.getElementById("progressFill");
+const progressText = document.getElementById("progressText");
+const statusText = document.getElementById("statusText");
+const progressWrap = document.getElementById("progressWrap");
+const generatedList = document.getElementById("generatedList");
+
+const fakeMessages = [
+  "Searching for proxies",
+  "Clearing cookies and data",
+  "reaching-13.zaq",
+  "shrjw.aj",
+  "node-77.xp",
+  "syncing headers"
+];
+
+function generate(){
+  const type = proxySelect.value;
+  if(!type) return;
+
+  progressWrap.style.display="block";
+  let progress = 0;
+  let msgIndex = 0;
+
+  const interval = setInterval(()=>{
+    progress += Math.random()*8;
+    if(progress>100) progress=100;
+
+    progressFill.style.width = progress+"%";
+    progressText.textContent = Math.floor(progress)+"%";
+
+    statusText.style.opacity=1;
+    statusText.textContent =
+      progress < 40 ? fakeMessages[0] :
+      progress < 60 ? fakeMessages[1] :
+      fakeMessages[2 + (msgIndex++ % (fakeMessages.length-2))];
+
+    if(progress===100){
+      clearInterval(interval);
+      finish(type);
+    }
+  }, 200);
+}
+
+function finish(type){
+  const stock = proxyTable[type];
+  if(!stock || stock.length===0){
+    statusText.textContent="Failed to generate: no stock";
+    return;
+  }
+
+  const link = stock[Math.floor(Math.random()*stock.length)];
+  statusText.textContent="Successfully generated";
+
+  const card = document.createElement("div");
+  card.className="gen-card";
+  card.innerHTML=`
+    <h4>${type}</h4>
+    <div class="divider"></div>
+    <div>${link}</div>
+    <div class="voteRow">
+      <div class="vote up">👍 <span>0</span></div>
+      <div class="vote down">👎 <span>0</span></div>
+    </div>
+  `;
+  generatedList.prepend(card);
+}
+
+/* ===== MENU / PROFILE ===== */
+menuBtn.onclick=()=>document.body.classList.add("menu-open");
+closeMenu.onclick=()=>document.body.classList.remove("menu-open");
+
+window.navigateTo=(p)=>{
+  document.body.classList.remove("menu-open");
+  setTimeout(()=>location.href=p,350);
+};
+
+profilePic.onclick=()=>{
+  profilePanel.style.display=
+    profilePanel.style.display==="flex"?"none":"flex";
+};
+
+/* Placeholder auth visuals */
+profilePic.textContent="U";
+profilePic.style.background="#4da3ff";
+profileName.textContent="User";
+
+window.logout=()=>location.href="login.html";
+</script>
+
+</body>
+</html>
