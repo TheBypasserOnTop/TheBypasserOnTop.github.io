@@ -12,7 +12,7 @@ html, body {
   padding:0;
   min-height:100%;
   font-family:system-ui,sans-serif;
-  background:radial-gradient(circle at top,#0b1e3d,#050b1a);
+  background:radial-gradient(circle at top,#0b2a55,#050b1a);
   color:#e6f0ff;
   overflow-x:hidden;
 }
@@ -47,8 +47,8 @@ body.menu-open #menuBtn {
   left:-300px;
   width:260px;
   height:100%;
-  background:rgba(12,25,55,.95);
-  backdrop-filter:blur(16px);
+  background:rgba(10,30,70,.95);
+  backdrop-filter:blur(18px);
   padding:20px;
   box-sizing:border-box;
   z-index:200;
@@ -101,16 +101,22 @@ body.menu-open .blur-layer {
 
 /* UPDATED welcome card */
 .card {
-  width:90%;
-  max-width:520px;            /* wider */
-  background:rgba(255,255,255,0.08); /* lighter */
-  backdrop-filter:blur(22px); /* stronger blur */
-  -webkit-backdrop-filter:blur(22px);
-  padding:36px;
-  border-radius:22px;
-  box-shadow:0 20px 60px rgba(0,0,0,.35);
+  width:92%;
+  max-width:560px;
+  background:rgba(80,140,255,0.14); /* more blue */
+  backdrop-filter:blur(26px);
+  -webkit-backdrop-filter:blur(26px);
+  padding:38px;
+  border-radius:24px;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.6),
+    0 0 35px rgba(90,150,255,.35);
   text-align:center;
   margin-bottom:24px;
+}
+
+.card h2 {
+  text-shadow:0 0 12px rgba(120,180,255,.65);
 }
 
 /* Scroll hint */
@@ -169,7 +175,7 @@ body.menu-open .blur-layer {
   right:20px;
   width:180px;
   background:rgba(12,25,55,.85);
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(10px);
   border-radius:14px;
   display:none;
   flex-direction:column;
@@ -204,6 +210,7 @@ body.menu-open .blur-layer {
   </div>
   <div class="divider"></div>
   <div class="nav-tab active">Dashboard</div>
+  <div class="nav-tab" onclick="navigateTo('proxies.html')">Proxies</div>
   <div class="nav-tab" onclick="navigateTo('settings.html')">Settings</div>
 </div>
 
@@ -218,7 +225,7 @@ body.menu-open .blur-layer {
 
 <div class="scroll-card">🚀 Fast & responsive UI</div>
 <div class="scroll-card">🔒 Secure Firebase authentication</div>
-<div class="scroll-card">🎨 Clean glassmorphism design</div>
+<div class="scroll-card">🎨 Glassy blue UI polish</div>
 
 <div id="profilePic"></div>
 
@@ -282,12 +289,10 @@ profilePic.onclick = () => {
 menuBtn.onclick = () => document.body.classList.add("menu-open");
 closeMenu.onclick = () => document.body.classList.remove("menu-open");
 
-/* ✅ Animated navigation */
+/* Animated navigation */
 window.navigateTo = (page) => {
   document.body.classList.remove("menu-open");
-  setTimeout(() => {
-    location.href = page;
-  }, 350);
+  setTimeout(() => location.href = page, 350);
 };
 
 window.logout = async () => {
