@@ -19,7 +19,7 @@ body {
 /* CARD */
 .card {
   width:90%;
-  max-width:380px;
+  max-width:450px;
   padding:30px;
   background:rgba(12,25,55,.65);
   backdrop-filter:blur(16px);
@@ -60,9 +60,10 @@ body {
   display:none;
   flex-direction:column;
   padding:10px;
-  width:150px;
+  width:180px;
   box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
+#profilePanel .accountName { font-weight:bold; padding:5px 0; text-align:center; border-bottom:1px solid rgba(255,255,255,.2); margin-bottom:5px; }
 #profilePanel button {
   margin:5px 0;
   padding:10px;
@@ -72,10 +73,9 @@ body {
   cursor:pointer;
 }
 #profilePanel .primary { background:#4da3ff; color:black; }
-#profilePanel .remove { background:#ff4c4c; color:white; }
 #profilePanel .settings { background:#888cff; color:black; }
 
-/* OVERLAYS */
+/* REMOVE ACCOUNT POPUP */
 .overlay {
   position:fixed;
   inset:0;
@@ -87,7 +87,7 @@ body {
 }
 .popup {
   width:90vw;
-  max-width:380px;
+  max-width:400px;
   background:#0c1937;
   padding:30px;
   border-radius:20px;
@@ -101,15 +101,13 @@ body {
 
 <div class="card">
   <h2 id="welcomeText">Welcome</h2>
+  <p>Your dashboard content goes here.</p>
 </div>
 
-<!-- PROFILE PIC -->
 <div id="profilePic"></div>
-
-<!-- PANEL -->
 <div id="profilePanel">
+  <div class="accountName" id="panelUsername"></div>
   <button class="primary" id="logoutBtn">Logout</button>
-  <button class="remove" id="removeBtn">Remove Account</button>
   <button class="settings" id="settingsBtn">Settings</button>
 </div>
 
@@ -125,7 +123,7 @@ body {
   </div>
 </div>
 
-<!-- LOGOUT CONFIRMATION -->
+<!-- LOGOUT CONFIRM POPUP -->
 <div class="overlay" id="logoutOverlay">
   <div class="popup">
     <span class="close" onclick="closeLogout()">✕</span>
@@ -163,19 +161,19 @@ const db = getFirestore(app);
 const welcomeText = document.getElementById("welcomeText");
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
+const panelUsername = document.getElementById("panelUsername");
 
+const logoutOverlay = document.getElementById("logoutOverlay");
 const removeOverlay = document.getElementById("removeOverlay");
 const removePassword = document.getElementById("removePassword");
 const removeError = document.getElementById("removeError");
 
-const logoutOverlay = document.getElementById("logoutOverlay");
-
-/* PROFILE PANEL TOGGLE */
-profilePic.addEventListener("click", ()=>{ profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex"; });
+let currentUser;
 
 /* AUTH STATE */
 auth.onAuthStateChanged(async (user)=>{
   if(!user) location.replace("login.html");
+  currentUser = user;
 
   let username = user.displayName;
   if(!username){
@@ -184,49 +182,66 @@ auth.onAuthStateChanged(async (user)=>{
     if(!snap.empty) username = snap.docs[0].id;
     else username = user.email.split("@")[0];
   }
-  welcomeText.textContent = `Welcome, ${username}`;
 
-  // Set profile pic initial and consistent color
+  welcomeText.textContent = `Welcome, ${username}`;
+  panelUsername.textContent = username;
+
   const firstLetter = username.charAt(0).toUpperCase();
   profilePic.textContent = firstLetter;
 
-  // Color based on username hash
+  // Color based on username
   let hash = 0;
   for(let i=0;i<username.length;i++) hash = username.charCodeAt(i) + ((hash<<5)-hash);
-  const color = `hsl(${hash%360}, 65%, 50%)`;
+  const color = `hsl(${hash%360},65%,50%)`;
   profilePic.style.background=color;
 });
 
-/* LOGOUT */
+/* PROFILE PANEL TOGGLE */
+profilePic.addEventListener("click", ()=>{
+  profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex";
+});
+
+/* LOGOUT CONFIRM */
 document.getElementById("logoutBtn").onclick = ()=>{ logoutOverlay.style.display="flex"; };
 function closeLogout(){ logoutOverlay.style.display="none"; }
 async function confirmLogout(){ await signOut(auth); location.replace("login.html"); }
 
-/* REMOVE ACCOUNT */
-document.getElementById("removeBtn").onclick = ()=>{ removeOverlay.style.display="flex"; removePassword.value=""; removeError.textContent=""; };
-function closeRemoveAccount(){ removeOverlay.style.display="none"; }
-async function removeAccount(){
+/* SETTINGS NAV */
+document.getElementById("settingsBtn").onclick = ()=>{ location.replace("settings.html"); };
+
+/* REMOVE ACCOUNT POPUP */
+window.openRemoveAccount = ()=>{
+  removeOverlay.style.display="flex";
+  removePassword.value="";
+  removeError.textContent="";
+};
+window.closeRemoveAccount = ()=> removeOverlay.style.display="none";
+
+window.removeAccount = async ()=>{
   const pass = removePassword.value;
   removeError.textContent="";
+  if(!pass){ removeError.textContent="Enter password"; return; }
+
   const user = auth.currentUser;
   if(!user){ removeError.textContent="No user logged in"; return; }
-  if(!pass){ removeError.textContent="Enter password"; return; }
+
   try {
     if(user.email){
       const cred = EmailAuthProvider.credential(user.email, pass);
       await reauthenticateWithCredential(user,cred);
     }
+
     const q = query(collection(db,"usernames"), where("uid","==",user.uid));
     const snap = await getDocs(q);
     snap.forEach(async d => await deleteDoc(doc(db,"usernames",d.id)));
+
     await deleteUser(user);
     location.replace("login.html");
-  } catch(e){ removeError.textContent=e.message; console.error(e); }
-}
-
-/* SETTINGS BUTTON */
-document.getElementById("settingsBtn").onclick = ()=>{ location.replace("settings.html"); };
+  } catch(e){
+    console.error(e);
+    removeError.textContent = e.message;
+  }
+};
 </script>
-
 </body>
 </html>
