@@ -29,8 +29,11 @@ body{
   transform:translate(-50%,-50%);
 }
 
-/* Profile pic */
-#profilePic, #pfpPreview{
+/* Top-right PFP */
+#profilePic{
+  position:fixed;
+  top:15px;
+  right:15px;
   width:50px;
   height:50px;
   border-radius:50%;
@@ -40,18 +43,39 @@ body{
   font-weight:bold;
   font-size:1.3rem;
   color:white;
+  cursor:pointer;
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
+}
+
+/* Profile panel */
+#profilePanel{
+  position:fixed;
+  top:75px;
+  right:15px;
+  width:190px;
+  background:rgba(12,25,55,.9);
+  backdrop-filter:blur(14px);
+  border-radius:14px;
+  display:none;
+  flex-direction:column;
+  padding:12px;
+}
+#panelUsername{
+  font-weight:600;
+  text-align:center;
+  margin-bottom:8px;
+}
+#profilePanel button{
+  margin-top:6px;
+  padding:9px;
+  border:none;
+  border-radius:10px;
   cursor:pointer;
 }
 
-#profilePic{
-  position:fixed;
-  top:15px;
-  right:15px;
-}
-
+/* Sections */
 .section{
   background:rgba(0,0,0,.25);
   padding:15px;
@@ -59,52 +83,116 @@ body{
   margin-bottom:15px;
 }
 
-button{
-  margin-top:10px;
-  padding:10px;
-  width:100%;
-  border-radius:12px;
-  border:none;
-  font-weight:600;
+/* PFP preview */
+#pfpPreview{
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  color:white;
   cursor:pointer;
+  background-size:cover;
+  background-position:center;
 }
 
-input{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  margin-top:10px;
+/* Overlay */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(7px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+.overlay.show{ display:flex; }
+
+.popup{
+  width:90%;
+  max-width:400px;
+  background:#0c1937;
+  padding:25px;
+  border-radius:18px;
 }
 
-.error{ color:#ff4c4c; margin-top:6px; }
+.close{ float:right; cursor:pointer; }
+input{ width:100%; padding:10px; margin-top:10px; border-radius:10px; border:none; }
+button{ margin-top:10px; padding:10px; border-radius:12px; border:none; font-weight:600; cursor:pointer; }
+.error{ color:#ff4c4c; margin-top:8px; }
 </style>
 </head>
 
 <body>
 
+<!-- Profile -->
 <div id="profilePic"></div>
+<div id="profilePanel">
+  <div id="panelUsername"></div>
+  <button onclick="location.href='dashboard.html'">Dashboard</button>
+  <button id="logoutBtn">Logout</button>
+</div>
 
 <div class="card">
   <h2>Settings</h2>
 
   <div class="section">
     <strong>Profile Picture</strong><br><br>
-    <div id="pfpPreview"></div>
+    <div id="pfpPreview"></div><br>
     <button id="changePfpBtn">Change</button>
     <button id="removePfpBtn">Remove</button>
   </div>
 
   <div class="section">
     <strong>Username:</strong>
-    <div id="usernameDisplay"></div>
-    <input id="newUsername" placeholder="New username">
-    <div class="error" id="usernameError"></div>
-    <button id="saveUsernameBtn">Save Username</button>
+    <span id="usernameDisplay"></span><br>
+    <button id="changeUsernameBtn">Change Username</button>
   </div>
 
   <div class="section">
-    <button id="logoutBtn">Logout</button>
+    <strong>Password:</strong> ••••••••<br>
+    <button id="changePasswordBtn">Change Password</button>
+  </div>
+
+  <div class="section">
+    <button id="removeAccountBtn">Remove Account</button>
+  </div>
+</div>
+
+<!-- Username -->
+<div class="overlay" id="usernameOverlay">
+  <div class="popup">
+    <span class="close">✕</span>
+    <h3>Change Username</h3>
+    <input id="newUsername">
+    <div class="error" id="usernameError"></div>
+    <button id="saveUsernameBtn">Save</button>
+  </div>
+</div>
+
+<!-- Password -->
+<div class="overlay" id="passwordOverlay">
+  <div class="popup">
+    <span class="close">✕</span>
+    <h3>Change Password</h3>
+    <input type="password" id="currentPassword" placeholder="Current password">
+    <input type="password" id="newPassword" placeholder="New password">
+    <input type="password" id="repeatPassword" placeholder="Repeat new password">
+    <div class="error" id="passwordError"></div>
+    <button id="savePasswordBtn">Save</button>
+  </div>
+</div>
+
+<!-- Remove -->
+<div class="overlay" id="removeOverlay">
+  <div class="popup">
+    <span class="close">✕</span>
+    <h3>Remove Account</h3>
+    <input type="password" id="removePassword">
+    <div class="error" id="removeError"></div>
+    <button id="confirmRemoveBtn">Remove</button>
   </div>
 </div>
 
@@ -112,7 +200,7 @@ input{
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -120,89 +208,99 @@ const app = initializeApp({
   authDomain:"login-34954.firebaseapp.com",
   projectId:"login-34954"
 });
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-const auth = getAuth(app);
-const db = getFirestore(app);
+const profilePic=document.getElementById("profilePic");
+const pfpPreview=document.getElementById("pfpPreview");
+const panelUsername=document.getElementById("panelUsername");
+const usernameDisplay=document.getElementById("usernameDisplay");
 
-/* Elements */
-const profilePic = document.getElementById("profilePic");
-const pfpPreview = document.getElementById("pfpPreview");
-const changePfpBtn = document.getElementById("changePfpBtn");
-const removePfpBtn = document.getElementById("removePfpBtn");
-const pfpFile = document.getElementById("pfpFile");
-const usernameDisplay = document.getElementById("usernameDisplay");
-const newUsername = document.getElementById("newUsername");
-const usernameError = document.getElementById("usernameError");
-const saveUsernameBtn = document.getElementById("saveUsernameBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-
-/* Color helper */
-function colorFrom(str){
-  let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
-  return `hsl(${h%360},70%,50%)`;
+function fallbackPFP(name){
+  profilePic.textContent=name[0].toUpperCase();
+  profilePic.style.backgroundImage="";
+  profilePic.style.backgroundColor="#4da3ff";
+  pfpPreview.textContent=name[0].toUpperCase();
+  pfpPreview.style.backgroundImage="";
+  pfpPreview.style.backgroundColor="#4da3ff";
 }
 
-/* Load user */
 onAuthStateChanged(auth, async user=>{
-  if(!user) return location.href="login.html";
+  if(!user) location.href="login.html";
 
-  const snap = await getDocs(query(collection(db,"usernames"), where("uid","==",user.uid)));
-  const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
+  const snap=await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
+  const username=!snap.empty?snap.docs[0].id:user.email.split("@")[0];
 
-  usernameDisplay.textContent = username;
+  panelUsername.textContent=username;
+  usernameDisplay.textContent=username;
+  fallbackPFP(username);
 
-  const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
-
+  const pfpDoc=await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
-    profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
-    pfpPreview.style.backgroundImage = `url(${pfpDoc.data().data})`;
-    profilePic.textContent = "";
-    pfpPreview.textContent = "";
-  } else {
-    const color = colorFrom(username);
-    profilePic.style.background = color;
-    pfpPreview.style.background = color;
-    profilePic.textContent = username[0].toUpperCase();
-    pfpPreview.textContent = username[0].toUpperCase();
+    profilePic.style.backgroundImage=`url(${pfpDoc.data().data})`;
+    pfpPreview.style.backgroundImage=`url(${pfpDoc.data().data})`;
+    profilePic.textContent="";
+    pfpPreview.textContent="";
   }
 });
 
-/* Change PFP */
-changePfpBtn.onclick = ()=>pfpFile.click();
-pfpFile.onchange = e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const r = new FileReader();
-  r.onload = async ev=>{
-    await setDoc(doc(db,"userPFPs",auth.currentUser.uid),{ data: ev.target.result });
+/* UI */
+profilePic.onclick=()=>profilePanel.style.display=
+  profilePanel.style.display==="flex"?"none":"flex";
+
+/* PFP */
+changePfpBtn.onclick=()=>pfpFile.click();
+pfpFile.onchange=e=>{
+  const r=new FileReader();
+  r.onload=async ev=>{
+    await setDoc(doc(db,"userPFPs",auth.currentUser.uid),{data:ev.target.result});
     location.reload();
   };
-  r.readAsDataURL(file);
+  r.readAsDataURL(e.target.files[0]);
 };
 
-/* Remove PFP */
-removePfpBtn.onclick = async()=>{
+removePfpBtn.onclick=async()=>{
   await deleteDoc(doc(db,"userPFPs",auth.currentUser.uid));
   location.reload();
 };
 
-/* Save username */
-saveUsernameBtn.onclick = async()=>{
-  const name = newUsername.value.trim().toLowerCase();
-  if(!name){ usernameError.textContent="Enter a username"; return; }
+/* Username */
+changeUsernameBtn.onclick=()=>usernameOverlay.classList.add("show");
+saveUsernameBtn.onclick=async()=>{
+  const name=newUsername.value.trim().toLowerCase();
+  if(!name) return usernameError.textContent="Enter username";
+  if((await getDoc(doc(db,"usernames",name))).exists()) return usernameError.textContent="Taken";
 
-  const taken = await getDoc(doc(db,"usernames",name));
-  if(taken.exists()){ usernameError.textContent="Username taken"; return; }
-
-  const old = await getDocs(query(collection(db,"usernames"), where("uid","==",auth.currentUser.uid)));
+  const old=await getDocs(query(collection(db,"usernames"),where("uid","==",auth.currentUser.uid)));
   old.forEach(d=>deleteDoc(doc(db,"usernames",d.id)));
-
-  await setDoc(doc(db,"usernames",name),{ uid: auth.currentUser.uid });
+  await setDoc(doc(db,"usernames",name),{uid:auth.currentUser.uid});
   location.reload();
 };
 
-/* Logout */
-logoutBtn.onclick = ()=>signOut(auth).then(()=>location.href="login.html");
+/* Password */
+changePasswordBtn.onclick=()=>passwordOverlay.classList.add("show");
+savePasswordBtn.onclick=async()=>{
+  try{
+    const cred=EmailAuthProvider.credential(auth.currentUser.email,currentPassword.value);
+    await reauthenticateWithCredential(auth.currentUser,cred);
+    await updatePassword(auth.currentUser,newPassword.value);
+    passwordOverlay.classList.remove("show");
+  }catch(e){ passwordError.textContent=e.message; }
+};
+
+/* Remove */
+removeAccountBtn.onclick=()=>removeOverlay.classList.add("show");
+confirmRemoveBtn.onclick=async()=>{
+  try{
+    const cred=EmailAuthProvider.credential(auth.currentUser.email,removePassword.value);
+    await reauthenticateWithCredential(auth.currentUser,cred);
+    await deleteUser(auth.currentUser);
+    location.href="login.html";
+  }catch(e){ removeError.textContent=e.message; }
+};
+
+logoutBtn.onclick=()=>signOut(auth).then(()=>location.href="login.html");
 </script>
+
 </body>
 </html>
