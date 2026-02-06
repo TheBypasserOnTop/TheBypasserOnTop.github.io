@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Proxies</title>
 <link rel="icon" href="favicon.ico">
-
 <style>
 html, body {
   margin:0;
@@ -15,63 +14,6 @@ html, body {
   background:radial-gradient(circle at top,#0b1e3d,#050b1a);
   color:#e6f0ff;
   overflow-x:hidden;
-}
-
-/* Centered wrapper */
-#welcomeWrapper {
-  width:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  min-height:80vh;
-  position:relative;
-  z-index:1;
-}
-
-/* Card */
-.card {
-  width:92%;
-  max-width:560px;
-  padding:38px;
-  border-radius:24px;
-
-  background: rgba(30,70,140,0.22);
-  backdrop-filter: blur(16px);
-
-  box-shadow:
-    0 25px 60px rgba(0,0,0,0.55),
-    inset 0 0 0 1px rgba(255,255,255,0.08);
-
-  text-align:center;
-  position:relative;
-  z-index:10;
-}
-
-.card h2 {
-  margin-bottom:10px;
-  text-shadow: 0 0 6px rgba(120,180,255,0.35);
-}
-
-.subtext {
-  font-size:0.9rem;
-  opacity:0;
-  transition: opacity 2s;
-  margin-top:10px;
-  color:#cfd8f0;
-}
-
-/* Scroll cards */
-.scroll-card {
-  width:90%;
-  max-width:350px;
-  padding:20px;
-  background:rgba(12,25,55,.7);
-  border-radius:15px;
-  margin:50px auto;
-  opacity:0;
-  transform:translateY(50px);
-  transition:all 1s ease;
 }
 
 /* Hamburger menu */
@@ -86,7 +28,6 @@ html, body {
   justify-content:space-between;
   cursor:pointer;
   z-index:150;
-  transition:opacity .3s, transform .3s;
 }
 #menuBtn span {
   height:4px;
@@ -113,7 +54,6 @@ body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); 
 }
 body.menu-open #sidePanel { left:0; }
 
-/* Side panel header */
 #sidePanelHeader {
   display:flex;
   justify-content:space-between;
@@ -122,19 +62,6 @@ body.menu-open #sidePanel { left:0; }
 #sidePanelHeader h3 { margin:0 auto; }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
 
-/* Divider */
-.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
-
-/* Search */
-#navSearch {
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  background:rgba(255,255,255,.08);
-  color:white;
-  margin-bottom:15px;
-}
-
 /* Tabs */
 .nav-tab {
   padding:12px;
@@ -142,6 +69,7 @@ body.menu-open #sidePanel { left:0; }
   cursor:pointer;
   margin-bottom:8px;
   font-weight:600;
+  text-align:center;
 }
 .nav-tab.active { background:#4da3ff; color:black; }
 .nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
@@ -157,7 +85,7 @@ body.menu-open .blur-layer {
   pointer-events:none;
 }
 
-/* Top-right PFP */
+/* Profile pic top-right */
 #profilePic {
   position:fixed;
   top:20px;
@@ -176,6 +104,7 @@ body.menu-open .blur-layer {
   z-index:100;
   background-size:cover;
   background-position:center;
+  background-repeat:no-repeat;
 }
 
 /* Profile panel */
@@ -211,87 +140,109 @@ body.menu-open .blur-layer {
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
 
-/* Dropdown and Proxy Generator */
-#proxySection {
-  margin-top:30px;
+/* Main proxy container */
+#proxyContainer {
+  max-width:500px;
+  margin:120px auto 40px auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
   text-align:center;
+  z-index:10;
+  position:relative;
 }
-#proxyDropdown {
-  padding:12px;
+
+/* Card */
+.card {
+  width:100%;
+  background:rgba(20,40,80,.8);
+  backdrop-filter:blur(12px);
+  border-radius:20px;
+  box-shadow:0 25px 50px rgba(0,0,0,.6);
+  padding:25px;
+  margin-bottom:20px;
+  color:#e6f0ff;
+}
+.card h2 { text-shadow:0 0 6px #4da3ff; }
+
+/* Dropdown */
+select {
+  width:70%;
+  padding:10px;
   border-radius:10px;
   border:none;
-  background:rgba(255,255,255,0.08);
-  color:white;
+  margin:10px 0;
   font-size:1rem;
-  margin-top:10px;
-  cursor:pointer;
+  text-align:center;
 }
-#generateBtn {
-  margin-top:15px;
-  padding:12px 18px;
-  font-weight:600;
-  border-radius:12px;
+
+/* Button */
+button {
+  padding:10px 20px;
+  margin-top:10px;
   border:none;
-  cursor:pointer;
+  border-radius:10px;
   background:#4da3ff;
   color:black;
+  font-weight:600;
+  cursor:pointer;
 }
 
 /* Progress bar */
 #progressWrapper {
+  width:80%;
   margin-top:20px;
-  width:90%;
-  max-width:500px;
-  height:18px;
-  background:rgba(255,255,255,0.1);
+  display:none;
+  flex-direction:column;
+  align-items:center;
+}
+#progressBarContainer {
+  width:100%;
+  height:20px;
+  background:rgba(255,255,255,0.2);
   border-radius:10px;
   overflow:hidden;
-  margin-left:auto;
-  margin-right:auto;
-  display:none;
+  position:relative;
 }
 #progressBar {
-  height:100%;
   width:0%;
+  height:100%;
   background:#4da3ff;
-  transition: width 0.2s linear;
+  border-radius:10px;
+  transition:width 0.1s linear;
 }
-
-/* Progress text */
 #progressText {
+  margin-right:10px;
+  font-weight:bold;
+}
+#progressStatus {
   margin-top:10px;
-  color:#cfd8f0;
-  min-height:18px;
-  font-family:monospace;
+  font-size:0.9rem;
+  opacity:0;
+  transition:opacity 0.3s;
 }
 
 /* Generated proxies */
-#generatedSection {
-  margin-top:40px;
-  width:90%;
-  max-width:560px;
-  margin-left:auto;
-  margin-right:auto;
-}
-.proxyCard {
-  background:rgba(12,25,55,0.7);
+#generatedProxies { max-width:500px; margin:20px auto; }
+.generatedCard {
+  width:100%;
+  background:rgba(20,40,80,.8);
+  backdrop-filter:blur(12px);
+  border-radius:15px;
   padding:15px;
-  border-radius:14px;
-  margin-top:15px;
+  margin-bottom:10px;
 }
-.proxyCard h4 { margin:0 0 8px 0; }
-.proxyCard .divider { margin:8px 0; height:1px; background:rgba(255,255,255,.2); }
-.voteButtons { display:flex; justify-content:space-between; margin-top:8px; }
-.voteButtons button { padding:6px 10px; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
-.voteButtons .up { background:green; color:white; }
-.voteButtons .down { background:red; color:white; }
-
+.generatedCard h4 { margin:0 0 5px 0; text-shadow:0 0 4px #4da3ff; }
+.voteButtons { display:flex; justify-content:flex-start; gap:10px; margin-top:5px; }
+.voteButtons button { padding:5px 10px; border-radius:6px; border:none; cursor:pointer; }
+.up { background:#4caf50; color:white; }
+.down { background:#f44336; color:white; }
+.voteCount { margin-left:5px; }
 </style>
 </head>
-
 <body>
 
-<!-- Hamburger menu -->
+<!-- Hamburger and Side Panel -->
 <div id="menuBtn"><span></span><span></span><span></span></div>
 <div id="sidePanel">
   <div id="sidePanelHeader">
@@ -300,146 +251,199 @@ body.menu-open .blur-layer {
     <div id="closeMenu">✕</div>
   </div>
   <div class="divider"></div>
-  <input id="navSearch" placeholder="Search...">
-  <div class="nav-tab active" id="tabDashboard">Dashboard</div>
+  <div class="nav-tab" id="tabDashboard">Dashboard</div>
+  <div class="nav-tab active" id="tabProxies">Proxies</div>
   <div class="nav-tab" id="tabSettings">Settings</div>
-  <div class="nav-tab" id="tabProxies">Proxies</div>
 </div>
 <div class="blur-layer"></div>
 
-<!-- Welcome card -->
-<div id="welcomeWrapper">
-  <div class="card">
-    <h2 id="welcomeText">Welcome</h2>
-    <div class="subtext" id="welcomeSubtext">Scroll down for more info</div>
-  </div>
-</div>
-
-<!-- Profile pic and panel -->
+<!-- Profile pic -->
 <div id="profilePic"></div>
 <div id="profilePanel">
   <h4 id="profileName">Username</h4>
+  <button class="primary" onclick="openDashboard()">Dashboard</button>
   <button class="primary" onclick="openSettings()">Settings</button>
   <button class="primary" onclick="confirmLogout()">Logout</button>
 </div>
 
-<!-- Proxy generator section -->
-<div id="proxySection">
-  <div>Select a proxy</div>
-  <select id="proxyDropdown">
-    <option value="">-- Choose Proxy --</option>
-    <option value="Rammerhead">Rammerhead</option>
-    <option value="Space">Space</option>
-    <option value="Shuttle">Shuttle</option>
-    <option value="Doge">Doge</option>
-    <option value="Bolt">Bolt</option>
-    <option value="Shadow">Shadow</option>
-    <option value="Ghost">Ghost</option>
-  </select>
-  <br>
-  <button id="generateBtn">Generate link</button>
+<!-- Proxy generator -->
+<div id="proxyContainer">
+  <div class="card">
+    <h2>Select a proxy</h2>
+    <select id="proxySelect">
+      <option value="">-- Choose Proxy --</option>
+      <option>Rammerhead</option>
+      <option>Space</option>
+      <option>Shuttle</option>
+      <option>Doge</option>
+      <option>Bolt</option>
+      <option>Shadow</option>
+      <option>Ghost</option>
+    </select>
+    <button id="generateBtn">Generate link</button>
 
-  <div id="progressWrapper">
-    <div id="progressBar"></div>
+    <div id="progressWrapper">
+      <div style="display:flex; width:100%; justify-content:flex-start; align-items:center;">
+        <div id="progressText">0%</div>
+        <div id="progressBarContainer">
+          <div id="progressBar"></div>
+        </div>
+      </div>
+      <div id="progressStatus">Status</div>
+    </div>
   </div>
-  <div id="progressText"></div>
 </div>
 
 <!-- Generated proxies section -->
-<div id="generatedSection">
-  <h3>Generated Proxies</h3>
+<div id="generatedProxies">
+  <h2>Generated Proxies</h2>
   <div class="divider"></div>
-  <div id="proxyCards"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 /* Firebase */
-const app = initializeApp({
-  apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain:"login-34954.firebaseapp.com",
-  projectId:"login-34954"
-});
+const firebaseConfig = {
+  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain: "login-34954.firebaseapp.com",
+  projectId: "login-34954",
+  storageBucket: "login-34954.firebasestorage.app"
+};
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+/* Elements */
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
+const menuBtn = document.getElementById("menuBtn");
+const closeMenu = document.getElementById("closeMenu");
+const sidePanel = document.getElementById("sidePanel");
 
-/* Profile PFP */
+/* Profile pic letter color */
 function stringToColor(str){
   let hash=0; for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
   let color='#'; for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
   return color;
 }
 
+/* Auth check */
 onAuthStateChanged(auth, async user=>{
   if(!user) location.replace("login.html");
+
   let username = user.displayName;
   if(!username){
     const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
     username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
   }
-  profileName.textContent = username;
+  profileName.textContent=username;
+  profilePic.textContent=username[0].toUpperCase();
+  profilePic.style.backgroundColor = stringToColor(username);
 
-  // PFP logic
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
   if(pfpDoc.exists() && pfpDoc.data().data){
     profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
     profilePic.textContent = "";
-  } else {
-    profilePic.style.backgroundImage = "";
-    profilePic.textContent = username.charAt(0).toUpperCase();
-    profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
   }
 });
 
+/* Menu toggle */
+let menuOpen=false;
+menuBtn.onclick=()=>{ menuOpen=!menuOpen; document.body.classList.toggle("menu-open"); };
+closeMenu.onclick=()=>{ menuOpen=false; document.body.classList.remove("menu-open"); };
+
 /* Profile panel toggle */
 let panelOpen=false;
-profilePic.addEventListener("click", ()=>{
-  panelOpen=!panelOpen;
-  profilePanel.style.display=panelOpen?"flex":"none";
-});
+profilePic.onclick=()=>{ panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none"; };
 
-/* Menu logic */
-const menuBtn=document.getElementById("menuBtn");
-const closeMenu=document.getElementById("closeMenu");
-const sidePanel=document.getElementById("sidePanel");
-menuBtn.onclick=()=>document.body.classList.add("menu-open");
-closeMenu.onclick=()=>document.body.classList.remove("menu-open");
-
-/* Tabs with animation out then redirect */
-function navigateTab(url){
+/* Tabs */
+document.getElementById("tabDashboard").onclick=()=>{ closePanelAndRedirect('dashboard.html'); };
+document.getElementById("tabSettings").onclick=()=>{ closePanelAndRedirect('settings.html'); };
+function closePanelAndRedirect(url){
   document.body.classList.remove("menu-open");
-  setTimeout(()=> location.href=url, 350);
+  setTimeout(()=> location.href=url, 300);
 }
-document.getElementById("tabDashboard").onclick = ()=> navigateTab("dashboard.html");
-document.getElementById("tabSettings").onclick = ()=> navigateTab("settings.html");
-document.getElementById("tabProxies").onclick = ()=> navigateTab("proxies.html");
+function openDashboard(){ location.href='dashboard.html'; }
+function openSettings(){ location.href='settings.html'; }
 
-/* Scroll cards animation */
-const scrollCards = document.querySelectorAll(".scroll-card");
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      e.target.style.opacity=1;
-      e.target.style.transform="translateY(0)";
-    }
-  });
-},{threshold:0.1});
-scrollCards.forEach(c=>observer.observe(c));
+/* Logout */
+window.confirmLogout=()=>{ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); };
 
-/* Scroll down text fade-in */
-const welcomeSubtext = document.getElementById("welcomeSubtext");
-setTimeout(()=> welcomeSubtext.style.opacity=1,500);
+/* Proxy generator */
+const proxySelect = document.getElementById("proxySelect");
+const generateBtn = document.getElementById("generateBtn");
+const progressWrapper = document.getElementById("progressWrapper");
+const progressBar = document.getElementById("progressBar");
+const progressText = document.getElementById("progressText");
+const progressStatus = document.getElementById("progressStatus");
+const generatedProxies = document.getElementById("generatedProxies");
 
-/* Logout/settings buttons */
-window.openSettings=()=>navigateTab("settings.html");
-window.confirmLogout=()=>{ if(confirm("Are you sure you want to logout?")) signOut(auth).then(()=>location.href="login.html"); };
+const proxyLinks = {
+  Rammerhead: ["link1","link2"],
+  Space: ["link3"],
+  Shuttle: [],
+  Doge: ["link4","link5"],
+  Bolt: ["link6"],
+  Shadow: ["link7","link8"],
+  Ghost: []
+};
+
+generateBtn.onclick = async ()=>{
+  const selected = proxySelect.value;
+  if(!selected) return alert("Select a proxy");
+
+  progressWrapper.style.display="flex";
+  progressBar.style.width="0%";
+  progressText.textContent="0%";
+  progressStatus.style.opacity=0;
+  progressStatus.textContent="";
+
+  let progress=0;
+  const statuses=["Searching for proxies","Clearing cookies and data"];
+  const randomStatus=["reaching-13.zaq","shrjw.aj","checking-x1","fetching..."];
+
+  function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+  while(progress<100){
+    await sleep(100);
+    progress += Math.floor(Math.random()*5)+2;
+    if(progress>100) progress=100;
+    progressBar.style.width=progress+"%";
+    progressText.textContent=progress+"%";
+
+    if(progress<50) progressStatus.textContent=statuses[Math.floor(Math.random()*statuses.length)];
+    else progressStatus.textContent=randomStatus[Math.floor(Math.random()*randomStatus.length)];
+    progressStatus.style.opacity=1;
+  }
+
+  // Handle success/failure
+  const links = proxyLinks[selected] || [];
+  let resultText="", generatedLink="";
+  if(links.length===0){ resultText="Failed to generate: no stock"; }
+  else{ 
+    generatedLink = links[Math.floor(Math.random()*links.length)];
+    resultText="Successfully generated"; 
+  }
+
+  // Add card
+  const card = document.createElement("div");
+  card.classList.add("generatedCard");
+  card.innerHTML=`
+    <h4>${selected}</h4>
+    <div class="divider"></div>
+    <div>${generatedLink || "-"}</div>
+    <div class="voteButtons">
+      <button class="up">👍 <span class="voteCount">0</span></button>
+      <button class="down">👎 <span class="voteCount">0</span></button>
+    </div>
+    <div style="margin-top:5px;font-size:0.9rem;color:#cfd8f0;">${resultText}</div>
+  `;
+  generatedProxies.appendChild(card);
+};
 </script>
 
 </body>
