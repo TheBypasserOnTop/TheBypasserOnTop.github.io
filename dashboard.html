@@ -16,206 +16,44 @@ html, body {
   overflow-x:hidden;
 }
 
-/* Centered welcome card wrapper */
-#welcomeWrapper {
-  width:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  min-height:80vh;
-  position:relative;
-  z-index:1;
-}
-.card {
-  width:90%;
-  max-width:400px;
-  padding:30px;
-  background:rgba(12,25,55,.65);
-  backdrop-filter:blur(16px);
-  border-radius:20px;
-  box-shadow:0 20px 60px rgba(0,0,0,.4);
-  text-align:center;
-  margin:20px auto;
-  z-index:10;
-}
+/* Cards, scroll, menu etc. - same as before */
+#welcomeWrapper { width:100%; display:flex; justify-content:center; align-items:center; flex-direction:column; min-height:80vh; position:relative; z-index:1; }
+.card { width:90%; max-width:400px; padding:30px; background:rgba(12,25,55,.65); backdrop-filter:blur(16px); border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.4); text-align:center; margin:20px auto; z-index:10; }
 h2 { margin-bottom:10px; }
-.subtext {
-  font-size:0.9rem;
-  opacity:0;
-  transition: opacity 2s;
-  margin-top:10px;
-  color:#cfd8f0;
-}
+.subtext { font-size:0.9rem; opacity:0; transition: opacity 2s; margin-top:10px; color:#cfd8f0; }
+#scrollText { text-align:center; font-weight:500; animation: upDown 2s ease-in-out infinite alternate; color:#cfd8f0; margin-top:15px; }
+@keyframes upDown{ 0%{ transform:translateY(0);} 100%{ transform:translateY(-10px);} }
+.scroll-card { width:90%; max-width:350px; padding:20px; background:rgba(12,25,55,.7); border-radius:15px; margin:50px auto; opacity:0; transform:translateY(50px); transition:all 1s ease; }
 
-/* Scroll text under welcome */
-#scrollText {
-  text-align:center;
-  font-weight:500;
-  animation: upDown 2s ease-in-out infinite alternate;
-  color:#cfd8f0;
-  margin-top:15px;
-}
-@keyframes upDown{
-  0%{ transform:translateY(0);}
-  100%{ transform:translateY(-10px);}
-}
-
-/* Scroll cards */
-.scroll-card {
-  width:90%;
-  max-width:350px;
-  padding:20px;
-  background:rgba(12,25,55,.7);
-  border-radius:15px;
-  margin:50px auto;
-  opacity:0;
-  transform:translateY(50px);
-  transition:all 1s ease;
-}
-
-/* Hamburger menu */
-#menuBtn {
-  position:fixed;
-  top:20px;
-  left:20px;
-  width:32px;
-  height:24px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  cursor:pointer;
-  z-index:150;
-  transition:opacity .3s, transform .3s;
-}
-#menuBtn span {
-  height:4px;
-  background:white;
-  border-radius:4px;
-}
+/* Menu and side panel */
+#menuBtn { position:fixed; top:20px; left:20px; width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; z-index:150; transition:opacity .3s, transform .3s; }
+#menuBtn span { height:4px; background:white; border-radius:4px; }
 body.menu-open #menuBtn { opacity:0; pointer-events:none; transform:scale(0.8); }
-
-/* Side panel */
-#sidePanel {
-  position:fixed;
-  top:0;
-  left:-300px;
-  width:260px;
-  height:100%;
-  background:rgba(12,25,55,.95);
-  backdrop-filter:blur(16px);
-  padding:20px;
-  box-sizing:border-box;
-  z-index:200;
-  transition:left .35s ease;
-  display:flex;
-  flex-direction:column;
-}
+#sidePanel { position:fixed; top:0; left:-300px; width:260px; height:100%; background:rgba(12,25,55,.95); backdrop-filter:blur(16px); padding:20px; box-sizing:border-box; z-index:200; transition:left .35s ease; display:flex; flex-direction:column; }
 body.menu-open #sidePanel { left:0; }
-
-/* Side panel header */
-#sidePanelHeader {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+#sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
 #sidePanelHeader h3 { margin:0 auto; }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
-
-/* Divider */
 .divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
-
-/* Search */
-#navSearch {
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  background:rgba(255,255,255,.08);
-  color:white;
-  margin-bottom:15px;
-}
-
-/* Tabs */
-.nav-tab {
-  padding:12px;
-  border-radius:10px;
-  cursor:pointer;
-  margin-bottom:8px;
-  font-weight:600;
-}
+#navSearch { padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,.08); color:white; margin-bottom:15px; }
+.nav-tab { padding:12px; border-radius:10px; cursor:pointer; margin-bottom:8px; font-weight:600; }
 .nav-tab.active { background:#4da3ff; color:black; }
 .nav-tab:not(.active):hover { background:rgba(255,255,255,.1); }
+.blur-layer { position:absolute; inset:0; z-index:5; }
+body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 
-/* Blur layer */
-.blur-layer {
-  position:absolute;
-  inset:0;
-  z-index:5;
-}
-body.menu-open .blur-layer {
-  backdrop-filter: blur(8px);
-  pointer-events:none;
-}
-
-/* Top-right PFP */
-#profilePic {
-  position:fixed;
-  top:20px;
-  right:20px;
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-weight:bold;
-  font-size:1.3rem;
-  color:white;
-  cursor:pointer;
-  user-select:none;
-  z-index:100;
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-}
-
-/* Profile panel */
-#profilePanel {
-  position:fixed;
-  top:80px;
-  right:20px;
-  width:180px;
-  background:rgba(12,25,55,.85);
-  backdrop-filter:blur(8px);
-  border-radius:14px;
-  display:none;
-  flex-direction:column;
-  padding:10px;
-  z-index:100;
-}
-#profilePanel h4 {
-  margin:0 0 8px 0;
-  font-size:1rem;
-  text-align:center;
-  border-bottom:1px solid rgba(255,255,255,0.2);
-  padding-bottom:5px;
-}
-#profilePanel button {
-  width:100%;
-  margin:5px 0;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  font-weight:600;
-  cursor:pointer;
-}
+/* Profile picture */
+#profilePic { position:fixed; top:20px; right:20px; width:50px; height:50px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:1.3rem; color:white; cursor:pointer; user-select:none; z-index:100; background-size:cover; background-position:center; background-repeat:no-repeat; }
+#profilePanel { position:fixed; top:80px; right:20px; width:180px; background:rgba(12,25,55,.85); backdrop-filter:blur(8px); border-radius:14px; display:none; flex-direction:column; padding:10px; z-index:100; }
+#profilePanel h4 { margin:0 0 8px 0; font-size:1rem; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px; }
+#profilePanel button { width:100%; margin:5px 0; padding:10px; border:none; border-radius:10px; font-weight:600; cursor:pointer; }
 .primary { background:#4da3ff; color:black; }
 .remove { background:#ff4c4c; color:white; }
 </style>
 </head>
 <body>
 
-<!-- Hamburger menu -->
+<!-- Menu -->
 <div id="menuBtn"><span></span><span></span><span></span></div>
 <div id="sidePanel">
   <div id="sidePanelHeader">
@@ -231,7 +69,7 @@ body.menu-open .blur-layer {
 </div>
 <div class="blur-layer"></div>
 
-<!-- Centered welcome card -->
+<!-- Welcome -->
 <div id="welcomeWrapper">
   <div class="card">
     <h2 id="welcomeText">Welcome</h2>
@@ -240,12 +78,11 @@ body.menu-open .blur-layer {
   <div id="scrollText">Scroll down for more info</div>
 </div>
 
-<!-- Scroll cards -->
 <div class="scroll-card">🚀 Cool feature 1: Fast, responsive design</div>
 <div class="scroll-card">💡 Tip: Use the menu to quickly access sections</div>
 <div class="scroll-card">🎨 Design: Radial gradient background + smooth animations</div>
 
-<!-- Profile pic top-right -->
+<!-- Profile -->
 <div id="profilePic"></div>
 <div id="profilePanel">
   <h4 id="profileName">Username</h4>
@@ -264,8 +101,7 @@ const firebaseConfig = {
   projectId: "login-34954",
   storageBucket: "login-34954.firebasestorage.app",
   messagingSenderId: "422184727508",
-  appId: "1:422184727508:web:cef39fc913d526febe9c41",
-  measurementId: "G-1MMT3C4M7K"
+  appId: "1:422184727508:web:cef39fc913d526febe9c41"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -279,81 +115,58 @@ const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
 
-/* Profile pic fallback color */
-function stringToColor(str){
-  let hash=0;
-  for(let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);}
-  let color='#';
-  for(let i=0;i<3;i++){ color+=('00'+((hash>>(i*8))&0xFF).toString(16)).slice(-2);}
-  return color;
+/* Color fallback */
+function colorFrom(str){
+  let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h); return `hsl(${h%360},70%,50%)`;
 }
 
-/* Auth check */
 onAuthStateChanged(auth, async user=>{
-  if(!user) location.replace("login.html");
+  if(!user) location.href="login.html";
 
-  // Get username
-  let username = user.displayName;
-  if(!username){
-    const q=query(collection(db,"usernames"),where("uid","==",user.uid));
-    const snap=await getDocs(q);
-    username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
-  }
+  // Get username from Firestore like settings
+  const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
+  const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
 
-  document.getElementById("welcomeText").textContent=`Welcome, ${username}`;
-  profileName.textContent=username;
-  welcomeSubtext.style.opacity=1;
+  document.getElementById("welcomeText").textContent = `Welcome, ${username}`;
+  profileName.textContent = username;
+  welcomeSubtext.style.opacity = 1;
 
-  // Profile picture
+  // Profile pic from Firestore
   const pfpDoc = await getDoc(doc(db,"userPFPs",user.uid));
-  if(pfpDoc.exists() && pfpDoc.data().data && pfpDoc.data().data.trim() !== ""){
-      profilePic.style.backgroundImage = `url("${pfpDoc.data().data}")`;
-      profilePic.style.backgroundSize = "cover";
-      profilePic.style.backgroundPosition = "center";
-      profilePic.style.backgroundColor = "transparent";
-      profilePic.textContent = "";
+  if(pfpDoc.exists() && pfpDoc.data().data?.trim()){
+    profilePic.style.backgroundImage = `url("${pfpDoc.data().data}")`;
+    profilePic.style.backgroundSize = "cover";
+    profilePic.style.backgroundPosition = "center";
+    profilePic.style.backgroundColor = "transparent";
+    profilePic.textContent = "";
   } else {
-      profilePic.style.backgroundImage = "none";
-      profilePic.style.backgroundColor = stringToColor(username.toLowerCase());
-      profilePic.textContent = username.charAt(0).toUpperCase();
-      profilePic.style.color = "#fff";
+    profilePic.style.backgroundImage = "none";
+    profilePic.style.backgroundColor = colorFrom(username);
+    profilePic.textContent = username[0].toUpperCase();
   }
 });
 
-/* Profile panel toggle */
+/* Menu toggle */
 let panelOpen=false;
-profilePic.addEventListener("click", ()=>{
-  panelOpen=!panelOpen;
-  profilePanel.style.display=panelOpen?"flex":"none";
-});
+profilePic.addEventListener("click", ()=>{ panelOpen=!panelOpen; profilePanel.style.display=panelOpen?"flex":"none"; });
 
-/* Menu logic */
 const menuBtn = document.getElementById("menuBtn");
 const closeMenu = document.getElementById("closeMenu");
 menuBtn.onclick = () => document.body.classList.add("menu-open");
 closeMenu.onclick = () => document.body.classList.remove("menu-open");
 
-/* Tabs */
 document.getElementById("tabDashboard").onclick = () => document.body.classList.remove("menu-open");
 document.getElementById("tabSettings").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="settings.html",350);}
-document.getElementById("tabCommunicate").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="chat.html",350);}
+document.getElementById("tabCommunicate").onclick = () => { document.body.classList.remove("menu-open"); setTimeout(()=>location.href="chat.html",350); }
+
+window.openSettings = ()=>location.href="settings.html";
+window.confirmLogout = ()=>{ if(confirm("Log out?")) signOut(auth).then(()=>location.href="login.html"); };
 
 /* Scroll fade-in */
 const observer = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      e.target.style.opacity=1;
-      e.target.style.transform="translateY(0)";
-    }
-  });
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.style.opacity=1; e.target.style.transform="translateY(0)"; } });
 },{threshold:0.1});
-
-/* Observe all scroll cards */
 scrollCards.forEach(c=>observer.observe(c));
-
-/* Logout/settings buttons */
-window.openSettings = ()=>location.href="settings.html";
-window.confirmLogout = ()=>{ if(confirm("Are you sure you want to logout?")) signOut(auth).then(()=>location.href="login.html"); };
 </script>
 </body>
 </html>
