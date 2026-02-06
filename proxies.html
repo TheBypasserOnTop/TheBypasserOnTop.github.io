@@ -30,15 +30,8 @@ html, body {
   cursor:pointer;
   z-index:150;
 }
-#menuBtn span {
-  height:4px;
-  background:white;
-  border-radius:4px;
-}
-body.menu-open #menuBtn {
-  opacity:0;
-  pointer-events:none;
-}
+#menuBtn span { height:4px; background:white; border-radius:4px; }
+body.menu-open #menuBtn { opacity:0; pointer-events:none; transition:.3s; }
 
 /* Side panel */
 #sidePanel {
@@ -57,176 +50,29 @@ body.menu-open #menuBtn {
   flex-direction:column;
 }
 body.menu-open #sidePanel { left:0; }
-
-#sidePanelHeader {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+#sidePanelHeader { display:flex; justify-content:space-between; align-items:center; }
 #closeMenu { cursor:pointer; font-size:1.4rem; }
-
-.divider {
-  height:1px;
-  background:rgba(255,255,255,.2);
-  margin:15px 0;
-}
-
+.divider { height:1px; background:rgba(255,255,255,.2); margin:15px 0; }
 .nav-tab {
-  padding:12px;
-  border-radius:10px;
-  cursor:pointer;
-  margin-bottom:8px;
-  font-weight:600;
+  padding:12px; border-radius:10px; cursor:pointer; margin-bottom:8px; font-weight:600;
 }
 .nav-tab.active { background:#4da3ff; color:black; }
 
 /* Blur layer */
-.blur-layer {
-  position:absolute;
-  inset:0;
-  z-index:5;
-  pointer-events:none; /* allow clicks when menu closed */
-}
-body.menu-open .blur-layer {
-  backdrop-filter: blur(8px);
-  pointer-events:auto;
-}
+.blur-layer { position:absolute; inset:0; z-index:5; }
+body.menu-open .blur-layer { backdrop-filter: blur(8px); pointer-events:none; }
 
-/* Main content wrapper */
-#mainContent {
-  min-height:100vh;
+/* Page content */
+#contentWrapper {
+  min-height:90vh;
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:flex-start;
-  padding-top:120px;
-  position:relative;
-  z-index:10; /* above blur-layer so clicks work */
+  padding-top:100px;
+  z-index:10;
 }
 
-/* Proxy selection */
-#proxySection {
-  width:90%;
-  max-width:480px;
-  background:rgba(12,25,55,.7);
-  backdrop-filter:blur(14px);
-  padding:30px;
-  border-radius:20px;
-  text-align:center;
-  margin-bottom:40px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-
-#proxySection select {
-  width:60%;
-  padding:12px;
-  margin-top:15px;
-  border-radius:10px;
-  border:none;
-  background:rgba(255,255,255,.08);
-  color:white;
-  font-weight:600;
-  cursor:pointer;
-}
-
-#generateBtn {
-  margin-top:20px;
-  padding:12px 25px;
-  border:none;
-  border-radius:12px;
-  font-weight:600;
-  cursor:pointer;
-  background:#4da3ff;
-  color:black;
-}
-
-#progressContainer {
-  width:80%;
-  margin-top:20px;
-  text-align:left;
-  display:none;
-}
-
-#progressBar {
-  width:100%;
-  background:rgba(255,255,255,.1);
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:6px;
-}
-
-#progressFill {
-  width:0%;
-  height:18px;
-  background:#4da3ff;
-  text-align:right;
-  line-height:18px;
-  padding-right:5px;
-  border-radius:10px;
-  color:black;
-  font-weight:600;
-}
-
-/* Progress text */
-#progressText {
-  margin-top:10px;
-  color:#cfd8f0;
-  font-size:0.9rem;
-  min-height:22px;
-  text-align:center;
-}
-
-/* Generated proxies section */
-#generatedSection {
-  width:90%;
-  max-width:600px;
-  margin-bottom:50px;
-}
-
-.generated-card {
-  width:100%;
-  background:rgba(12,25,55,.6);
-  padding:18px;
-  border-radius:16px;
-  margin-bottom:18px;
-  display:flex;
-  flex-direction:column;
-  color:white;
-}
-
-.generated-card .title {
-  font-weight:600;
-  margin-bottom:6px;
-}
-
-.generated-card .divider {
-  height:1px;
-  background:rgba(255,255,255,.2);
-  margin:8px 0;
-}
-
-.generated-card .link {
-  word-break:break-all;
-  margin-bottom:8px;
-}
-
-.voteButtons {
-  display:flex;
-  gap:10px;
-}
-.voteButtons button {
-  flex:1;
-  padding:8px;
-  border:none;
-  border-radius:10px;
-  font-weight:600;
-  cursor:pointer;
-}
-.voteButtons .up { background:green; color:white; }
-.voteButtons .down { background:red; color:white; }
-
+/* Profile pic */
 #profilePic {
   position:fixed;
   top:20px;
@@ -246,7 +92,6 @@ body.menu-open .blur-layer {
   background-repeat:no-repeat;
   background-position:center;
 }
-
 #profilePanel {
   position:fixed;
   top:80px;
@@ -260,26 +105,89 @@ body.menu-open .blur-layer {
   padding:10px;
   z-index:100;
 }
-#profilePanel h4 {
-  text-align:center;
-  margin:0 0 8px;
-}
-#profilePanel button {
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  margin-top:5px;
-  font-weight:600;
-  cursor:pointer;
-}
+#profilePanel h4 { text-align:center; margin:0 0 8px; }
+#profilePanel button { padding:10px; border:none; border-radius:10px; margin-top:5px; font-weight:600; cursor:pointer; }
 .primary { background:#4da3ff; color:black; }
 
+/* Proxies panel */
+#proxyPanel {
+  margin-top:20px;
+  width:320px;
+  text-align:center;
+}
+#proxyPanel h3 { margin-bottom:10px; }
+#proxySelect {
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,.1);
+  color:white;
+  font-size:1rem;
+  cursor:pointer;
+  margin-bottom:15px;
+}
+#generateBtn {
+  width:100%;
+  padding:12px;
+  font-size:1rem;
+  border:none;
+  border-radius:12px;
+  background:#4da3ff;
+  color:black;
+  cursor:pointer;
+}
+
+/* Progress bar */
+#progressContainer {
+  width:100%;
+  background:rgba(255,255,255,.1);
+  border-radius:12px;
+  overflow:hidden;
+  margin-top:20px;
+  display:none;
+}
+#progressFill {
+  width:0%;
+  background:#4da3ff;
+  height:28px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  transition:width .2s;
+}
+#progressText {
+  margin-top:8px;
+  font-size:0.9rem;
+  color:#cfd8f0;
+}
+
+/* Generated proxies list */
+#generatedList {
+  margin-top:40px;
+  width:90%;
+  max-width:600px;
+}
+.generated-card {
+  background:rgba(12,25,55,.7);
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  text-align:left;
+}
+.generated-card .divider { margin:10px 0; height:1px; background:rgba(255,255,255,.2); }
+.generated-card button { margin-right:8px; padding:6px 12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
+.generated-card .thumbs-up { background:#4caf50; color:white; }
+.generated-card .thumbs-down { background:#ff4c4c; color:white; }
+.generated-card .count { margin-left:5px; font-weight:bold; }
 </style>
 </head>
 
 <body>
-<div id="menuBtn"><span></span><span></span><span></span></div>
 
+<div id="menuBtn"><span></span><span></span><span></span></div>
 <div id="sidePanel">
   <div id="sidePanelHeader">
     <div></div>
@@ -294,33 +202,26 @@ body.menu-open .blur-layer {
 
 <div class="blur-layer"></div>
 
-<div id="mainContent">
-  <div id="proxySection">
-    <h2>Select a proxy</h2>
+<div id="contentWrapper">
+  <div id="proxyPanel">
+    <h3>Select a proxy</h3>
     <select id="proxySelect">
-      <option>Rammerhead</option>
-      <option>Space</option>
-      <option>Shuttle</option>
-      <option>Doge</option>
-      <option>Bolt</option>
-      <option>Shadow</option>
-      <option>Ghost</option>
+      <option value="Rammerhead">Rammerhead</option>
+      <option value="Space">Space</option>
+      <option value="Shuttle">Shuttle</option>
+      <option value="Doge">Doge</option>
+      <option value="Bolt">Bolt</option>
+      <option value="Shadow">Shadow</option>
+      <option value="Ghost">Ghost</option>
     </select>
     <button id="generateBtn">Generate link</button>
-
     <div id="progressContainer">
-      <div id="progressBar">
-        <div id="progressFill">0%</div>
-      </div>
-      <div id="progressText"></div>
+      <div id="progressFill">0%</div>
+      <div id="progressText">Starting...</div>
     </div>
   </div>
 
-  <div id="generatedSection">
-    <h2>Generated Proxies</h2>
-    <div class="divider"></div>
-    <div id="generatedList"></div>
-  </div>
+  <div id="generatedList"></div>
 </div>
 
 <div id="profilePic"></div>
@@ -333,12 +234,12 @@ body.menu-open .blur-layer {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey:"AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-  authDomain:"login-34954.firebaseapp.com",
-  projectId:"login-34954"
+  apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
+  authDomain: "login-34954.firebaseapp.com",
+  projectId: "login-34954"
 });
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -346,25 +247,20 @@ const db = getFirestore(app);
 const profilePic = document.getElementById("profilePic");
 const profilePanel = document.getElementById("profilePanel");
 const profileName = document.getElementById("profileName");
-const proxySelect = document.getElementById("proxySelect");
-const generateBtn = document.getElementById("generateBtn");
-const progressContainer = document.getElementById("progressContainer");
-const progressFill = document.getElementById("progressFill");
-const progressText = document.getElementById("progressText");
-const generatedList = document.getElementById("generatedList");
 
+/* Profile logic */
 function stringToColor(str){
   let h=0; for(let c of str) h=c.charCodeAt(0)+((h<<5)-h);
   return `hsl(${h%360},70%,50%)`;
 }
 
 onAuthStateChanged(auth, async user=>{
-  if(!user) location.href="login.html";
+  if(!user) location.replace("login.html");
 
-  const snap = await getDocs(query(collection(db,"usernames"),where("uid","==",user.uid)));
-  const username = !snap.empty ? snap.docs[0].id : user.email.split("@")[0];
-  profileName.textContent=username;
+  const snap = await getDoc(doc(db,"usernames",user.uid));
+  const username = snap?.data()?.name || user.email.split("@")[0];
 
+  profileName.textContent = username;
   profilePic.textContent = username[0].toUpperCase();
   profilePic.style.backgroundColor = stringToColor(username);
   profilePic.style.backgroundImage = "";
@@ -374,58 +270,85 @@ onAuthStateChanged(auth, async user=>{
     profilePic.style.backgroundImage = `url(${pfpDoc.data().data})`;
     profilePic.textContent = "";
   }
-
-  // Load previously generated links
-  const genSnap = await getDoc(doc(db,"generatedProxies",user.uid));
-  if(genSnap.exists() && genSnap.data().list){
-    genSnap.data().list.reverse().forEach(item=>addGeneratedCard(item));
-  }
 });
 
-/* Profile panel toggle */
-profilePic.onclick=()=>{ profilePanel.style.display = profilePanel.style.display==="flex"?"none":"flex"; };
+profilePic.onclick = () => {
+  profilePanel.style.display = profilePanel.style.display === "flex" ? "none" : "flex";
+};
 
-/* Menu */
-const menuBtn = document.getElementById("menuBtn");
-const closeMenu = document.getElementById("closeMenu");
-menuBtn.onclick = () => document.body.classList.add("menu-open");
-closeMenu.onclick = () => document.body.classList.remove("menu-open");
+/* Menu open/close */
+document.getElementById("menuBtn").onclick = () => document.body.classList.add("menu-open");
+document.getElementById("closeMenu").onclick = () => document.body.classList.remove("menu-open");
 
 /* Navigation */
-window.navigateTo = (page)=>{
+window.navigateTo = (page) => {
   document.body.classList.remove("menu-open");
-  setTimeout(()=> location.href=page,350);
+  setTimeout(()=>location.href = page, 300);
 };
-window.logout = async ()=>{ await signOut(auth); location.href="login.html"; };
 
-/* Generated card helper */
+window.logout = async () => { await signOut(auth); location.href="login.html"; };
+
+/* Proxy generator logic */
+const proxySelect = document.getElementById("proxySelect");
+const generateBtn = document.getElementById("generateBtn");
+const progressContainer = document.getElementById("progressContainer");
+const progressFill = document.getElementById("progressFill");
+const progressText = document.getElementById("progressText");
+const generatedList = document.getElementById("generatedList");
+
+let cooldown = false;
+
 function addGeneratedCard(item){
   const card = document.createElement("div");
-  card.classList.add("generated-card");
-  card.innerHTML = `
-    <div class="title">${item.proxy}</div>
+  card.className="generated-card";
+  card.innerHTML=`
+    <strong>${item.proxy}</strong>
     <div class="divider"></div>
-    <div class="link">${item.link}</div>
-    <div class="voteButtons">
-      <button class="up">👍 <span>${item.up || 0}</span></button>
-      <button class="down">👎 <span>${item.down || 0}</span></button>
-    </div>`;
-  const upBtn = card.querySelector(".up");
-  const downBtn = card.querySelector(".down");
-  upBtn.onclick=()=>{ let val=parseInt(upBtn.querySelector("span").textContent)+1; upBtn.querySelector("span").textContent=val; };
-  downBtn.onclick=()=>{ let val=parseInt(downBtn.querySelector("span").textContent)+1; downBtn.querySelector("span").textContent=val; };
-  generatedList.prepend(card); // newest on top
+    <span>${item.link}</span>
+    <div style="margin-top:8px;">
+      <button class="thumbs-up">👍 <span class="count">${item.up}</span></button>
+      <button class="thumbs-down">👎 <span class="count">${item.down}</span></button>
+    </div>
+  `;
+  const upBtn = card.querySelector(".thumbs-up");
+  const downBtn = card.querySelector(".thumbs-down");
+  const counts = card.querySelectorAll(".count");
+
+  upBtn.onclick = () => { item.up++; counts[0].textContent=item.up; saveList(); }
+  downBtn.onclick = () => { item.down++; counts[1].textContent=item.down; saveList(); }
+
+  generatedList.prepend(card);
 }
 
-/* Generate proxy link */
-let cooldown=false;
-generateBtn.onclick=async ()=>{
-  if(cooldown){
-    alert("Wait 10 seconds before generating again");
-    return;
+/* Save/Load generated proxies */
+async function saveList(){
+  const user = auth.currentUser;
+  const items = Array.from(generatedList.children).map(c=>{
+    return {
+      proxy: c.querySelector("strong").textContent,
+      link: c.querySelector("span").textContent,
+      up: parseInt(c.querySelectorAll(".count")[0].textContent),
+      down: parseInt(c.querySelectorAll(".count")[1].textContent)
+    }
+  });
+  await setDoc(doc(db,"generatedProxies",user.uid), {list:items});
+}
+
+async function loadList(){
+  const user = auth.currentUser;
+  const snap = await getDoc(doc(db,"generatedProxies",user.uid));
+  if(snap.exists() && snap.data().list){
+    snap.data().list.forEach(addGeneratedCard);
   }
-  cooldown=true;
-  setTimeout(()=> cooldown=false,10000);
+}
+
+loadList();
+
+/* Generate proxy */
+generateBtn.onclick = async () => {
+  if(cooldown){ alert("Wait 10 seconds before generating again"); return; }
+  cooldown = true;
+  setTimeout(()=>cooldown=false, 10000);
 
   progressContainer.style.display="block";
   progressFill.style.width="0%";
@@ -433,50 +356,44 @@ generateBtn.onclick=async ()=>{
   progressText.textContent="Starting...";
 
   const selectedProxy = proxySelect.value;
-  const fakeLogs = ["Searching for proxies", "Clearing cookies and data", "reaching-13.zaq","shrjw.aj","loading..."];
+  const fakeLogs = ["Searching for proxies","Clearing cookies and data","reaching-13.zaq","shrjw.aj","loading..."];
   let percent=0;
 
-  const user = auth.currentUser;
-  const genRef = doc(db,"generatedProxies",user.uid);
-  let savedList = [];
-  const snap = await getDoc(genRef);
-  if(snap.exists() && snap.data().list) savedList=snap.data().list;
+  const proxyLinks = {
+    "Rammerhead":["link1","link2"],
+    "Space":["link3"],
+    "Shuttle":[],
+    "Doge":["link4"],
+    "Bolt":["link5"],
+    "Shadow":["link6"],
+    "Ghost":["link7"]
+  };
 
   const interval = setInterval(()=>{
-    percent += Math.floor(Math.random()*6)+2;
-    if(percent>100) percent=100;
-    progressFill.style.width=percent+"%";
-    progressFill.textContent=percent+"%";
-    const logIndex = Math.floor(Math.random()*fakeLogs.length);
-    progressText.textContent=fakeLogs[logIndex];
-
-    if(percent===100){
+    if(percent>=100){
       clearInterval(interval);
-
-      // Check if any links exist for this proxy
-      const proxyLinks = {
-        "Rammerhead":["link1","link2"],
-        "Space":["link3"],
-        "Shuttle":[],
-        "Doge":["link4"],
-        "Bolt":["link5"],
-        "Shadow":["link6"],
-        "Ghost":["link7"]
-      };
-      let links = proxyLinks[selectedProxy];
+      const links = proxyLinks[selectedProxy];
       if(!links || links.length===0){
         progressText.textContent="Failed to generate: no stock";
+        progressFill.style.backgroundColor="#ff4c4c";
       } else {
         const link = links[Math.floor(Math.random()*links.length)];
         progressText.textContent="Successfully generated";
-        const item = {proxy:selectedProxy,link,up:0,down:0};
-        savedList.push(item);
-        setDoc(genRef,{list:savedList});
-        addGeneratedCard(item);
+        progressFill.style.backgroundColor="#4da3ff";
+        addGeneratedCard({proxy:selectedProxy,link,up:0,down:0});
+        saveList();
       }
+      return;
     }
-  },300);
+
+    percent += Math.floor(Math.random()*5)+2;
+    if(percent>100) percent=100;
+    progressFill.style.width=percent+"%";
+    progressFill.textContent=percent+"%";
+    progressText.textContent=fakeLogs[Math.floor(Math.random()*fakeLogs.length)];
+  }, 250);
 };
 </script>
+
 </body>
 </html>
