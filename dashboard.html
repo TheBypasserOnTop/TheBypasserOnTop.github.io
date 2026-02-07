@@ -15,11 +15,12 @@
             font-family: 'Inter', sans-serif;
             min-height: 180vh;
             overflow-x: hidden;
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transition: opacity 0.5s ease;
         }
 
-        body.leaving { opacity: 0; transform: translateY(-20px); }
+        body.leaving { opacity: 0; pointer-events: none; }
 
+        /* Slow Gradient Title */
         .gradient-text {
             background: linear-gradient(to right, #ffffff 0%, #a855f7 25%, #3b82f6 50%, #a855f7 75%, #ffffff 100%);
             background-size: 200% auto;
@@ -29,6 +30,7 @@
         }
         @keyframes slowFlow { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
 
+        /* Stars Background */
         .stars-container { position: fixed; inset: 0; z-index: -1; }
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 12px white; } }
@@ -36,14 +38,14 @@
         /* Sidebar - Glassy & Refined */
         #sidePanel {
             position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
-            background: rgba(10, 10, 25, 0.75); /* Transparent */
-            backdrop-filter: blur(35px); /* Blurred */
+            background: rgba(5, 5, 15, 0.7);
+            backdrop-filter: blur(40px);
             border-right: 1px solid var(--border);
             z-index: 200;
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             padding: 2.5rem;
         }
-        body.menu-open #sidePanel { transform: translateX(320px); }
+        body.menu-open #sidePanel { left: 0; }
 
         .nav-item {
             padding: 1rem; border-radius: 12px; margin-bottom: 0.5rem;
@@ -102,7 +104,7 @@
     </button>
     
     <div class="relative">
-        <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center"></div>
+        <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center overflow-hidden"></div>
         
         <div id="profileDropdown">
             <div class="px-3 pb-3 mb-3 border-b border-white/5">
@@ -116,9 +118,11 @@
 </nav>
 
 <aside id="sidePanel" class="flex flex-col">
-    <div class="mb-8">
+    <div class="mb-8 relative">
         <h1 class="text-xl font-black gradient-text tracking-widest">COSMIC</h1>
-        <div class="h-px w-full bg-white/5 mt-4"></div> </div>
+        <div class="h-px w-full bg-white/5 mt-4"></div>
+        <button onclick="toggleMenu()" class="absolute -top-2 -right-4 text-white/20 hover:text-white p-2">✕</button>
+    </div>
     
     <nav class="flex-1">
         <div class="nav-item active">Dashboard</div>
@@ -129,14 +133,13 @@
     <div class="mt-auto pt-6 border-t border-white/5">
         <button onclick="confirmLogout()" class="w-full text-left p-4 text-red-500/60 hover:text-red-500 text-xs font-bold uppercase tracking-widest transition">Logout System</button>
     </div>
-    
-    <button onclick="toggleMenu()" class="absolute top-8 right-8 text-white/20 hover:text-white transition">✕</button>
 </aside>
 
 <section class="h-screen flex flex-col items-center justify-center text-center">
     <div class="p-12 max-w-2xl">
         <h2 id="welcomeText" class="text-6xl md:text-7xl font-black mb-6 tracking-tighter uppercase">Welcome</h2>
-        <div class="h-px w-32 bg-white/10 mx-auto mb-6"></div> <p class="text-white/20 uppercase tracking-[0.6em] text-[10px] font-bold">Terminal Identity Synchronized</p>
+        <div class="h-px w-32 bg-white/20 mx-auto mb-6"></div>
+        <p class="text-white/20 uppercase tracking-[0.6em] text-[10px] font-bold">Terminal Identity Synchronized</p>
     </div>
     
     <div class="scroll-hint flex flex-col items-center">
@@ -181,11 +184,17 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Sync PFP and Username with Firebase
+    // Profile Setup Logic
+    function stringToColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        return `hsl(${hash % 360}, 60%, 45%)`;
+    }
+
     onAuthStateChanged(auth, async user => {
         if (!user) location.replace("login.html");
         
-        // Fetch custom username
+        // 1. Get Username (Firestore first, then Fallback)
         const snap = await getDocs(query(collection(db, "usernames"), where("uid", "==", user.uid)));
         const username = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
         
@@ -194,14 +203,20 @@
         
         const pfp = document.getElementById("profilePic");
         
-        // Fetch custom PFP from Firestore
+        // 2. Set Default Appearance (Letter + Solid Color)
+        pfp.textContent = username[0].toUpperCase();
+        pfp.style.backgroundColor = stringToColor(username);
+        pfp.style.backgroundImage = "none"; 
+
+        // 3. Try Loading Image from Firestore
         const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
         if(pfpDoc.exists() && pfpDoc.data().data) {
-            pfp.style.backgroundImage = `url(${pfpDoc.data().data})`;
-            pfp.textContent = "";
-        } else {
-            pfp.textContent = username[0].toUpperCase();
-            pfp.style.backgroundColor = `hsl(${username.length * 50}, 40%, 30%)`;
+            const img = new Image();
+            img.src = pfpDoc.data().data;
+            img.onload = () => {
+                pfp.style.backgroundImage = `url(${img.src})`;
+                pfp.textContent = ""; // Remove letter once image loads
+            };
         }
     });
 
@@ -225,14 +240,19 @@
         location.href = "login.html";
     };
 
-    // Tab Animation & Redirect
+    // Correct Navigation Flow
     window.animateNav = (url) => {
-        document.body.classList.remove("menu-open"); // Close menu UI
-        document.body.classList.add("leaving"); // Slide/Fade out effect
-        setTimeout(() => { location.href = url; }, 500);
+        // First, close the menu (trigger CSS transition)
+        document.body.classList.remove("menu-open");
+        
+        // Wait for sidebar slide (500ms) + Page Fade
+        setTimeout(() => {
+            document.body.classList.add("leaving");
+            setTimeout(() => { location.href = url; }, 500);
+        }, 150);
     };
 
-    // Intersection Observer for Card Fades
+    // Intersection Observer
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) entry.target.classList.add("revealed");
