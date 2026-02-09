@@ -73,10 +73,12 @@
             align-items: center; justify-content: center;
         }
 
+        /* Hard Lock Styling */
         #generateBtn:disabled {
             background: #334155 !important;
-            cursor: not-allowed;
+            cursor: not-allowed !important;
             opacity: 0.7;
+            pointer-events: none; /* Prevents clicks entirely */
         }
     </style>
 </head>
@@ -93,7 +95,6 @@
     
     <div class="relative">
         <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center overflow-hidden text-sm">?</div>
-        
         <div id="profileDropdown">
             <div class="px-3 pb-3 mb-3 border-b border-white/5">
                 <p id="profileUserText" class="text-xs font-bold text-white/80 truncate">User</p>
@@ -122,7 +123,7 @@
             <option value="Standard">Free Account</option>
         </select>
         
-        <button id="generateBtn" class="w-full py-4 rounded-xl font-bold uppercase text-sm bg-purple-600 hover:bg-purple-500 transition shadow-lg">Generate Account</button>
+        <button id="generateBtn" disabled class="w-full py-4 rounded-xl font-bold uppercase text-sm bg-purple-600 hover:bg-purple-500 transition shadow-lg">Checking Stock...</button>
         
         <div id="progressContainer" class="mt-6 hidden">
             <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
@@ -139,7 +140,7 @@
 <div id="logoutModal" class="overlay-bg">
     <div class="bg-[#050510] border border-white/10 p-10 max-w-sm w-full mx-4 text-center rounded-3xl">
         <h3 class="text-lg font-bold mb-2">Logout?</h3>
-        <p class="text-white/30 text-xs mb-8">Are you sure you want to logout?</p>
+        <p class="text-white/30 text-xs mb-8">Confirm Logout.</p>
         <div class="flex gap-3">
             <button onclick="closeLogout()" class="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 transition text-xs font-bold">Cancel</button>
             <button onclick="executeLogout()" class="flex-1 py-4 rounded-xl bg-red-600 hover:bg-red-500 transition text-xs font-bold">Logout</button>
@@ -161,7 +162,7 @@
     let savedAlts = JSON.parse(localStorage.getItem("cosmic_alts") || "[]");
     let cooldownTimer = null;
 
-    // --- DATE & TABS LOGIC ---
+    // --- UTILS ---
     function calculateDays(dateStr) {
         try {
             const created = new Date(dateStr);
@@ -196,14 +197,19 @@
                     dropdown.appendChild(dropBtn);
                 }
             });
-        } catch (e) { console.error("Tabs failed to load."); }
+        } catch (e) {}
     }
 
-    // --- COOLDOWN SYSTEM ---
+    // --- HARD COOLDOWN SYSTEM ---
     function startCooldownUI() {
         const btn = document.getElementById('generateBtn');
         const nextAvailable = localStorage.getItem('cosmic_next_gen');
-        if (!nextAvailable) return;
+        if (!nextAvailable) {
+            btn.disabled = false;
+            btn.textContent = "Generate Account";
+            return;
+        }
+
         if (cooldownTimer) clearInterval(cooldownTimer);
 
         cooldownTimer = setInterval(() => {
@@ -222,7 +228,7 @@
         }, 1000);
     }
 
-    // --- RENDERING ---
+    // --- RENDER ---
     function renderAlts() {
         const container = document.getElementById("historyContainer");
         container.innerHTML = `<h3 class="text-xs font-bold uppercase text-white/20 mb-4 px-2">Generated Accounts</h3>`;
@@ -268,11 +274,19 @@
     window.toggleExpand = (index) => { savedAlts[index].expanded = !savedAlts[index].expanded; renderAlts(); };
     window.copyText = (id) => { navigator.clipboard.writeText(document.getElementById(id).textContent); alert("Copied!"); };
 
-    // --- GENERATOR LOGIC ---
+    // --- GENERATOR CLICK ---
     document.getElementById("generateBtn").onclick = async () => {
+        // SECONDARY SECURITY CHECK
+        const nextGenCheck = localStorage.getItem('cosmic_next_gen');
+        if (nextGenCheck && Date.now() < nextGenCheck) {
+            alert("Cooldown is still active!");
+            return;
+        }
+
         const btn = document.getElementById("generateBtn");
         const prog = document.getElementById("progressContainer");
         const bar = document.getElementById("progressBar");
+        
         btn.disabled = true;
         prog.classList.remove("hidden");
         bar.style.width = "20%";
@@ -288,7 +302,10 @@
             savedAlts.forEach(a => a.expanded = false);
             savedAlts.unshift({ user: u, pass: ps, date: data.date, pfp: data.pfp || "", expanded: true });
             localStorage.setItem("cosmic_alts", JSON.stringify(savedAlts));
+            
+            // Lock immediately
             localStorage.setItem('cosmic_next_gen', Date.now() + (5 * 60 * 1000));
+            
             bar.style.width = "100%";
             setTimeout(() => { renderAlts(); prog.classList.add("hidden"); startCooldownUI(); }, 500);
         } catch (error) { alert("Error: " + error.message); btn.disabled = false; prog.classList.add("hidden"); }
@@ -297,8 +314,16 @@
     onAuthStateChanged(auth, async user => {
         if (!user) location.replace("index.html");
         loadTabs();
+        
+        // Always check cooldown on load
         const nextGen = localStorage.getItem('cosmic_next_gen');
-        if (nextGen && nextGen > Date.now()) startCooldownUI();
+        if (nextGen && nextGen > Date.now()) {
+            startCooldownUI();
+        } else {
+            document.getElementById('generateBtn').disabled = false;
+            document.getElementById('generateBtn').textContent = "Generate Account";
+        }
+        
         renderAlts();
         const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
         const snap = await getDocs(q);
@@ -316,7 +341,7 @@
     window.closeLogout = () => document.getElementById("logoutModal").style.display = "none";
     window.executeLogout = async () => { await signOut(auth); location.replace("index.html"); };
 
-    // Stars
+    // Background Stars
     const starField = document.getElementById('starField');
     for (let i = 0; i < 80; i++) {
         const star = document.createElement('div');
