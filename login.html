@@ -18,7 +18,7 @@
             align-items: center; justify-content: center;
             overflow: hidden;
             opacity: 0;
-            animation: pageLoad 0.8s ease-out forwards;
+            animation: pageLoad 0.6s ease-out forwards;
         }
 
         @keyframes pageLoad {
@@ -26,7 +26,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Optimized Stars */
+        /* Lag-Free Stars */
         .stars-container { position: fixed; inset: 0; z-index: -1; backface-visibility: hidden; }
         .star {
             position: absolute; background: white; border-radius: 50%;
@@ -35,10 +35,10 @@
         }
         @keyframes pulse {
             0%, 100% { opacity: 0.1; transform: scale(0.8); }
-            50% { opacity: 0.7; transform: scale(1.2); }
+            50% { opacity: 0.6; transform: scale(1.2); }
         }
 
-        /* Glass Card */
+        /* Glassmorphism Card */
         .auth-card {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(25px);
@@ -69,8 +69,10 @@
         .btn-primary {
             background: var(--accent);
             transition: all 0.3s ease;
+            font-weight: 700;
         }
-        .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.1); }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.1); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .overlay {
             position: fixed; inset: 0;
@@ -87,9 +89,9 @@
 <body>
 
     <script>
-        if (!sessionStorage.getItem('visited')) {
-            sessionStorage.setItem('visited', 'true');
-            window.location.replace("loading.html"); // Replace with your loading file name
+        if (!sessionStorage.getItem('notFirstLoad')) {
+            sessionStorage.setItem('notFirstLoad', 'true');
+            window.location.replace("loading.html"); 
         }
     </script>
 
@@ -105,7 +107,7 @@
                 <input id="password" type="password" placeholder="Password" class="w-full p-4 rounded-2xl">
                 <div id="loginError" class="error-msg"></div>
 
-                <button onclick="login()" class="btn-primary w-full py-4 rounded-2xl uppercase tracking-widest text-sm font-bold">Login</button>
+                <button onclick="login()" class="btn-primary w-full py-4 rounded-2xl uppercase tracking-widest text-sm">Login</button>
 
                 <div class="flex items-center my-6">
                     <div class="flex-grow h-px bg-white/10"></div>
@@ -113,7 +115,7 @@
                     <div class="flex-grow h-px bg-white/10"></div>
                 </div>
 
-                <button onclick="googleLogin()" class="w-full py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-sm font-medium">
+                <button id="googleBtn" onclick="googleLogin()" class="w-full py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-sm font-medium flex items-center justify-center gap-2">
                     Continue with Google
                 </button>
 
@@ -126,7 +128,7 @@
 
     <div id="signupOverlay" class="overlay">
         <div class="auth-card w-full max-w-lg p-10 rounded-[3rem] relative m-4">
-            <button onclick="toggleOverlay('signupOverlay', false)" class="absolute top-8 right-8 text-3xl opacity-50 hover:opacity-100">&times;</button>
+            <button id="closeOverlayBtn" onclick="toggleOverlay('signupOverlay', false)" class="absolute top-8 right-8 text-3xl opacity-50 hover:opacity-100">&times;</button>
             
             <div id="signupForm">
                 <h2 id="signupTitle" class="text-3xl font-bold mb-8 italic">New Identity</h2>
@@ -153,15 +155,15 @@
                 </div>
 
                 <div id="signupGeneralError" class="error-msg text-center my-4"></div>
-                <button id="submitBtn" onclick="signup()" class="btn-primary w-full py-4 rounded-xl font-bold">Initialize Account</button>
+                <button id="submitBtn" onclick="signup()" class="btn-primary w-full py-4 rounded-xl">Initialize Account</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
@@ -179,15 +181,15 @@
 
         let isGoogleCompletion = false;
 
-        // --- Helper: Toggle Overlays ---
+        // --- UI UTILITIES ---
         window.toggleOverlay = (id, show) => {
             document.getElementById(id).style.display = show ? 'flex' : 'none';
         };
 
-        // --- Optimized Star Field ---
+        // Optimized Star Generation
         const starField = document.getElementById('starField');
         const frag = document.createDocumentFragment();
-        for (let i = 0; i < 70; i++) {
+        for (let i = 0; i < 60; i++) {
             const star = document.createElement('div');
             star.className = 'star';
             const size = Math.random() * 2 + 1;
@@ -199,76 +201,60 @@
         }
         starField.appendChild(frag);
 
-        // --- Validation Logic ---
-        const inputs = {
-            user: document.getElementById("suUsername"),
-            pass: document.getElementById("suPassword"),
-            rep: document.getElementById("suPasswordRepeat")
-        };
-
-        inputs.user.addEventListener("input", async () => {
-            const val = inputs.user.value.trim().toLowerCase();
-            if(val.length < 3) return;
-            const snap = await getDoc(doc(db, "usernames", val));
-            const isTaken = snap.exists();
-            inputs.user.classList.toggle("input-error", isTaken);
-            document.getElementById("usernameCheck").textContent = isTaken ? "Username Taken" : "";
-        });
-
-        // --- Auth Actions ---
-        window.login = async () => {
-            const id = document.getElementById("emailUsername").value.trim();
-            const pw = document.getElementById("password").value;
-            try {
-                let email = id;
-                if(!id.includes("@")) {
-                    const snap = await getDoc(doc(db, "usernames", id.toLowerCase()));
-                    if(!snap.exists()) throw new Error("Identity not found");
-                    email = snap.data().email;
-                }
-                await signInWithEmailAndPassword(auth, email, pw);
-                window.location.replace("dashboard.html");
-            } catch(e) { document.getElementById("loginError").textContent = "Invalid Credentials"; }
-        };
+        // --- AUTH LOGIC ---
 
         window.googleLogin = async () => {
+            const gBtn = document.getElementById("googleBtn");
+            gBtn.disabled = true;
+            gBtn.innerText = "Syncing...";
+
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 
-                // Check if user has a profile in Firestore
+                // CRITICAL: Check if profile exists in Firestore
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 
                 if (!userDoc.exists()) {
-                    // Force username/password setup
+                    // NEW GOOGLE USER: Trigger overlay
                     isGoogleCompletion = true;
                     document.getElementById("signupTitle").textContent = "Complete Profile";
                     document.getElementById("emailContainer").style.display = "none";
-                    document.getElementById("submitBtn").textContent = "Finalize Profile";
+                    document.getElementById("closeOverlayBtn").style.display = "none"; // Force them to finish
+                    document.getElementById("submitBtn").textContent = "Finalize & Enter";
                     toggleOverlay('signupOverlay', true);
+                    gBtn.disabled = false;
+                    gBtn.innerText = "Continue with Google";
                 } else {
                     window.location.replace("dashboard.html");
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) { 
+                document.getElementById("loginError").textContent = "Google Authentication Failed.";
+                gBtn.disabled = false;
+                gBtn.innerText = "Continue with Google";
+            }
         };
 
         window.signup = async () => {
             const email = document.getElementById("suEmail").value.trim();
-            const user = inputs.user.value.trim().toLowerCase();
-            const pass = inputs.pass.value;
-            const rep = inputs.rep.value;
+            const user = document.getElementById("suUsername").value.trim().toLowerCase();
+            const pass = document.getElementById("suPassword").value;
+            const rep = document.getElementById("suPasswordRepeat").value;
+            const err = document.getElementById("signupGeneralError");
 
-            if (pass !== rep || pass.length < 8) {
-                document.getElementById("signupGeneralError").textContent = "Check password requirements";
-                return;
-            }
+            if(user.length < 3) return err.textContent = "Username too short";
+            if(pass.length < 8) return err.textContent = "Password must be 8+ chars";
+            if(pass !== rep) return err.textContent = "Passwords do not match";
 
             try {
+                // Check username availability
+                const nameSnap = await getDoc(doc(db, "usernames", user));
+                if(nameSnap.exists()) return err.textContent = "Username already taken";
+
                 if (isGoogleCompletion) {
                     const currentUser = auth.currentUser;
-                    // 1. Update Password for the Google Account (optional, but requested)
+                    // Update password and save records
                     await updatePassword(currentUser, pass);
-                    // 2. Save to Firestore
                     await setDoc(doc(db, "usernames", user), { uid: currentUser.uid, email: currentUser.email });
                     await setDoc(doc(db, "users", currentUser.uid), { username: user, email: currentUser.email });
                 } else {
@@ -277,7 +263,22 @@
                     await setDoc(doc(db, "users", cred.user.uid), { username: user, email });
                 }
                 window.location.replace("dashboard.html");
-            } catch(e) { document.getElementById("signupGeneralError").textContent = e.message; }
+            } catch(e) { err.textContent = e.message; }
+        };
+
+        window.login = async () => {
+            const id = document.getElementById("emailUsername").value.trim();
+            const pw = document.getElementById("password").value;
+            try {
+                let email = id;
+                if(!id.includes("@")) {
+                    const snap = await getDoc(doc(db, "usernames", id.toLowerCase()));
+                    if(!snap.exists()) throw new Error("User not found");
+                    email = snap.data().email;
+                }
+                await signInWithEmailAndPassword(auth, email, pw);
+                window.location.replace("dashboard.html");
+            } catch(e) { document.getElementById("loginError").textContent = "Access Denied"; }
         };
     </script>
 </body>
