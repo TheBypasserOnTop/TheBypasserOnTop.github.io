@@ -20,12 +20,10 @@
 
         body.leaving { opacity: 0; pointer-events: none; }
 
-        /* Stars Background */
         .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; will-change: transform; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
 
-        /* Sidebar */
         #sidePanel {
             position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
             background: rgba(5, 5, 15, 0.85);
@@ -49,14 +47,13 @@
         .nav-item {
             padding: 1rem; border-radius: 12px; margin-bottom: 0.5rem;
             transition: 0.3s; color: rgba(255,255,255,0.4);
-            cursor: pointer; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; font-size: 0.9rem; font-weight: 600; text-transform: capitalize;
         }
         .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
         .nav-item.active { color: white; background: var(--accent); }
 
         .glass-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; }
 
-        /* Profile Dropdown Fix */
         #profileDropdown {
             position: absolute; top: 70px; right: 40px; width: 220px;
             display: none; flex-direction: column; z-index: 100;
@@ -98,7 +95,7 @@
                 <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">Syncing...</p>
                 <p class="text-[8px] text-white/20 font-bold tracking-widest uppercase">Verified Operator</p>
             </div>
-            <button onclick="animateNav('dashboard.html')" class="w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition">Dashboard</button>
+            <div id="dynamicProfileLinks"></div>
             <button onclick="confirmLogout()" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold transition">Logout</button>
         </div>
     </div>
@@ -110,11 +107,8 @@
         <div class="h-px w-full bg-white/5 mt-4"></div>
         <button onclick="toggleMenu()" class="absolute -top-2 -right-4 text-white/20 hover:text-white p-2">✕</button>
     </div>
-    <nav class="flex-1">
-        <div class="nav-item" onclick="animateNav('dashboard.html')">Dashboard</div>
-        <div class="nav-item" onclick="animateNav('proxies.html')">Proxies</div>
-        <div class="nav-item active">Settings</div>
-    </nav>
+    <nav class="flex-1" id="dynamicSidebarNav">
+        </nav>
 </aside>
 
 <main class="max-w-2xl mx-auto px-6 pt-32 pb-20">
@@ -176,14 +170,50 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    function stringToColor(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        return `hsl(${hash % 360}, 60%, 45%)`;
+    const currentPage = window.location.pathname.split("/").pop().split(".")[0] || "dashboard";
+
+    // --- DYNAMIC TABS FETCHER ---
+    async function loadTabs() {
+        try {
+            const response = await fetch('tabs.txt');
+            const text = await response.text();
+            const tabs = text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+            
+            const sidebar = document.getElementById('dynamicSidebarNav');
+            const dropdown = document.getElementById('dynamicProfileLinks');
+            
+            sidebar.innerHTML = '';
+            dropdown.innerHTML = '';
+
+            tabs.forEach(tab => {
+                const isCurrent = tab.toLowerCase() === currentPage.toLowerCase();
+                const fileName = `${tab.toLowerCase()}.html`;
+
+                // Add to Sidebar
+                const navItem = document.createElement('div');
+                navItem.className = `nav-item ${isCurrent ? 'active' : ''}`;
+                navItem.textContent = tab;
+                navItem.onclick = () => animateNav(fileName);
+                sidebar.appendChild(navItem);
+
+                // Add to Profile Dropdown (except settings itself to keep it clean)
+                if(!isCurrent) {
+                    const dropBtn = document.createElement('button');
+                    dropBtn.className = "w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition capitalize";
+                    dropBtn.textContent = tab;
+                    dropBtn.onclick = () => animateNav(fileName);
+                    dropdown.appendChild(dropBtn);
+                }
+            });
+        } catch (e) {
+            console.error("Tab Loader Error:", e);
+        }
     }
 
     onAuthStateChanged(auth, async user => {
         if (!user) { location.replace("index.html"); return; }
+        loadTabs(); // Build the UI
+        
         const snap = await getDocs(query(collection(db, "usernames"), where("uid", "==", user.uid)));
         const username = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
         
@@ -192,9 +222,10 @@
         
         const pfp = document.getElementById("profilePic");
         const preview = document.getElementById("pfpPreview");
+        const color = `hsl(${username.length * 40}, 60%, 45%)`;
         [pfp, preview].forEach(el => {
             el.textContent = username[0].toUpperCase();
-            el.style.backgroundColor = stringToColor(username);
+            el.style.backgroundColor = color;
         });
 
         const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
@@ -203,34 +234,30 @@
         }
     });
 
-    // PASSWORD UPDATE FIX
+    // PASSWORD / DELETE LOGIC
     document.getElementById('savePasswordBtn').onclick = async () => {
         const curr = document.getElementById('currentPassword').value;
         const next = document.getElementById('newPassword').value;
-        const err = document.getElementById('passwordError');
         try {
             const cred = EmailAuthProvider.credential(auth.currentUser.email, curr);
             await reauthenticateWithCredential(auth.currentUser, cred);
             await updatePassword(auth.currentUser, next);
-            alert("Password updated. System will now re-sync.");
+            alert("Password updated. Syncing system...");
             location.reload();
-        } catch(e) { err.textContent = "Re-auth failed. Check current password."; }
+        } catch(e) { document.getElementById('passwordError').textContent = "Auth Failure."; }
     };
 
-    // DELETE ACCOUNT FIX
     document.getElementById('confirmRemoveBtn').onclick = async () => {
         const pass = document.getElementById('removePassword').value;
-        const err = document.getElementById('removeError');
         try {
             const cred = EmailAuthProvider.credential(auth.currentUser.email, pass);
             await reauthenticateWithCredential(auth.currentUser, cred);
-            // Cleanup and Delete
             await deleteUser(auth.currentUser);
             location.href = "index.html";
-        } catch(e) { err.textContent = "Auth failed. Password mismatch."; }
+        } catch(e) { document.getElementById('removeError').textContent = "Verification Failed."; }
     };
 
-    // UI LOGIC
+    // UI UTILS
     window.toggleMenu = () => document.body.classList.toggle("menu-open");
     window.toggleProfile = () => {
         const dp = document.getElementById("profileDropdown");
@@ -238,7 +265,10 @@
     };
     window.openModal = (id) => document.getElementById(id).style.display = "flex";
     window.closeModal = (id) => document.getElementById(id).style.display = "none";
-    window.animateNav = (url) => { document.body.classList.add("leaving"); setTimeout(() => location.href = url, 500); };
+    window.animateNav = (url) => { 
+        document.body.classList.add("leaving"); 
+        setTimeout(() => location.href = url, 400); 
+    };
     window.confirmLogout = () => signOut(auth).then(() => location.href="index.html");
 
     // PFP LOGIC
@@ -250,22 +280,17 @@
         };
         r.readAsDataURL(e.target.files[0]);
     };
-    document.getElementById('removePfpBtn').onclick = async () => {
-        await deleteDoc(doc(db, "userPFPs", auth.currentUser.uid));
-        location.reload();
-    };
 
-    // Reset Button
     document.getElementById('resetPasswordBtn').onclick = () => sendPasswordResetEmail(auth, auth.currentUser.email).then(() => alert("Reset email sent."));
 
-    // Star Logic (Reduced for Lag Fix)
+    // Star Logic
     const starField = document.getElementById('starField');
     for (let i = 0; i < 100; i++) {
         const star = document.createElement('div');
         star.className = 'star';
         star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
         star.style.left = `${Math.random() * 100}%`; star.style.top = `${Math.random() * 100}%`;
-        star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
+        star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
         starField.appendChild(star);
     }
 </script>
