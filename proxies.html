@@ -20,15 +20,14 @@
 
         body.leaving { opacity: 0; pointer-events: none; }
 
-        /* Stars Background */
-        .stars-container { position: fixed; inset: 0; z-index: -1; }
-        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 12px white; } }
+        .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; will-change: transform; }
+        @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
 
-        /* Sidebar - Transparent & Heavily Blurred */
+        /* Sidebar */
         #sidePanel {
             position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
-            background: rgba(10, 10, 25, 0.7);
+            background: rgba(5, 5, 15, 0.9);
             backdrop-filter: blur(45px);
             border-right: 1px solid var(--border);
             z-index: 200;
@@ -37,7 +36,6 @@
         }
         body.menu-open #sidePanel { left: 0; }
 
-        /* Cosmic Gradient Title */
         .gradient-text {
             background: linear-gradient(to right, #ffffff 0%, #a855f7 25%, #3b82f6 50%, #a855f7 75%, #ffffff 100%);
             background-size: 200% auto;
@@ -50,35 +48,29 @@
         .nav-item {
             padding: 1rem; border-radius: 12px; margin-bottom: 0.5rem;
             transition: 0.3s; color: rgba(255,255,255,0.4);
-            cursor: pointer; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; font-size: 0.9rem; font-weight: 600; text-transform: capitalize;
         }
         .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
         .nav-item.active { color: white; background: var(--accent); }
 
-        /* Glass Components */
-        .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-        }
-
+        /* Profile Dropdown */
         #profileDropdown {
-            position: absolute; top: 70px; right: 0; width: 220px;
+            position: absolute; top: 70px; right: 40px; width: 220px;
             display: none; flex-direction: column; z-index: 100;
-            background: rgba(10, 10, 25, 0.9);
+            background: rgba(10, 10, 25, 0.95);
             backdrop-filter: blur(25px);
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 1rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
+        .glass-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; }
         #progressBar { transition: width 0.2s ease; background: linear-gradient(90deg, var(--accent), #3b82f6); }
 
         .overlay-bg {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px); display: none; z-index: 300;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px); display: none; z-index: 300;
             align-items: center; justify-content: center;
         }
     </style>
@@ -91,16 +83,17 @@
     <button onclick="toggleMenu()" class="flex flex-col gap-1.5 opacity-60 hover:opacity-100 transition">
         <div class="w-6 h-0.5 bg-white"></div>
         <div class="w-6 h-0.5 bg-white"></div>
+        <div class="w-6 h-0.5 bg-white"></div>
     </button>
     
     <div class="relative">
-        <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center overflow-hidden"></div>
+        <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center overflow-hidden text-sm">?</div>
         <div id="profileDropdown">
             <div class="px-3 pb-3 mb-3 border-b border-white/5">
-                <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">---</p>
+                <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">Operator</p>
                 <p class="text-[8px] text-white/20 font-bold tracking-widest uppercase">Verified Access</p>
             </div>
-            <button onclick="animateNav('settings.html')" class="w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition">Settings</button>
+            <div id="dynamicProfileLinks"></div>
             <button onclick="confirmLogout()" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold transition">Logout</button>
         </div>
     </div>
@@ -112,14 +105,7 @@
         <div class="h-px w-full bg-white/5 mt-4"></div>
         <button onclick="toggleMenu()" class="absolute -top-2 -right-4 text-white/20 hover:text-white p-2">✕</button>
     </div>
-    <nav class="flex-1">
-        <div class="nav-item" onclick="animateNav('dashboard.html')">Dashboard</div>
-        <div class="nav-item active">Proxies</div>
-        <div class="nav-item" onclick="animateNav('settings.html')">Settings</div>
-    </nav>
-    <div class="mt-auto pt-6 border-t border-white/5">
-        <button onclick="confirmLogout()" class="w-full text-left p-4 text-red-500/60 hover:text-red-500 text-xs font-bold uppercase tracking-widest transition">Logout System</button>
-    </div>
+    <nav class="flex-1" id="dynamicSidebarNav"></nav>
 </aside>
 
 <main class="max-w-2xl mx-auto px-6 pt-32 pb-20">
@@ -171,22 +157,62 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Profile Setup
-    function stringToColor(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        return `hsl(${hash % 360}, 60%, 40%)`;
+    const currentPage = "proxies";
+
+    // --- NAVIGATION LOGIC ---
+    window.animateNav = (url) => {
+        document.body.classList.remove("menu-open");
+        setTimeout(() => {
+            document.body.classList.add("leaving");
+            setTimeout(() => { location.href = url; }, 500);
+        }, 300);
+    };
+
+    async function loadTabs() {
+        try {
+            const response = await fetch('tabs.txt');
+            const text = await response.text();
+            const tabs = text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+            
+            const sidebar = document.getElementById('dynamicSidebarNav');
+            const dropdown = document.getElementById('dynamicProfileLinks');
+            
+            sidebar.innerHTML = ''; dropdown.innerHTML = '';
+            tabs.forEach(tab => {
+                const isCurrent = tab.toLowerCase() === currentPage;
+                const fileName = `${tab.toLowerCase()}.html`;
+
+                const navItem = document.createElement('div');
+                navItem.className = `nav-item ${isCurrent ? 'active' : ''}`;
+                navItem.textContent = tab;
+                navItem.onclick = () => animateNav(fileName);
+                sidebar.appendChild(navItem);
+
+                if(!isCurrent) {
+                    const dropBtn = document.createElement('button');
+                    dropBtn.className = "w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition capitalize";
+                    dropBtn.textContent = tab;
+                    dropBtn.onclick = () => animateNav(fileName);
+                    dropdown.appendChild(dropBtn);
+                }
+            });
+        } catch (e) { console.error(e); }
     }
 
+    // --- IDENTITY SYNC ---
     onAuthStateChanged(auth, async user => {
-        if (!user) location.replace("login.html");
-        const snap = await getDocs(query(collection(db, "usernames"), where("uid", "==", user.uid)));
+        if (!user) { location.replace("index.html"); return; }
+        loadTabs();
+        
+        const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
+        const snap = await getDocs(q);
         const username = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
         
         document.getElementById("profileUserText").textContent = username;
         const pfp = document.getElementById("profilePic");
+        const color = `hsl(${username.length * 40}, 60%, 45%)`;
         pfp.textContent = username[0].toUpperCase();
-        pfp.style.backgroundColor = stringToColor(username);
+        pfp.style.backgroundColor = color;
 
         const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
         if(pfpDoc.exists() && pfpDoc.data().data) {
@@ -195,39 +221,37 @@
         }
     });
 
-    // UI Navigation
+    // --- UI ACTIONS ---
     window.toggleMenu = () => document.body.classList.toggle("menu-open");
     window.toggleProfile = () => {
         const dp = document.getElementById("profileDropdown");
         dp.style.display = dp.style.display === "flex" ? "none" : "flex";
     };
-
-    window.animateNav = (url) => {
-        document.body.classList.remove("menu-open");
-        setTimeout(() => {
-            document.body.classList.add("leaving");
-            setTimeout(() => { location.href = url; }, 500);
-        }, 150);
-    };
-
     window.confirmLogout = () => document.getElementById("logoutModal").style.display = "flex";
     window.closeLogout = () => document.getElementById("logoutModal").style.display = "none";
-    window.executeLogout = async () => { await signOut(auth); location.href = "login.html"; };
+    window.executeLogout = async () => { await signOut(auth); location.href = "index.html"; };
 
-    // Stars Logic
+    // --- STARS LOGIC (Optimized) ---
     const starField = document.getElementById('starField');
-    for (let i = 0; i < 150; i++) {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 90; i++) {
         const star = document.createElement('div');
         star.className = 'star';
         star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
-        star.style.left = `${Math.random() * 100}%`; 
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
-        starField.appendChild(star);
+        star.style.left = `${Math.random() * 100}%`; star.style.top = `${Math.random() * 100}%`;
+        star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
+        frag.appendChild(star);
     }
+    starField.appendChild(frag);
 
-    // Proxy Logic
-    const proxyLinks = { Rammerhead: ["https://engineering.bergbahnen-bezau.at/", "https://science-study.bergbahnen-bezau.at/"], Space: ["#"], Shuttle: ["#"], Doge: ["#"] };
+    // --- PROXY LOGIC ---
+    const proxyLinks = { 
+        Rammerhead: ["https://engineering.bergbahnen-bezau.at/", "https://science-study.bergbahnen-bezau.at/"], 
+        Space: ["https://space.example.com"], 
+        Shuttle: ["https://shuttle.example.com"], 
+        Doge: ["https://doge.example.com"] 
+    };
+    
     let generatedLinks = JSON.parse(localStorage.getItem("generatedLinks") || "[]");
 
     const renderLinks = () => {
@@ -266,18 +290,19 @@
         
         let p = 0;
         const interval = setInterval(() => {
-            p += Math.random() * 12;
+            p += Math.random() * 15;
             if (p >= 100) {
                 p = 100;
                 clearInterval(interval);
-                const link = proxyLinks[sel][Math.floor(Math.random() * proxyLinks[sel].length)];
+                const options = proxyLinks[sel];
+                const link = options[Math.floor(Math.random() * options.length)];
                 generatedLinks.unshift({ proxy: sel, link });
                 localStorage.setItem("generatedLinks", JSON.stringify(generatedLinks));
                 renderLinks();
-                setTimeout(() => { prog.classList.add("hidden"); btn.disabled = false; }, 1000);
+                setTimeout(() => { prog.classList.add("hidden"); btn.disabled = false; bar.style.width = "0%"; }, 800);
             }
             bar.style.width = p + "%";
-        }, 120);
+        }, 100);
     };
 
     renderLinks();
