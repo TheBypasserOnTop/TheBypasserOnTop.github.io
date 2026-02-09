@@ -18,83 +18,63 @@
             align-items: center; justify-content: center;
             overflow: hidden;
             opacity: 0;
-            animation: pageLoad 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation: pageLoad 0.8s ease-out forwards;
         }
 
         @keyframes pageLoad {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Seamless Slow Gradient Title */
-        .gradient-text {
-            background: linear-gradient(
-                to right, 
-                #ffffff 0%, 
-                #a855f7 25%, 
-                #3b82f6 50%, 
-                #a855f7 75%, 
-                #ffffff 100%
-            );
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: slowFlow 12s linear infinite;
-        }
-
-        @keyframes slowFlow {
-            0% { background-position: 0% center; }
-            100% { background-position: 200% center; }
-        }
-
-        /* Animated Stars */
-        .stars-container { position: fixed; inset: 0; z-index: -1; }
+        /* Optimized Stars */
+        .stars-container { position: fixed; inset: 0; z-index: -1; backface-visibility: hidden; }
         .star {
             position: absolute; background: white; border-radius: 50%;
+            will-change: opacity, transform;
             animation: pulse var(--duration) infinite ease-in-out;
         }
         @keyframes pulse {
             0%, 100% { opacity: 0.1; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 12px white; }
+            50% { opacity: 0.7; transform: scale(1.2); }
         }
 
         /* Glass Card */
         .auth-card {
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(30px);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Inputs */
+        .gradient-text {
+            background: linear-gradient(to right, #fff, #a855f7, #3b82f6, #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slowFlow 8s linear infinite;
+        }
+        @keyframes slowFlow { to { background-position: 200% center; } }
+
         input {
             background: rgba(255, 255, 255, 0.05) !important;
             border: 2px solid transparent !important;
-            transition: all 0.3s ease !important;
+            transition: all 0.2s ease !important;
             outline: none !important;
             color: white;
         }
-        .input-valid { border-color: var(--success) !important; box-shadow: 0 0 15px rgba(34, 197, 94, 0.1); }
-        .input-error { border-color: var(--error) !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.1); }
-        input:focus:not(.input-valid):not(.input-error) { border-color: var(--accent) !important; }
+        .input-valid { border-color: var(--success) !important; }
+        .input-error { border-color: var(--error) !important; }
+        input:focus { border-color: var(--accent) !important; }
 
-        /* Login Button */
         .btn-primary {
-            background-color: var(--accent);
-            color: white;
-            font-weight: 700;
+            background: var(--accent);
             transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(168, 85, 247, 0.2);
         }
-        .btn-primary:hover {
-            background-color: #9333ea;
-            transform: translateY(-2px);
-            box-shadow: 0 15px 25px rgba(168, 85, 247, 0.3);
-        }
+        .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.1); }
 
-        /* Signup Overlay */
-        #signupOverlay {
+        .overlay {
             position: fixed; inset: 0;
-            background: rgba(2, 6, 23, 0.95);
+            background: rgba(2, 6, 23, 0.98);
             backdrop-filter: blur(20px);
             display: none;
             z-index: 100;
@@ -106,29 +86,30 @@
 </head>
 <body>
 
+    <script>
+        if (!sessionStorage.getItem('visited')) {
+            sessionStorage.setItem('visited', 'true');
+            window.location.replace("loading.html"); // Replace with your loading file name
+        }
+    </script>
+
     <div class="stars-container" id="starField"></div>
 
     <div class="w-full max-w-md px-6 z-10" id="loginPanel">
-        <div class="auth-card p-10 rounded-[2.5rem] text-center shadow-2xl">
-            <h1 class="text-4xl font-black tracking-tighter uppercase gradient-text">
-                COSMIC
-            </h1>
-            <p class="text-gray-400 text-[10px] tracking-[0.5em] uppercase mt-1 mb-10 font-bold opacity-60">
-                BETA 1.2
-            </p>
+        <div class="auth-card p-10 rounded-[2.5rem] text-center">
+            <h1 class="text-4xl font-black tracking-tighter gradient-text">COSMIC</h1>
+            <p class="text-gray-400 text-[10px] tracking-[0.5em] uppercase mt-1 mb-10 font-bold opacity-60">BETA 1.2</p>
             
             <div class="space-y-4">
                 <input id="emailUsername" type="text" placeholder="Email or Username" class="w-full p-4 rounded-2xl">
                 <input id="password" type="password" placeholder="Password" class="w-full p-4 rounded-2xl">
-                <div id="loginError" class="error-msg text-center"></div>
+                <div id="loginError" class="error-msg"></div>
 
-                <button onclick="login()" class="btn-primary w-full py-4 rounded-2xl uppercase tracking-widest text-sm">
-                    Login
-                </button>
+                <button onclick="login()" class="btn-primary w-full py-4 rounded-2xl uppercase tracking-widest text-sm font-bold">Login</button>
 
-                <div class="flex items-center my-8">
+                <div class="flex items-center my-6">
                     <div class="flex-grow h-px bg-white/10"></div>
-                    <span class="px-4 text-[10px] text-gray-500 uppercase tracking-widest">OR</span>
+                    <span class="px-4 text-[10px] text-gray-500">OR</span>
                     <div class="flex-grow h-px bg-white/10"></div>
                 </div>
 
@@ -136,22 +117,22 @@
                     Continue with Google
                 </button>
 
-                <p class="pt-10 text-gray-500 text-sm">
-                    Unknown identity? <span onclick="openSignup()" class="text-purple-400 cursor-pointer hover:underline font-bold">Register Now</span>
+                <p class="pt-8 text-gray-500 text-sm">
+                    Unknown identity? <span onclick="toggleOverlay('signupOverlay', true)" class="text-purple-400 cursor-pointer hover:underline font-bold">Register Now</span>
                 </p>
             </div>
         </div>
     </div>
 
-    <div id="signupOverlay">
-        <div class="auth-card w-full max-w-lg p-8 md:p-12 rounded-[3rem] relative m-4">
-            <button onclick="closeSignup()" class="absolute top-8 right-8 text-3xl opacity-50 hover:opacity-100">&times;</button>
+    <div id="signupOverlay" class="overlay">
+        <div class="auth-card w-full max-w-lg p-10 rounded-[3rem] relative m-4">
+            <button onclick="toggleOverlay('signupOverlay', false)" class="absolute top-8 right-8 text-3xl opacity-50 hover:opacity-100">&times;</button>
             
             <div id="signupForm">
-                <h2 class="text-3xl font-bold mb-8 italic">New Identity</h2>
+                <h2 id="signupTitle" class="text-3xl font-bold mb-8 italic">New Identity</h2>
                 
                 <div class="space-y-4 text-left">
-                    <div>
+                    <div id="emailContainer">
                         <input id="suEmail" placeholder="Email Address" class="w-full p-4 rounded-xl">
                         <div id="emailCheck" class="error-msg"></div>
                     </div>
@@ -172,23 +153,15 @@
                 </div>
 
                 <div id="signupGeneralError" class="error-msg text-center my-4"></div>
-                <button onclick="signup()" class="btn-primary w-full py-4 rounded-xl">
-                    Initialize Account
-                </button>
-            </div>
-
-            <div id="verifyBox" class="hidden text-center py-8">
-                <div class="text-6xl mb-6">📡</div>
-                <h3 class="text-2xl font-bold mb-4">Signal Sent</h3>
-                <p class="text-gray-400 mb-8">Verification transmitted to:<br><span id="verifyEmail" class="text-purple-300 font-mono"></span></p>
+                <button id="submitBtn" onclick="signup()" class="btn-primary w-full py-4 rounded-xl font-bold">Initialize Account</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
@@ -203,93 +176,109 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
-        setPersistence(auth, browserSessionPersistence);
 
-        // --- Real-Time Validation ---
-        const suEmail = document.getElementById("suEmail");
-        const suUser = document.getElementById("suUsername");
-        const suPass = document.getElementById("suPassword");
-        const suPassRep = document.getElementById("suPasswordRepeat");
+        let isGoogleCompletion = false;
 
-        const updateStatus = (el, id, msg, isValid) => {
-            document.getElementById(id).textContent = msg;
-            el.classList.toggle("input-valid", isValid && el.value !== "");
-            el.classList.toggle("input-error", !isValid && el.value !== "");
+        // --- Helper: Toggle Overlays ---
+        window.toggleOverlay = (id, show) => {
+            document.getElementById(id).style.display = show ? 'flex' : 'none';
         };
 
-        suEmail.addEventListener("input", () => {
-            const valid = /\S+@\S+\.\S+/.test(suEmail.value);
-            updateStatus(suEmail, "emailCheck", valid ? "" : "Invalid email", valid);
-        });
-
-        suUser.addEventListener("input", async () => {
-            const val = suUser.value.trim().toLowerCase();
-            if(!val) return;
-            const snap = await getDoc(doc(db, "usernames", val));
-            updateStatus(suUser, "usernameCheck", snap.exists() ? "Taken" : "", !snap.exists());
-        });
-
-        suPass.addEventListener("input", () => {
-            const valid = suPass.value.length >= 8;
-            updateStatus(suPass, "passwordCheck", valid ? "" : "8+ chars", valid);
-        });
-
-        suPassRep.addEventListener("input", () => {
-            const match = suPassRep.value === suPass.value && suPassRep.value !== "";
-            updateStatus(suPassRep, "passwordRepeatCheck", match ? "" : "No match", match);
-        });
-
-        // --- Global Actions ---
-        window.openSignup = () => { document.getElementById("signupOverlay").style.display = "flex"; };
-        window.closeSignup = () => { document.getElementById("signupOverlay").style.display = "none"; };
-
-        window.login = async () => {
-            const input = document.getElementById("emailUsername").value.trim();
-            const pass = document.getElementById("password").value;
-            try {
-                let email = input;
-                if(!input.includes("@")) {
-                    const snap = await getDoc(doc(db, "usernames", input.toLowerCase()));
-                    if(snap.exists()) email = snap.data().email;
-                    else throw new Error();
-                }
-                await signInWithEmailAndPassword(auth, email, pass);
-                location.replace("dashboard.html");
-            } catch(e) { document.getElementById("loginError").textContent = "Access Denied: Invalid Credentials"; }
-        };
-
-        window.googleLogin = async () => {
-            try { await signInWithPopup(auth, provider); location.replace("dashboard.html"); }
-            catch(e) { document.getElementById("loginError").textContent = e.message; }
-        };
-
-        window.signup = async () => {
-            const email = suEmail.value.trim();
-            const user = suUser.value.trim().toLowerCase();
-            const pass = suPass.value;
-            if(document.querySelectorAll(".input-error").length > 0 || !email || !user) return;
-            try {
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "usernames", user), { uid: cred.user.uid, email });
-                await sendEmailVerification(cred.user);
-                document.getElementById("signupForm").classList.add("hidden");
-                document.getElementById("verifyBox").classList.remove("hidden");
-                document.getElementById("verifyEmail").textContent = email;
-            } catch(e) { document.getElementById("signupGeneralError").textContent = e.message; }
-        };
-
-        // Shimmery Stars
+        // --- Optimized Star Field ---
         const starField = document.getElementById('starField');
-        for (let i = 0; i < 110; i++) {
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < 70; i++) {
             const star = document.createElement('div');
             star.className = 'star';
-            const size = Math.random() * 3 + 1;
+            const size = Math.random() * 2 + 1;
             star.style.width = star.style.height = `${size}px`;
             star.style.left = `${Math.random() * 100}%`; 
             star.style.top = `${Math.random() * 100}%`;
-            star.style.setProperty('--duration', `${1.5 + Math.random() * 4}s`);
-            starField.appendChild(star);
+            star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
+            frag.appendChild(star);
         }
+        starField.appendChild(frag);
+
+        // --- Validation Logic ---
+        const inputs = {
+            user: document.getElementById("suUsername"),
+            pass: document.getElementById("suPassword"),
+            rep: document.getElementById("suPasswordRepeat")
+        };
+
+        inputs.user.addEventListener("input", async () => {
+            const val = inputs.user.value.trim().toLowerCase();
+            if(val.length < 3) return;
+            const snap = await getDoc(doc(db, "usernames", val));
+            const isTaken = snap.exists();
+            inputs.user.classList.toggle("input-error", isTaken);
+            document.getElementById("usernameCheck").textContent = isTaken ? "Username Taken" : "";
+        });
+
+        // --- Auth Actions ---
+        window.login = async () => {
+            const id = document.getElementById("emailUsername").value.trim();
+            const pw = document.getElementById("password").value;
+            try {
+                let email = id;
+                if(!id.includes("@")) {
+                    const snap = await getDoc(doc(db, "usernames", id.toLowerCase()));
+                    if(!snap.exists()) throw new Error("Identity not found");
+                    email = snap.data().email;
+                }
+                await signInWithEmailAndPassword(auth, email, pw);
+                window.location.replace("dashboard.html");
+            } catch(e) { document.getElementById("loginError").textContent = "Invalid Credentials"; }
+        };
+
+        window.googleLogin = async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                
+                // Check if user has a profile in Firestore
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                
+                if (!userDoc.exists()) {
+                    // Force username/password setup
+                    isGoogleCompletion = true;
+                    document.getElementById("signupTitle").textContent = "Complete Profile";
+                    document.getElementById("emailContainer").style.display = "none";
+                    document.getElementById("submitBtn").textContent = "Finalize Profile";
+                    toggleOverlay('signupOverlay', true);
+                } else {
+                    window.location.replace("dashboard.html");
+                }
+            } catch(e) { console.error(e); }
+        };
+
+        window.signup = async () => {
+            const email = document.getElementById("suEmail").value.trim();
+            const user = inputs.user.value.trim().toLowerCase();
+            const pass = inputs.pass.value;
+            const rep = inputs.rep.value;
+
+            if (pass !== rep || pass.length < 8) {
+                document.getElementById("signupGeneralError").textContent = "Check password requirements";
+                return;
+            }
+
+            try {
+                if (isGoogleCompletion) {
+                    const currentUser = auth.currentUser;
+                    // 1. Update Password for the Google Account (optional, but requested)
+                    await updatePassword(currentUser, pass);
+                    // 2. Save to Firestore
+                    await setDoc(doc(db, "usernames", user), { uid: currentUser.uid, email: currentUser.email });
+                    await setDoc(doc(db, "users", currentUser.uid), { username: user, email: currentUser.email });
+                } else {
+                    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                    await setDoc(doc(db, "usernames", user), { uid: cred.user.uid, email });
+                    await setDoc(doc(db, "users", cred.user.uid), { username: user, email });
+                }
+                window.location.replace("dashboard.html");
+            } catch(e) { document.getElementById("signupGeneralError").textContent = e.message; }
+        };
     </script>
 </body>
 </html>
