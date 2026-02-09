@@ -13,7 +13,7 @@
             background: radial-gradient(circle at top, #1e1b4b, #020617);
             color: #e6f0ff;
             font-family: 'Inter', sans-serif;
-            min-height: 120vh;
+            min-height: 150vh; /* Increased height to allow scrolling */
             overflow-x: hidden;
             transition: opacity 0.5s ease;
         }
@@ -35,10 +35,23 @@
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
 
+        /* Floating Scroll Hint */
+        .scroll-hint {
+            position: absolute; bottom: 40px; left: 50%;
+            transform: translateX(-50%);
+            animation: bounceUpDown 2s ease-in-out infinite;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+        @keyframes bounceUpDown {
+            0%, 100% { transform: translate(-50%, 0); opacity: 0.3; }
+            50% { transform: translate(-50%, -15px); opacity: 0.8; }
+        }
+
         /* Sidebar */
         #sidePanel {
             position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
-            background: rgba(5, 5, 15, 0.8);
+            background: rgba(5, 5, 15, 0.85);
             backdrop-filter: blur(40px);
             border-right: 1px solid var(--border);
             z-index: 200;
@@ -55,11 +68,11 @@
         .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
         .nav-item.active { color: white; background: var(--accent); }
 
-        /* Scroll Animations */
+        /* Scroll Cards */
         .scroll-card {
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 1s ease, transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateY(40px);
+            transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .scroll-card.revealed { opacity: 1; transform: translateY(0); }
 
@@ -98,8 +111,8 @@
         
         <div id="profileDropdown">
             <div class="px-3 pb-3 mb-3 border-b border-white/5">
-                <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">Syncing...</p>
-                <p class="text-[8px] text-white/20 font-bold tracking-widest uppercase">Level 1 Operator</p>
+                <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">Synchronizing...</p>
+                <p class="text-[8px] text-white/20 font-bold tracking-widest uppercase">Verified Operator</p>
             </div>
             <button onclick="animateNav('settings.html')" class="w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition">Settings</button>
             <button onclick="confirmLogout()" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold transition">Logout</button>
@@ -119,32 +132,33 @@
         <div class="nav-item" onclick="animateNav('proxies.html')">Proxies</div>
         <div class="nav-item" onclick="animateNav('settings.html')">Settings</div>
     </nav>
-    
-    <div class="mt-auto pt-6 border-t border-white/5">
-        <button onclick="confirmLogout()" class="w-full text-left p-4 text-red-500/60 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition">Terminate Session</button>
-    </div>
 </aside>
 
-<section class="h-screen flex flex-col items-center justify-center text-center">
+<section class="h-screen flex flex-col items-center justify-center text-center relative">
     <div class="p-12 max-w-2xl">
         <h2 id="welcomeText" class="text-5xl md:text-7xl font-black mb-6 tracking-tighter uppercase leading-tight">Welcome</h2>
         <div class="h-px w-32 bg-gradient-to-r from-transparent via-purple-500 to-transparent mx-auto mb-6"></div>
         <p class="text-white/20 uppercase tracking-[0.6em] text-[10px] font-bold">Terminal Identity Synchronized</p>
+    </div>
+
+    <div id="scrollHint" class="scroll-hint flex flex-col items-center">
+        <p class="text-[9px] uppercase tracking-[0.4em] font-bold mb-4 opacity-40">Explore Terminal</p>
+        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent opacity-40"></div>
     </div>
 </section>
 
 <main class="max-w-5xl mx-auto px-6 pb-40 grid grid-cols-1 md:grid-cols-3 gap-10">
     <div class="scroll-card p-10 rounded-3xl border border-white/5 bg-white/[0.02]">
         <h4 class="font-bold tracking-widest text-[10px] text-purple-400 mb-4 uppercase">Nodes</h4>
-        <p class="text-white/40 text-sm leading-relaxed">High-frequency cosmic nodes scattered across the void for ultimate speed.</p>
+        <p class="text-white/40 text-sm leading-relaxed font-medium">High-frequency cosmic nodes scattered across the void for ultimate speed and low latency.</p>
     </div>
     <div class="scroll-card p-10 rounded-3xl border border-white/5 bg-white/[0.02]">
         <h4 class="font-bold tracking-widest text-[10px] text-blue-400 mb-4 uppercase">Shield</h4>
-        <p class="text-white/40 text-sm leading-relaxed">Military-grade identity masking protocols active in all sectors.</p>
+        <p class="text-white/40 text-sm leading-relaxed font-medium">Military-grade identity masking protocols active in all sectors, keeping you untraceable.</p>
     </div>
     <div class="scroll-card p-10 rounded-3xl border border-white/5 bg-white/[0.02]">
         <h4 class="font-bold tracking-widest text-[10px] text-white/30 mb-4 uppercase">Core</h4>
-        <p class="text-white/40 text-sm leading-relaxed">V8 powered backend engine for instantaneous data synchronization.</p>
+        <p class="text-white/40 text-sm leading-relaxed font-medium">V8 powered backend engine optimized for instantaneous data synchronization across modules.</p>
     </div>
 </main>
 
@@ -154,7 +168,7 @@
         <p class="text-white/30 text-xs mb-8">Terminate active session and return to portal?</p>
         <div class="flex gap-3">
             <button onclick="closeLogout()" class="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 transition text-xs font-bold">Cancel</button>
-            <button onclick="executeLogout()" class="flex-1 py-4 rounded-xl bg-red-600 hover:bg-red-500 transition text-xs font-bold shadow-lg shadow-red-600/20">Logout</button>
+            <button onclick="executeLogout()" class="flex-1 py-4 rounded-xl bg-red-600 hover:bg-red-500 transition text-xs font-bold">Logout</button>
         </div>
     </div>
 </div>
@@ -164,7 +178,6 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
     import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-    // Matching Login Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
         authDomain: "login-34954.firebaseapp.com",
@@ -178,30 +191,23 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Profile Color Utility
     function stringToColor(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        return `hsl(${hash % 360}, 60%, 45%)`;
+        return `hsl(${hash % 360}, 65%, 50%)`;
     }
 
-    // AUTH OBSERVER
     onAuthStateChanged(auth, async user => {
         if (!user) {
-            // No user? Boot them to login immediately
             location.replace("index.html");
             return;
         }
         
         try {
-            // Fetch Username
             const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
             const snap = await getDocs(q);
-            
-            // If no username found in database, fallback to email prefix
             const username = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
             
-            // UI Updates
             document.getElementById("welcomeText").textContent = `Welcome, ${username}`;
             document.getElementById("profileUserText").textContent = username;
             
@@ -209,7 +215,6 @@
             pfp.textContent = username[0].toUpperCase();
             pfp.style.backgroundColor = stringToColor(username);
 
-            // Attempt to load custom PFP image
             const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
             if(pfpDoc.exists() && pfpDoc.data().data) {
                 const img = new Image();
@@ -219,26 +224,31 @@
                     pfp.textContent = ""; 
                 };
             }
-        } catch (error) {
-            console.error("Dashboard Data Sync Error:", error);
+        } catch (e) { console.error("Sync Error:", e); }
+    });
+
+    // --- SCROLL LOGIC ---
+    window.addEventListener('scroll', () => {
+        const hint = document.getElementById('scrollHint');
+        if (window.scrollY > 100) {
+            hint.style.opacity = '0';
+            hint.style.pointerEvents = 'none';
+        } else {
+            hint.style.opacity = '1';
         }
     });
 
-    // --- UI LOGIC ---
+    // --- NAVIGATION & UI ---
     window.toggleMenu = () => document.body.classList.toggle("menu-open");
-    
     window.toggleProfile = () => {
         const dp = document.getElementById("profileDropdown");
         dp.style.display = dp.style.display === "flex" ? "none" : "flex";
     };
-
     window.confirmLogout = () => {
         document.getElementById("logoutModal").style.display = "flex";
         document.getElementById("profileDropdown").style.display = "none";
     };
-    
     window.closeLogout = () => document.getElementById("logoutModal").style.display = "none";
-    
     window.executeLogout = async () => {
         await signOut(auth);
         location.replace("index.html");
@@ -252,24 +262,22 @@
         }, 150);
     };
 
-    // Scroll Observer
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) entry.target.classList.add("revealed");
         });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.15 });
 
     document.querySelectorAll(".scroll-card").forEach(card => observer.observe(card));
 
-    // Stars
     const starField = document.getElementById('starField');
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 150; i++) {
         const star = document.createElement('div');
         star.className = 'star';
         star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
         star.style.left = `${Math.random() * 100}%`; 
         star.style.top = `${Math.random() * 100}%`;
-        star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
+        star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
         starField.appendChild(star);
     }
 </script>
