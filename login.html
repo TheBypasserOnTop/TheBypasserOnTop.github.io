@@ -26,7 +26,8 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .stars-container { position: fixed; inset: 0; z-index: -1; backface-visibility: hidden; }
+        /* Optimized Star Performance */
+        .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
         .star {
             position: absolute; background: white; border-radius: 50%;
             will-change: opacity, transform;
@@ -68,7 +69,7 @@
             font-weight: 700;
         }
         .btn-primary:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.1); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary:disabled { opacity: 0.5; cursor: wait; }
 
         .overlay {
             position: fixed; inset: 0;
@@ -149,10 +150,12 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // Using Version 12.9.0 to match your Dashboard
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
+        // Full Config with appId and messagingSenderId (Required for Google Auth verification)
         const firebaseConfig = {
             apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
             authDomain: "login-34954.firebaseapp.com",
@@ -173,14 +176,13 @@
             document.getElementById(id).style.display = show ? 'flex' : 'none';
         };
 
-        // Optimized Stars
+        // Render Stars
         const starField = document.getElementById('starField');
         const frag = document.createDocumentFragment();
-        for (let i = 0; i < 60; i++) {
+        for (let i = 0; i < 80; i++) {
             const star = document.createElement('div');
             star.className = 'star';
-            const size = Math.random() * 2 + 1;
-            star.style.width = star.style.height = `${size}px`;
+            star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
             star.style.left = `${Math.random() * 100}%`; 
             star.style.top = `${Math.random() * 100}%`;
             star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
@@ -193,33 +195,34 @@
             const gBtn = document.getElementById("googleBtn");
             const errDisplay = document.getElementById("loginError");
             gBtn.disabled = true;
-            gBtn.innerText = "Authenticating...";
+            gBtn.innerText = "Connecting Google...";
 
             try {
-                // First, sign in with Google
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 
-                // Now that we are authenticated, Firebase won't deny "Permission" to read your own doc
-                const userDoc = await getDoc(doc(db, "users", user.uid));
+                // Check if user has completed the COSMIC setup
+                // Search 'usernames' collection for a doc where uid matches
+                const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
+                const querySnapshot = await getDocs(q);
                 
-                if (userDoc.exists()) {
-                    // Already has a profile - GO TO DASHBOARD
+                if (!querySnapshot.empty) {
+                    // USER EXISTS -> DASHBOARD
                     window.location.replace("dashboard.html");
                 } else {
-                    // New user - SHOW POPUP
+                    // NEW USER -> SHOW SETUP POPUP
                     isGoogleCompletion = true;
-                    document.getElementById("signupTitle").textContent = "Finalize Your Identity";
+                    document.getElementById("signupTitle").textContent = "Finalize Profile";
                     document.getElementById("emailContainer").style.display = "none";
                     document.getElementById("closeOverlayBtn").style.display = "none";
-                    document.getElementById("submitBtn").textContent = "Complete Initialization";
+                    document.getElementById("submitBtn").textContent = "Finish & Access Dashboard";
                     toggleOverlay('signupOverlay', true);
                     gBtn.disabled = false;
                     gBtn.innerText = "Continue with Google";
                 }
             } catch(e) { 
                 console.error(e);
-                errDisplay.textContent = "Identity Verification Failed.";
+                errDisplay.textContent = "Google Verification Failed. Try again.";
                 gBtn.disabled = false;
                 gBtn.innerText = "Continue with Google";
             }
@@ -232,27 +235,27 @@
             const rep = document.getElementById("suPasswordRepeat").value;
             const err = document.getElementById("signupGeneralError");
 
-            if(user.length < 3) return err.textContent = "Username too short";
+            if(!user || user.length < 3) return err.textContent = "Username too short";
             if(pass.length < 8) return err.textContent = "Password must be 8+ chars";
             if(pass !== rep) return err.textContent = "Passwords do not match";
 
             try {
+                // Double check username availability
                 const nameSnap = await getDoc(doc(db, "usernames", user));
                 if(nameSnap.exists()) return err.textContent = "Username taken";
 
                 if (isGoogleCompletion) {
-                    // Update password for the newly linked account
                     await updatePassword(auth.currentUser, pass);
-                    // Create the profile mapping
+                    // Save the username mapping
                     await setDoc(doc(db, "usernames", user), { uid: auth.currentUser.uid, email: auth.currentUser.email });
-                    await setDoc(doc(db, "users", auth.currentUser.uid), { username: user, email: auth.currentUser.email });
                 } else {
                     const cred = await createUserWithEmailAndPassword(auth, email, pass);
                     await setDoc(doc(db, "usernames", user), { uid: cred.user.uid, email });
-                    await setDoc(doc(db, "users", cred.user.uid), { username: user, email });
                 }
                 window.location.replace("dashboard.html");
-            } catch(e) { err.textContent = e.message; }
+            } catch(e) { 
+                err.textContent = e.message; 
+            }
         };
 
         window.login = async () => {
@@ -262,12 +265,14 @@
                 let email = id;
                 if(!id.includes("@")) {
                     const snap = await getDoc(doc(db, "usernames", id.toLowerCase()));
-                    if(!snap.exists()) throw new Error("User not found");
+                    if(!snap.exists()) throw new Error("Identity not found");
                     email = snap.data().email;
                 }
                 await signInWithEmailAndPassword(auth, email, pw);
                 window.location.replace("dashboard.html");
-            } catch(e) { document.getElementById("loginError").textContent = "Access Denied"; }
+            } catch(e) { 
+                document.getElementById("loginError").textContent = "Access Denied: Invalid Credentials"; 
+            }
         };
     </script>
 </body>
