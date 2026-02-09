@@ -19,6 +19,7 @@
 
         body.leaving { opacity: 0; pointer-events: none; }
 
+        /* Stars */
         .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; will-change: transform; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
@@ -26,7 +27,7 @@
         /* Sidebar Navigation */
         #sidePanel {
             position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
-            background: rgba(5, 5, 15, 0.9);
+            background: rgba(5, 5, 15, 0.95);
             backdrop-filter: blur(45px);
             border-right: 1px solid var(--border);
             z-index: 200;
@@ -41,26 +42,36 @@
             cursor: pointer; font-size: 0.9rem; font-weight: 600; text-transform: capitalize;
         }
         .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
-        /* Selection Fix */
-        .nav-item.active { color: white !important; background: var(--accent) !important; opacity: 1; }
+        .nav-item.active { color: white !important; background: var(--accent) !important; }
+
+        /* Profile Dropdown */
+        #profileDropdown {
+            position: absolute; top: 70px; right: 40px; width: 220px;
+            display: none; flex-direction: column; z-index: 100;
+            background: rgba(10, 10, 25, 0.95);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
 
         .glass-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         
-        /* Account Card States */
         .alt-card-mini { cursor: pointer; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
         .alt-card-mini:hover { background: rgba(255,255,255,0.05); }
         
         #progressBar { transition: width 0.2s ease; background: linear-gradient(90deg, var(--accent), #3b82f6); }
         
+        .gradient-text {
+            background: linear-gradient(to right, #ffffff, #a855f7, #3b82f6);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
         .overlay-bg {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85);
             backdrop-filter: blur(12px); display: none; z-index: 300;
             align-items: center; justify-content: center;
-        }
-        
-        .gradient-text {
-            background: linear-gradient(to right, #ffffff, #a855f7, #3b82f6);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
     </style>
 </head>
@@ -74,14 +85,28 @@
         <div class="w-6 h-0.5 bg-white"></div>
         <div class="w-6 h-0.5 bg-white"></div>
     </button>
-    <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center overflow-hidden">?</div>
+    
+    <div class="relative">
+        <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center overflow-hidden text-sm">?</div>
+        
+        <div id="profileDropdown">
+            <div class="px-3 pb-3 mb-3 border-b border-white/5">
+                <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">Syncing...</p>
+                <p class="text-[8px] text-white/20 font-bold tracking-widest uppercase">Verified Operator</p>
+            </div>
+            <div id="dynamicProfileLinks"></div>
+            <button onclick="confirmLogout()" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold transition">Logout</button>
+        </div>
+    </div>
 </nav>
 
-<aside id="sidePanel">
-    <div class="mb-8">
+<aside id="sidePanel" class="flex flex-col">
+    <div class="mb-8 relative">
         <h1 class="text-xl font-black gradient-text tracking-widest">COSMIC</h1>
+        <div class="h-px w-full bg-white/5 mt-4"></div>
+        <button onclick="toggleMenu()" class="absolute -top-2 -right-2 text-white/40 hover:text-white p-2 text-xl">✕</button>
     </div>
-    <nav id="dynamicSidebarNav"></nav>
+    <nav class="flex-1" id="dynamicSidebarNav"></nav>
 </aside>
 
 <main class="max-w-2xl mx-auto px-6 pt-32 pb-20">
@@ -102,12 +127,23 @@
 
     <div id="historyContainer" class="space-y-4">
         <h3 class="text-xs font-black uppercase tracking-[0.3em] text-white/20 mb-4 px-2">Generated Terminals</h3>
-        </div>
+    </div>
 </main>
+
+<div id="logoutModal" class="overlay-bg">
+    <div class="bg-[#050510] border border-white/10 p-10 max-w-sm w-full mx-4 text-center rounded-3xl">
+        <h3 class="text-lg font-bold mb-2">Logout?</h3>
+        <p class="text-white/30 text-xs mb-8">Confirm termination of session.</p>
+        <div class="flex gap-3">
+            <button onclick="closeLogout()" class="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 transition text-xs font-bold">Cancel</button>
+            <button onclick="executeLogout()" class="flex-1 py-4 rounded-xl bg-red-600 hover:bg-red-500 transition text-xs font-bold">Logout</button>
+        </div>
+    </div>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
     import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
     const config = { apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954" };
@@ -115,7 +151,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const currentPage = "alt generator"; // Updated to match tabs.txt precisely
+    const currentPage = "alt generator";
     let savedAlts = JSON.parse(localStorage.getItem("cosmic_alts") || "[]");
 
     const accountStock = [
@@ -124,12 +160,20 @@
         { creds: "VoidWalker:Star77", date: "2022-11-20" }
     ];
 
+    // --- NAVIGATION LOGIC ---
+    window.animateNav = (url) => {
+        document.body.classList.remove("menu-open");
+        setTimeout(() => {
+            document.body.classList.add("leaving");
+            setTimeout(() => { location.href = url; }, 500);
+        }, 300);
+    };
+
     // --- RENDER SYSTEM ---
     function renderAlts() {
         const container = document.getElementById("historyContainer");
-        const existingHeader = container.querySelector('h3');
-        container.innerHTML = '';
-        container.appendChild(existingHeader);
+        const headerText = `<h3 class="text-xs font-black uppercase tracking-[0.3em] text-white/20 mb-4 px-2">Generated Terminals</h3>`;
+        container.innerHTML = headerText;
 
         savedAlts.forEach((alt, index) => {
             const card = document.createElement('div');
@@ -142,7 +186,7 @@
                              <div class="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
                                 <img src="https://api.dicebear.com/7.x/bottts/svg?seed=${alt.user}" class="w-full h-full">
                              </div>
-                             <button onclick="toggleExpand(${index})" class="text-white/20 hover:text-white text-xs uppercase font-bold tracking-widest">Minimize</button>
+                             <button onclick="toggleExpand(${index})" class="text-white/20 hover:text-white text-[10px] uppercase font-bold tracking-widest">Minimize</button>
                         </div>
                         <div class="space-y-4">
                             ${createField("Username", alt.user, `user-${index}`)}
@@ -150,11 +194,10 @@
                             ${createField("Combined", `${alt.user}:${alt.pass}`, `full-${index}`)}
                             <div class="pt-2 flex justify-between items-center opacity-30">
                                 <span class="text-[9px] font-black uppercase tracking-widest">Created: ${alt.date}</span>
-                                <span class="text-[9px] font-black uppercase tracking-widest">ID: #${1000 + index}</span>
+                                <span class="text-[9px] font-black uppercase tracking-widest">Index: #${index + 1}</span>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             } else {
                 card.classList.add("alt-card-mini");
                 card.onclick = () => toggleExpand(index);
@@ -162,10 +205,9 @@
                     <img src="https://api.dicebear.com/7.x/bottts/svg?seed=${alt.user}" class="w-8 h-8 rounded-lg bg-white/5">
                     <div class="flex-1">
                         <p class="text-xs font-bold uppercase tracking-tight">${alt.user}</p>
-                        <p class="text-[8px] text-white/20 uppercase font-black">Click to expand details</p>
+                        <p class="text-[8px] text-white/20 uppercase font-black">Expand Access</p>
                     </div>
-                    <span class="text-[9px] text-purple-400 font-bold uppercase">${alt.date}</span>
-                `;
+                    <span class="text-[9px] text-purple-400 font-bold uppercase">${alt.date}</span>`;
             }
             container.appendChild(card);
         });
@@ -182,7 +224,6 @@
             </div>`;
     }
 
-    // --- LOGIC ---
     window.toggleExpand = (index) => {
         savedAlts[index].expanded = !savedAlts[index].expanded;
         renderAlts();
@@ -191,9 +232,62 @@
     window.copyText = (id) => {
         const text = document.getElementById(id).textContent;
         navigator.clipboard.writeText(text);
-        alert("Copied to clipboard");
     };
 
+    // --- TAB LOADER ---
+    async function loadTabs() {
+        try {
+            const response = await fetch(`tabs.txt?v=${Date.now()}`, { cache: "no-store" });
+            const text = await response.text();
+            const tabs = text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+            const sidebar = document.getElementById('dynamicSidebarNav');
+            const dropdown = document.getElementById('dynamicProfileLinks');
+            
+            sidebar.innerHTML = ''; dropdown.innerHTML = '';
+            tabs.forEach(tab => {
+                const isCurrent = tab.toLowerCase() === currentPage;
+                const fileName = `${tab.toLowerCase().replace(/\s/g, '')}.html`;
+
+                const navItem = document.createElement('div');
+                navItem.className = `nav-item ${isCurrent ? 'active' : ''}`;
+                navItem.textContent = tab;
+                navItem.onclick = () => isCurrent ? toggleMenu() : animateNav(fileName);
+                sidebar.appendChild(navItem);
+
+                if(!isCurrent) {
+                    const dropBtn = document.createElement('button');
+                    dropBtn.className = "w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition capitalize";
+                    dropBtn.textContent = tab;
+                    dropBtn.onclick = () => animateNav(fileName);
+                    dropdown.appendChild(dropBtn);
+                }
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    // --- IDENTITY SYNC ---
+    onAuthStateChanged(auth, async user => {
+        if (!user) { location.replace("index.html"); return; }
+        loadTabs();
+        renderAlts();
+
+        const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
+        const snap = await getDocs(q);
+        const username = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
+        
+        document.getElementById("profileUserText").textContent = username;
+        const pfp = document.getElementById("profilePic");
+        pfp.textContent = username[0].toUpperCase();
+        pfp.style.backgroundColor = `hsl(${username.length * 40}, 60%, 45%)`;
+
+        const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
+        if(pfpDoc.exists() && pfpDoc.data().data) {
+            pfp.style.backgroundImage = `url(${pfpDoc.data().data})`;
+            pfp.textContent = "";
+        }
+    });
+
+    // --- GENERATE ACTION ---
     document.getElementById("generateBtn").onclick = () => {
         const btn = document.getElementById("generateBtn");
         const prog = document.getElementById("progressContainer");
@@ -208,58 +302,42 @@
             if (p >= 100) {
                 p = 100;
                 clearInterval(interval);
-                
                 const stock = accountStock[Math.floor(Math.random() * accountStock.length)];
                 const [u, ps] = stock.creds.split(':');
-                
-                // Add to start of array, minimize others
                 savedAlts.forEach(a => a.expanded = false);
                 savedAlts.unshift({ user: u, pass: ps, date: stock.date, expanded: true });
-                
                 localStorage.setItem("cosmic_alts", JSON.stringify(savedAlts));
                 renderAlts();
-
-                setTimeout(() => { 
-                    prog.classList.add("hidden"); 
-                    btn.disabled = false; 
-                    bar.style.width = "0%"; 
-                }, 500);
+                setTimeout(() => { prog.classList.add("hidden"); btn.disabled = false; bar.style.width = "0%"; }, 500);
             }
             bar.style.width = p + "%";
         }, 80);
     };
 
-    // --- TABS & AUTH (Fixed Selection) ---
-    async function loadTabs() {
-        const response = await fetch(`tabs.txt?v=${Date.now()}`, { cache: "no-store" });
-        const text = await response.text();
-        const tabs = text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
-        const sidebar = document.getElementById('dynamicSidebarNav');
-        
-        sidebar.innerHTML = '';
-        tabs.forEach(tab => {
-            const isCurrent = tab.toLowerCase() === currentPage.toLowerCase();
-            const navItem = document.createElement('div');
-            navItem.className = `nav-item ${isCurrent ? 'active' : ''}`;
-            navItem.textContent = tab;
-            navItem.onclick = () => isCurrent ? toggleMenu() : location.href = `${tab.toLowerCase().replace(' ', '')}.html`;
-            sidebar.appendChild(navItem);
-        });
-    }
-
-    onAuthStateChanged(auth, async user => {
-        if (!user) location.replace("index.html");
-        loadTabs();
-        renderAlts();
-        // Standard PFP logic here...
-        const pfp = document.getElementById("profilePic");
-        const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
-        const snap = await getDocs(q);
-        const name = !snap.empty ? snap.docs[0].id : "User";
-        pfp.textContent = name[0].toUpperCase();
-    });
-
     window.toggleMenu = () => document.body.classList.toggle("menu-open");
+    window.toggleProfile = () => {
+        const dp = document.getElementById("profileDropdown");
+        dp.style.display = dp.style.display === "flex" ? "none" : "flex";
+    };
+    window.confirmLogout = () => {
+        document.getElementById("logoutModal").style.display = "flex";
+        document.getElementById("profileDropdown").style.display = "none";
+    };
+    window.closeLogout = () => document.getElementById("logoutModal").style.display = "none";
+    window.executeLogout = async () => { await signOut(auth); location.replace("index.html"); };
+
+    // Stars
+    const starField = document.getElementById('starField');
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 90; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
+        star.style.left = `${Math.random() * 100}%`; star.style.top = `${Math.random() * 100}%`;
+        star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
+        frag.appendChild(star);
+    }
+    starField.appendChild(frag);
 </script>
 </body>
 </html>
