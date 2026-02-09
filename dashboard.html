@@ -13,14 +13,13 @@
             background: radial-gradient(circle at top, #1e1b4b, #020617);
             color: #e6f0ff;
             font-family: 'Inter', sans-serif;
-            min-height: 150vh; /* Increased height to allow scrolling */
+            min-height: 150vh;
             overflow-x: hidden;
             transition: opacity 0.5s ease;
         }
 
         body.leaving { opacity: 0; pointer-events: none; }
 
-        /* Slow Gradient Title */
         .gradient-text {
             background: linear-gradient(to right, #ffffff 0%, #a855f7 25%, #3b82f6 50%, #a855f7 75%, #ffffff 100%);
             background-size: 200% auto;
@@ -30,12 +29,10 @@
         }
         @keyframes slowFlow { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
 
-        /* Stars Background */
         .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
-        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; will-change: transform; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
 
-        /* Floating Scroll Hint */
         .scroll-hint {
             position: absolute; bottom: 40px; left: 50%;
             transform: translateX(-50%);
@@ -48,11 +45,10 @@
             50% { transform: translate(-50%, -15px); opacity: 0.8; }
         }
 
-        /* Sidebar */
         #sidePanel {
             position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
-            background: rgba(5, 5, 15, 0.85);
-            backdrop-filter: blur(40px);
+            background: rgba(5, 5, 15, 0.9);
+            backdrop-filter: blur(45px);
             border-right: 1px solid var(--border);
             z-index: 200;
             transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -63,22 +59,19 @@
         .nav-item {
             padding: 1rem; border-radius: 12px; margin-bottom: 0.5rem;
             transition: 0.3s; color: rgba(255,255,255,0.4);
-            cursor: pointer; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; font-size: 0.9rem; font-weight: 600; text-transform: capitalize;
         }
         .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
         .nav-item.active { color: white; background: var(--accent); }
 
-        /* Scroll Cards */
         .scroll-card {
-            opacity: 0;
-            transform: translateY(40px);
+            opacity: 0; transform: translateY(40px);
             transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .scroll-card.revealed { opacity: 1; transform: translateY(0); }
 
-        /* Profile Dropdown */
         #profileDropdown {
-            position: absolute; top: 70px; right: 0; width: 220px;
+            position: absolute; top: 70px; right: 40px; width: 220px;
             display: none; flex-direction: column; z-index: 100;
             background: rgba(10, 10, 25, 0.95);
             backdrop-filter: blur(25px);
@@ -90,7 +83,7 @@
 
         .overlay-bg {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(10px); display: none; z-index: 300;
+            backdrop-filter: blur(12px); display: none; z-index: 300;
             align-items: center; justify-content: center;
         }
     </style>
@@ -111,10 +104,10 @@
         
         <div id="profileDropdown">
             <div class="px-3 pb-3 mb-3 border-b border-white/5">
-                <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">Synchronizing...</p>
+                <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">Syncing...</p>
                 <p class="text-[8px] text-white/20 font-bold tracking-widest uppercase">Verified Operator</p>
             </div>
-            <button onclick="animateNav('settings.html')" class="w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition">Settings</button>
+            <div id="dynamicProfileLinks"></div>
             <button onclick="confirmLogout()" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold transition">Logout</button>
         </div>
     </div>
@@ -126,12 +119,7 @@
         <div class="h-px w-full bg-white/5 mt-4"></div>
         <button onclick="toggleMenu()" class="absolute -top-2 -right-4 text-white/20 hover:text-white p-2">✕</button>
     </div>
-    
-    <nav class="flex-1">
-        <div class="nav-item active">Dashboard</div>
-        <div class="nav-item" onclick="animateNav('proxies.html')">Proxies</div>
-        <div class="nav-item" onclick="animateNav('settings.html')">Settings</div>
-    </nav>
+    <nav class="flex-1" id="dynamicSidebarNav"></nav>
 </aside>
 
 <section class="h-screen flex flex-col items-center justify-center text-center relative">
@@ -178,67 +166,78 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
     import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4",
-        authDomain: "login-34954.firebaseapp.com",
-        projectId: "login-34954",
-        storageBucket: "login-34954.firebasestorage.app",
-        messagingSenderId: "422184727508",
-        appId: "1:422184727508:web:cef39fc913d526febe9c41"
-    };
-
-    const app = initializeApp(firebaseConfig);
+    const config = { apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954", storageBucket: "login-34954.firebasestorage.app", messagingSenderId: "422184727508", appId: "1:422184727508:web:cef39fc913d526febe9c41" };
+    const app = initializeApp(config);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    function stringToColor(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        return `hsl(${hash % 360}, 65%, 50%)`;
+    const currentPage = "dashboard";
+
+    // --- NAVIGATION LOGIC ---
+    window.animateNav = (url) => {
+        document.body.classList.remove("menu-open");
+        setTimeout(() => {
+            document.body.classList.add("leaving");
+            setTimeout(() => { location.href = url; }, 500);
+        }, 300);
+    };
+
+    async function loadTabs() {
+        try {
+            const response = await fetch('tabs.txt');
+            const text = await response.text();
+            const tabs = text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+            
+            const sidebar = document.getElementById('dynamicSidebarNav');
+            const dropdown = document.getElementById('dynamicProfileLinks');
+            
+            sidebar.innerHTML = ''; dropdown.innerHTML = '';
+            tabs.forEach(tab => {
+                const isCurrent = tab.toLowerCase() === currentPage;
+                const fileName = `${tab.toLowerCase()}.html`;
+
+                const navItem = document.createElement('div');
+                navItem.className = `nav-item ${isCurrent ? 'active' : ''}`;
+                navItem.textContent = tab;
+                navItem.onclick = () => animateNav(fileName);
+                sidebar.appendChild(navItem);
+
+                if(!isCurrent) {
+                    const dropBtn = document.createElement('button');
+                    dropBtn.className = "w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition capitalize";
+                    dropBtn.textContent = tab;
+                    dropBtn.onclick = () => animateNav(fileName);
+                    dropdown.appendChild(dropBtn);
+                }
+            });
+        } catch (e) { console.error("Tab Sync Error:", e); }
     }
 
+    // --- IDENTITY SYNC ---
     onAuthStateChanged(auth, async user => {
-        if (!user) {
-            location.replace("index.html");
-            return;
-        }
+        if (!user) { location.replace("index.html"); return; }
+        loadTabs();
         
-        try {
-            const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
-            const snap = await getDocs(q);
-            const username = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
-            
-            document.getElementById("welcomeText").textContent = `Welcome, ${username}`;
-            document.getElementById("profileUserText").textContent = username;
-            
-            const pfp = document.getElementById("profilePic");
-            pfp.textContent = username[0].toUpperCase();
-            pfp.style.backgroundColor = stringToColor(username);
+        const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
+        const snap = await getDocs(q);
+        const username = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
+        
+        document.getElementById("welcomeText").textContent = `Welcome, ${username}`;
+        document.getElementById("profileUserText").textContent = username;
+        
+        const pfp = document.getElementById("profilePic");
+        const color = `hsl(${username.length * 40}, 60%, 45%)`;
+        pfp.textContent = username[0].toUpperCase();
+        pfp.style.backgroundColor = color;
 
-            const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
-            if(pfpDoc.exists() && pfpDoc.data().data) {
-                const img = new Image();
-                img.src = pfpDoc.data().data;
-                img.onload = () => {
-                    pfp.style.backgroundImage = `url(${img.src})`;
-                    pfp.textContent = ""; 
-                };
-            }
-        } catch (e) { console.error("Sync Error:", e); }
-    });
-
-    // --- SCROLL LOGIC ---
-    window.addEventListener('scroll', () => {
-        const hint = document.getElementById('scrollHint');
-        if (window.scrollY > 100) {
-            hint.style.opacity = '0';
-            hint.style.pointerEvents = 'none';
-        } else {
-            hint.style.opacity = '1';
+        const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
+        if(pfpDoc.exists() && pfpDoc.data().data) {
+            pfp.style.backgroundImage = `url(${pfpDoc.data().data})`;
+            pfp.textContent = "";
         }
     });
 
-    // --- NAVIGATION & UI ---
+    // --- UI ACTIONS ---
     window.toggleMenu = () => document.body.classList.toggle("menu-open");
     window.toggleProfile = () => {
         const dp = document.getElementById("profileDropdown");
@@ -249,37 +248,32 @@
         document.getElementById("profileDropdown").style.display = "none";
     };
     window.closeLogout = () => document.getElementById("logoutModal").style.display = "none";
-    window.executeLogout = async () => {
-        await signOut(auth);
-        location.replace("index.html");
-    };
+    window.executeLogout = async () => { await signOut(auth); location.replace("index.html"); };
 
-    window.animateNav = (url) => {
-        document.body.classList.remove("menu-open");
-        setTimeout(() => {
-            document.body.classList.add("leaving");
-            setTimeout(() => { location.href = url; }, 500);
-        }, 150);
-    };
+    // --- SCROLL EFFECTS ---
+    window.addEventListener('scroll', () => {
+        const hint = document.getElementById('scrollHint');
+        if (window.scrollY > 100) { hint.style.opacity = '0'; hint.style.pointerEvents = 'none'; }
+        else { hint.style.opacity = '1'; }
+    });
 
     const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add("revealed");
-        });
+        entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add("revealed"); });
     }, { threshold: 0.15 });
-
     document.querySelectorAll(".scroll-card").forEach(card => observer.observe(card));
 
+    // --- OPTIMIZED STARS ---
     const starField = document.getElementById('starField');
-    for (let i = 0; i < 150; i++) {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 90; i++) {
         const star = document.createElement('div');
         star.className = 'star';
         star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
-        star.style.left = `${Math.random() * 100}%`; 
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
-        starField.appendChild(star);
+        star.style.left = `${Math.random() * 100}%`; star.style.top = `${Math.random() * 100}%`;
+        star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
+        frag.appendChild(star);
     }
+    starField.appendChild(frag);
 </script>
 
 </body>
