@@ -72,6 +72,13 @@
             backdrop-filter: blur(12px); display: none; z-index: 300;
             align-items: center; justify-content: center;
         }
+
+        /* Cooldown Button Styles */
+        #generateBtn:disabled {
+            background: #334155 !important;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
@@ -87,7 +94,6 @@
     
     <div class="relative">
         <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center overflow-hidden text-sm">?</div>
-        
         <div id="profileDropdown">
             <div class="px-3 pb-3 mb-3 border-b border-white/5">
                 <p id="profileUserText" class="text-xs font-bold text-white/80 truncate">User</p>
@@ -111,10 +117,8 @@
 <main class="max-w-2xl mx-auto px-6 pt-32 pb-20">
     <div class="glass-card p-8 mb-10">
         <h2 class="text-2xl font-black uppercase mb-6">Alt Generator</h2>
-        
         <select id="altSelect" class="w-full p-4 rounded-xl mb-4 bg-white/5 border border-white/10 text-white appearance-none cursor-pointer focus:outline-none focus:border-purple-500 transition">
             <option value="Standard">Free Account</option>
-            <option value="30d" disabled>Premium Account (Locked)</option>
         </select>
         
         <button id="generateBtn" class="w-full py-4 rounded-xl font-bold uppercase text-sm bg-purple-600 hover:bg-purple-500 transition shadow-lg">Generate Account</button>
@@ -147,18 +151,52 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
     import { getFirestore, collection, query, where, getDocs, doc, getDoc, deleteDoc, setDoc, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-    const config = { 
-        apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", 
-        authDomain: "login-34954.firebaseapp.com", 
-        projectId: "login-34954" 
-    };
-    
+    const config = { apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954" };
     const app = initializeApp(config);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     const currentPage = "alt generator";
     let savedAlts = JSON.parse(localStorage.getItem("cosmic_alts") || "[]");
+    let cooldownTimer = null;
+
+    // --- DATE CALCULATOR ---
+    function calculateDays(dateStr) {
+        try {
+            const created = new Date(dateStr);
+            const today = new Date();
+            const diffTime = Math.abs(today - created);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        } catch(e) { return 0; }
+    }
+
+    // --- COOLDOWN LOGIC ---
+    function startCooldownUI() {
+        const btn = document.getElementById('generateBtn');
+        const nextAvailable = localStorage.getItem('cosmic_next_gen');
+        
+        if (!nextAvailable) return;
+
+        if (cooldownTimer) clearInterval(cooldownTimer);
+
+        cooldownTimer = setInterval(() => {
+            const now = Date.now();
+            const timeLeft = nextAvailable - now;
+
+            if (timeLeft <= 0) {
+                btn.disabled = false;
+                btn.textContent = "Generate Account";
+                localStorage.removeItem('cosmic_next_gen');
+                clearInterval(cooldownTimer);
+            } else {
+                btn.disabled = true;
+                const mins = Math.floor(timeLeft / 60000);
+                const secs = Math.floor((timeLeft % 60000) / 1000);
+                btn.textContent = `Cooldown (${mins}:${secs < 10 ? '0' : ''}${secs})`;
+            }
+        }, 1000);
+    }
 
     // --- RENDERING ---
     function renderAlts() {
@@ -168,8 +206,8 @@
         savedAlts.forEach((alt, index) => {
             const card = document.createElement('div');
             card.className = "glass-card overflow-hidden mb-4";
-            
             const pfpUrl = alt.pfp || `https://api.dicebear.com/7.x/bottts/svg?seed=${alt.user}`;
+            const daysOld = calculateDays(alt.date);
 
             if (alt.expanded) {
                 card.innerHTML = `
@@ -182,8 +220,8 @@
                             ${createField("Username", alt.user, `user-${index}`)}
                             ${createField("Password", alt.pass, `pass-${index}`)}
                             ${createField("Combined", `${alt.user}:${alt.pass}`, `full-${index}`)}
-                            <div class="pt-2 opacity-30">
-                                <span class="text-[9px] font-bold uppercase">Account Created: ${alt.date}</span>
+                            <div class="pt-4 mt-4 border-t border-white/5">
+                                <p class="text-xs font-black text-white uppercase tracking-wider">Account Created: <span class="text-purple-400 ml-1">${alt.date} (${daysOld} Days)</span></p>
                             </div>
                         </div>
                     </div>`;
@@ -194,7 +232,7 @@
                     <div class="w-8 h-8 rounded-lg bg-white/5 bg-cover bg-center" style="background-image: url('${pfpUrl}')"></div>
                     <div class="flex-1">
                         <p class="text-xs font-bold uppercase">${alt.user}</p>
-                        <p class="text-[8px] text-white/20 uppercase">Click to view account</p>
+                        <p class="text-[8px] text-white/20 uppercase">View Details</p>
                     </div>
                     <span class="text-[9px] text-purple-400 font-bold uppercase">${alt.date}</span>`;
             }
@@ -203,25 +241,11 @@
     }
 
     function createField(label, value, id) {
-        return `
-            <div>
-                <label class="text-[9px] uppercase font-bold text-purple-400 mb-1 block">${label}</label>
-                <div class="flex bg-white/5 border border-white/5 rounded-xl p-3 justify-between items-center group">
-                    <span id="${id}" class="text-xs font-mono text-white/70 truncate mr-4">${value}</span>
-                    <button onclick="event.stopPropagation(); copyText('${id}')" class="text-[9px] font-bold text-white/20 hover:text-purple-400 uppercase">Copy</button>
-                </div>
-            </div>`;
+        return `<div><label class="text-[9px] uppercase font-bold text-purple-400 mb-1 block">${label}</label><div class="flex bg-white/5 border border-white/5 rounded-xl p-3 justify-between items-center"><span id="${id}" class="text-xs font-mono text-white/70 truncate mr-4">${value}</span><button onclick="event.stopPropagation(); copyText('${id}')" class="text-[9px] font-bold text-white/20 hover:text-purple-400 uppercase">Copy</button></div></div>`;
     }
 
-    window.toggleExpand = (index) => {
-        savedAlts[index].expanded = !savedAlts[index].expanded;
-        renderAlts();
-    };
-
-    window.copyText = (id) => {
-        navigator.clipboard.writeText(document.getElementById(id).textContent);
-        alert("Copied!");
-    };
+    window.toggleExpand = (index) => { savedAlts[index].expanded = !savedAlts[index].expanded; renderAlts(); };
+    window.copyText = (id) => { navigator.clipboard.writeText(document.getElementById(id).textContent); alert("Copied!"); };
 
     // --- GENERATOR LOGIC ---
     document.getElementById("generateBtn").onclick = async () => {
@@ -238,7 +262,7 @@
             const snap = await getDocs(query(stockRef, limit(1)));
 
             if (snap.empty) {
-                alert("Out of stock! Please wait for more accounts.");
+                alert("Out of stock!");
                 btn.disabled = false;
                 prog.classList.add("hidden");
                 return;
@@ -248,27 +272,22 @@
             const accountDoc = snap.docs[0];
             const data = accountDoc.data();
             
-            // Delete account from global stock
             await deleteDoc(doc(db, "altStock", accountDoc.id));
 
             const [u, ps] = data.creds.split(':');
             savedAlts.forEach(a => a.expanded = false);
-            savedAlts.unshift({ 
-                user: u, 
-                pass: ps, 
-                date: data.date, 
-                pfp: data.pfp || "", 
-                expanded: true 
-            });
-            
+            savedAlts.unshift({ user: u, pass: ps, date: data.date, pfp: data.pfp || "", expanded: true });
             localStorage.setItem("cosmic_alts", JSON.stringify(savedAlts));
             
+            // Set 5-Minute Cooldown
+            const fiveMinsFromNow = Date.now() + (5 * 60 * 1000);
+            localStorage.setItem('cosmic_next_gen', fiveMinsFromNow);
+
             bar.style.width = "100%";
             setTimeout(() => {
                 renderAlts();
                 prog.classList.add("hidden");
-                btn.disabled = false;
-                bar.style.width = "0%";
+                startCooldownUI(); // Start countdown timer
             }, 500);
 
         } catch (error) {
@@ -278,62 +297,31 @@
         }
     };
 
-    // --- SIDEBAR & AUTH ---
-    async function loadTabs() {
-        try {
-            const res = await fetch(`tabs.txt?v=${Date.now()}`, { cache: "no-store" });
-            const text = await res.text();
-            const tabs = text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
-            const sidebar = document.getElementById('dynamicSidebarNav');
-            const dropdown = document.getElementById('dynamicProfileLinks');
-            
-            sidebar.innerHTML = ''; dropdown.innerHTML = '';
-            tabs.forEach(tab => {
-                const isCurrent = tab.toLowerCase() === currentPage;
-                const fileName = `${tab.toLowerCase().replace(/\s/g, '')}.html`;
-
-                const navItem = document.createElement('div');
-                navItem.className = `nav-item ${isCurrent ? 'active' : ''}`;
-                navItem.textContent = tab;
-                navItem.onclick = () => isCurrent ? toggleMenu() : location.href = fileName;
-                sidebar.appendChild(navItem);
-
-                if(!isCurrent) {
-                    const dropBtn = document.createElement('button');
-                    dropBtn.className = "w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition capitalize";
-                    dropBtn.textContent = tab;
-                    dropBtn.onclick = () => location.href = fileName;
-                    dropdown.appendChild(dropBtn);
-                }
-            });
-        } catch (e) {}
-    }
-
+    // --- INITIALIZE ---
     onAuthStateChanged(auth, async user => {
         if (!user) location.replace("index.html");
-        loadTabs();
-        renderAlts();
+        
+        // Check for existing cooldown on page load
+        const nextGen = localStorage.getItem('cosmic_next_gen');
+        if (nextGen && nextGen > Date.now()) {
+            startCooldownUI();
+        }
 
+        renderAlts();
+        
+        // Identity Loading
         const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
         const snap = await getDocs(q);
         const name = !snap.empty ? snap.docs[0].id : "User";
-        
         document.getElementById("profileUserText").textContent = name;
         const pfp = document.getElementById("profilePic");
         pfp.textContent = name[0].toUpperCase();
-
         const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
-        if(pfpDoc.exists() && pfpDoc.data().data) {
-            pfp.style.backgroundImage = `url(${pfpDoc.data().data})`;
-            pfp.textContent = "";
-        }
+        if(pfpDoc.exists() && pfpDoc.data().data) { pfp.style.backgroundImage = `url(${pfpDoc.data().data})`; pfp.textContent = ""; }
     });
 
     window.toggleMenu = () => document.body.classList.toggle("menu-open");
-    window.toggleProfile = () => {
-        const dp = document.getElementById("profileDropdown");
-        dp.style.display = dp.style.display === "flex" ? "none" : "flex";
-    };
+    window.toggleProfile = () => { const dp = document.getElementById("profileDropdown"); dp.style.display = dp.style.display === "flex" ? "none" : "flex"; };
     window.confirmLogout = () => document.getElementById("logoutModal").style.display = "flex";
     window.closeLogout = () => document.getElementById("logoutModal").style.display = "none";
     window.executeLogout = async () => { await signOut(auth); location.replace("index.html"); };
