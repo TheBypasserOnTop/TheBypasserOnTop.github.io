@@ -1,3 +1,4 @@
 Dashboard
 Proxies
+Alt Generator
 Settings
