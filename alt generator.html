@@ -20,7 +20,7 @@
         body.leaving { opacity: 0; pointer-events: none; }
 
         .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
-        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; will-change: transform; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
 
         /* Sidebar Navigation */
@@ -73,7 +73,6 @@
             align-items: center; justify-content: center;
         }
 
-        /* Cooldown Button Styles */
         #generateBtn:disabled {
             background: #334155 !important;
             cursor: not-allowed;
@@ -94,6 +93,7 @@
     
     <div class="relative">
         <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center overflow-hidden text-sm">?</div>
+        
         <div id="profileDropdown">
             <div class="px-3 pb-3 mb-3 border-b border-white/5">
                 <p id="profileUserText" class="text-xs font-bold text-white/80 truncate">User</p>
@@ -117,6 +117,7 @@
 <main class="max-w-2xl mx-auto px-6 pt-32 pb-20">
     <div class="glass-card p-8 mb-10">
         <h2 class="text-2xl font-black uppercase mb-6">Alt Generator</h2>
+        
         <select id="altSelect" class="w-full p-4 rounded-xl mb-4 bg-white/5 border border-white/10 text-white appearance-none cursor-pointer focus:outline-none focus:border-purple-500 transition">
             <option value="Standard">Free Account</option>
         </select>
@@ -160,30 +161,53 @@
     let savedAlts = JSON.parse(localStorage.getItem("cosmic_alts") || "[]");
     let cooldownTimer = null;
 
-    // --- DATE CALCULATOR ---
+    // --- DATE & TABS LOGIC ---
     function calculateDays(dateStr) {
         try {
             const created = new Date(dateStr);
             const today = new Date();
             const diffTime = Math.abs(today - created);
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays;
+            return Math.floor(diffTime / (1000 * 60 * 60 * 24));
         } catch(e) { return 0; }
     }
 
-    // --- COOLDOWN LOGIC ---
+    async function loadTabs() {
+        try {
+            const res = await fetch(`tabs.txt?v=${Date.now()}`, { cache: "no-store" });
+            const text = await res.text();
+            const tabs = text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+            const sidebar = document.getElementById('dynamicSidebarNav');
+            const dropdown = document.getElementById('dynamicProfileLinks');
+            sidebar.innerHTML = ''; dropdown.innerHTML = '';
+            
+            tabs.forEach(tab => {
+                const isCurrent = tab.toLowerCase() === currentPage;
+                const fileName = `${tab.toLowerCase().replace(/\s/g, '')}.html`;
+                const navItem = document.createElement('div');
+                navItem.className = `nav-item ${isCurrent ? 'active' : ''}`;
+                navItem.textContent = tab;
+                navItem.onclick = () => isCurrent ? toggleMenu() : location.href = fileName;
+                sidebar.appendChild(navItem);
+                if(!isCurrent) {
+                    const dropBtn = document.createElement('button');
+                    dropBtn.className = "w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition capitalize";
+                    dropBtn.textContent = tab;
+                    dropBtn.onclick = () => location.href = fileName;
+                    dropdown.appendChild(dropBtn);
+                }
+            });
+        } catch (e) { console.error("Tabs failed to load."); }
+    }
+
+    // --- COOLDOWN SYSTEM ---
     function startCooldownUI() {
         const btn = document.getElementById('generateBtn');
         const nextAvailable = localStorage.getItem('cosmic_next_gen');
-        
         if (!nextAvailable) return;
-
         if (cooldownTimer) clearInterval(cooldownTimer);
 
         cooldownTimer = setInterval(() => {
-            const now = Date.now();
-            const timeLeft = nextAvailable - now;
-
+            const timeLeft = nextAvailable - Date.now();
             if (timeLeft <= 0) {
                 btn.disabled = false;
                 btn.textContent = "Generate Account";
@@ -202,7 +226,6 @@
     function renderAlts() {
         const container = document.getElementById("historyContainer");
         container.innerHTML = `<h3 class="text-xs font-bold uppercase text-white/20 mb-4 px-2">Generated Accounts</h3>`;
-        
         savedAlts.forEach((alt, index) => {
             const card = document.createElement('div');
             card.className = "glass-card overflow-hidden mb-4";
@@ -210,30 +233,25 @@
             const daysOld = calculateDays(alt.date);
 
             if (alt.expanded) {
-                card.innerHTML = `
-                    <div class="p-8">
-                        <div class="flex justify-between items-start mb-6">
-                             <div class="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 overflow-hidden bg-cover bg-center" style="background-image: url('${pfpUrl}')"></div>
-                             <button onclick="toggleExpand(${index})" class="text-white/20 hover:text-white text-[10px] uppercase font-bold">Close</button>
+                card.innerHTML = `<div class="p-8">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 overflow-hidden bg-cover bg-center" style="background-image: url('${pfpUrl}')"></div>
+                        <button onclick="toggleExpand(${index})" class="text-white/20 hover:text-white text-[10px] uppercase font-bold">Close</button>
+                    </div>
+                    <div class="space-y-4">
+                        ${createField("Username", alt.user, `user-${index}`)}
+                        ${createField("Password", alt.pass, `pass-${index}`)}
+                        ${createField("Combined", `${alt.user}:${alt.pass}`, `full-${index}`)}
+                        <div class="pt-4 mt-4 border-t border-white/5">
+                            <p class="text-xs font-black text-white uppercase tracking-wider">Account Created: <span class="text-purple-400 ml-1">${alt.date} (${daysOld} Days)</span></p>
                         </div>
-                        <div class="space-y-4">
-                            ${createField("Username", alt.user, `user-${index}`)}
-                            ${createField("Password", alt.pass, `pass-${index}`)}
-                            ${createField("Combined", `${alt.user}:${alt.pass}`, `full-${index}`)}
-                            <div class="pt-4 mt-4 border-t border-white/5">
-                                <p class="text-xs font-black text-white uppercase tracking-wider">Account Created: <span class="text-purple-400 ml-1">${alt.date} (${daysOld} Days)</span></p>
-                            </div>
-                        </div>
-                    </div>`;
+                    </div>
+                </div>`;
             } else {
                 card.classList.add("alt-card-mini");
                 card.onclick = () => toggleExpand(index);
-                card.innerHTML = `
-                    <div class="w-8 h-8 rounded-lg bg-white/5 bg-cover bg-center" style="background-image: url('${pfpUrl}')"></div>
-                    <div class="flex-1">
-                        <p class="text-xs font-bold uppercase">${alt.user}</p>
-                        <p class="text-[8px] text-white/20 uppercase">View Details</p>
-                    </div>
+                card.innerHTML = `<div class="w-8 h-8 rounded-lg bg-white/5 bg-cover bg-center" style="background-image: url('${pfpUrl}')"></div>
+                    <div class="flex-1"><p class="text-xs font-bold uppercase">${alt.user}</p><p class="text-[8px] text-white/20 uppercase">View Details</p></div>
                     <span class="text-[9px] text-purple-400 font-bold uppercase">${alt.date}</span>`;
             }
             container.appendChild(card);
@@ -241,7 +259,10 @@
     }
 
     function createField(label, value, id) {
-        return `<div><label class="text-[9px] uppercase font-bold text-purple-400 mb-1 block">${label}</label><div class="flex bg-white/5 border border-white/5 rounded-xl p-3 justify-between items-center"><span id="${id}" class="text-xs font-mono text-white/70 truncate mr-4">${value}</span><button onclick="event.stopPropagation(); copyText('${id}')" class="text-[9px] font-bold text-white/20 hover:text-purple-400 uppercase">Copy</button></div></div>`;
+        return `<div><label class="text-[9px] uppercase font-bold text-purple-400 mb-1 block">${label}</label>
+        <div class="flex bg-white/5 border border-white/5 rounded-xl p-3 justify-between items-center">
+        <span id="${id}" class="text-xs font-mono text-white/70 truncate mr-4">${value}</span>
+        <button onclick="event.stopPropagation(); copyText('${id}')" class="text-[9px] font-bold text-white/20 hover:text-purple-400 uppercase">Copy</button></div></div>`;
     }
 
     window.toggleExpand = (index) => { savedAlts[index].expanded = !savedAlts[index].expanded; renderAlts(); };
@@ -252,64 +273,33 @@
         const btn = document.getElementById("generateBtn");
         const prog = document.getElementById("progressContainer");
         const bar = document.getElementById("progressBar");
-
         btn.disabled = true;
         prog.classList.remove("hidden");
         bar.style.width = "20%";
 
         try {
-            const stockRef = collection(db, "altStock");
-            const snap = await getDocs(query(stockRef, limit(1)));
-
-            if (snap.empty) {
-                alert("Out of stock!");
-                btn.disabled = false;
-                prog.classList.add("hidden");
-                return;
-            }
-
+            const snap = await getDocs(query(collection(db, "altStock"), limit(1)));
+            if (snap.empty) { alert("Out of stock!"); btn.disabled = false; prog.classList.add("hidden"); return; }
             bar.style.width = "70%";
             const accountDoc = snap.docs[0];
             const data = accountDoc.data();
-            
             await deleteDoc(doc(db, "altStock", accountDoc.id));
-
             const [u, ps] = data.creds.split(':');
             savedAlts.forEach(a => a.expanded = false);
             savedAlts.unshift({ user: u, pass: ps, date: data.date, pfp: data.pfp || "", expanded: true });
             localStorage.setItem("cosmic_alts", JSON.stringify(savedAlts));
-            
-            // Set 5-Minute Cooldown
-            const fiveMinsFromNow = Date.now() + (5 * 60 * 1000);
-            localStorage.setItem('cosmic_next_gen', fiveMinsFromNow);
-
+            localStorage.setItem('cosmic_next_gen', Date.now() + (5 * 60 * 1000));
             bar.style.width = "100%";
-            setTimeout(() => {
-                renderAlts();
-                prog.classList.add("hidden");
-                startCooldownUI(); // Start countdown timer
-            }, 500);
-
-        } catch (error) {
-            alert("Error: " + error.message);
-            btn.disabled = false;
-            prog.classList.add("hidden");
-        }
+            setTimeout(() => { renderAlts(); prog.classList.add("hidden"); startCooldownUI(); }, 500);
+        } catch (error) { alert("Error: " + error.message); btn.disabled = false; prog.classList.add("hidden"); }
     };
 
-    // --- INITIALIZE ---
     onAuthStateChanged(auth, async user => {
         if (!user) location.replace("index.html");
-        
-        // Check for existing cooldown on page load
+        loadTabs();
         const nextGen = localStorage.getItem('cosmic_next_gen');
-        if (nextGen && nextGen > Date.now()) {
-            startCooldownUI();
-        }
-
+        if (nextGen && nextGen > Date.now()) startCooldownUI();
         renderAlts();
-        
-        // Identity Loading
         const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
         const snap = await getDocs(q);
         const name = !snap.empty ? snap.docs[0].id : "User";
