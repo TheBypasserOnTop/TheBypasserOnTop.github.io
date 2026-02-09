@@ -26,7 +26,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Lag-Free Stars */
         .stars-container { position: fixed; inset: 0; z-index: -1; backface-visibility: hidden; }
         .star {
             position: absolute; background: white; border-radius: 50%;
@@ -189,35 +188,38 @@
         }
         starField.appendChild(frag);
 
-        // --- GOOGLE LOGIN FIX ---
+        // --- GOOGLE LOGIN ---
         window.googleLogin = async () => {
             const gBtn = document.getElementById("googleBtn");
             const errDisplay = document.getElementById("loginError");
             gBtn.disabled = true;
-            gBtn.innerText = "Connecting...";
+            gBtn.innerText = "Authenticating...";
 
             try {
+                // First, sign in with Google
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 
-                // Check Firestore for profile
+                // Now that we are authenticated, Firebase won't deny "Permission" to read your own doc
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 
-                if (!userDoc.exists()) {
+                if (userDoc.exists()) {
+                    // Already has a profile - GO TO DASHBOARD
+                    window.location.replace("dashboard.html");
+                } else {
+                    // New user - SHOW POPUP
                     isGoogleCompletion = true;
-                    document.getElementById("signupTitle").textContent = "Complete Profile";
+                    document.getElementById("signupTitle").textContent = "Finalize Your Identity";
                     document.getElementById("emailContainer").style.display = "none";
                     document.getElementById("closeOverlayBtn").style.display = "none";
-                    document.getElementById("submitBtn").textContent = "Finalize & Enter";
+                    document.getElementById("submitBtn").textContent = "Complete Initialization";
                     toggleOverlay('signupOverlay', true);
                     gBtn.disabled = false;
                     gBtn.innerText = "Continue with Google";
-                } else {
-                    window.location.replace("dashboard.html");
                 }
             } catch(e) { 
-                console.error("Full Error Object:", e); // Check your console (F12) for this!
-                errDisplay.textContent = `Error: ${e.code || "Auth Failed"}`;
+                console.error(e);
+                errDisplay.textContent = "Identity Verification Failed.";
                 gBtn.disabled = false;
                 gBtn.innerText = "Continue with Google";
             }
@@ -239,7 +241,9 @@
                 if(nameSnap.exists()) return err.textContent = "Username taken";
 
                 if (isGoogleCompletion) {
+                    // Update password for the newly linked account
                     await updatePassword(auth.currentUser, pass);
+                    // Create the profile mapping
                     await setDoc(doc(db, "usernames", user), { uid: auth.currentUser.uid, email: auth.currentUser.email });
                     await setDoc(doc(db, "users", auth.currentUser.uid), { username: user, email: auth.currentUser.email });
                 } else {
