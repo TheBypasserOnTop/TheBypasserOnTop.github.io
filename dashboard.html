@@ -33,18 +33,6 @@
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; will-change: transform; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
 
-        .scroll-hint {
-            position: absolute; bottom: 40px; left: 50%;
-            transform: translateX(-50%);
-            animation: bounceUpDown 2s ease-in-out infinite;
-            transition: opacity 0.5s ease;
-            z-index: 10;
-        }
-        @keyframes bounceUpDown {
-            0%, 100% { transform: translate(-50%, 0); opacity: 0.3; }
-            50% { transform: translate(-50%, -15px); opacity: 0.8; }
-        }
-
         #sidePanel {
             position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
             background: rgba(5, 5, 15, 0.9);
@@ -128,11 +116,6 @@
         <div class="h-px w-32 bg-gradient-to-r from-transparent via-purple-500 to-transparent mx-auto mb-6"></div>
         <p class="text-white/20 uppercase tracking-[0.6em] text-[10px] font-bold">Terminal Identity Synchronized</p>
     </div>
-
-    <div id="scrollHint" class="scroll-hint flex flex-col items-center">
-        <p class="text-[9px] uppercase tracking-[0.4em] font-bold mb-4 opacity-40">Explore Terminal</p>
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent opacity-40"></div>
-    </div>
 </section>
 
 <main class="max-w-5xl mx-auto px-6 pb-40 grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -173,7 +156,7 @@
 
     const currentPage = "dashboard";
 
-    // --- NAVIGATION LOGIC ---
+    // --- NAVIGATION WITH SIDEBAR EXIT ---
     window.animateNav = (url) => {
         document.body.classList.remove("menu-open");
         setTimeout(() => {
@@ -182,9 +165,11 @@
         }, 300);
     };
 
+    // --- CACHE-BUSTED TAB LOADER ---
     async function loadTabs() {
         try {
-            const response = await fetch('tabs.txt');
+            // Added Cache Buster ?v= and no-store
+            const response = await fetch(`tabs.txt?v=${Date.now()}`, { cache: "no-store" });
             const text = await response.text();
             const tabs = text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
             
@@ -199,7 +184,7 @@
                 const navItem = document.createElement('div');
                 navItem.className = `nav-item ${isCurrent ? 'active' : ''}`;
                 navItem.textContent = tab;
-                navItem.onclick = () => animateNav(fileName);
+                navItem.onclick = () => isCurrent ? toggleMenu() : animateNav(fileName);
                 sidebar.appendChild(navItem);
 
                 if(!isCurrent) {
@@ -213,7 +198,7 @@
         } catch (e) { console.error("Tab Sync Error:", e); }
     }
 
-    // --- IDENTITY SYNC ---
+    // --- FIREBASE SYNC ---
     onAuthStateChanged(auth, async user => {
         if (!user) { location.replace("index.html"); return; }
         loadTabs();
@@ -226,9 +211,8 @@
         document.getElementById("profileUserText").textContent = username;
         
         const pfp = document.getElementById("profilePic");
-        const color = `hsl(${username.length * 40}, 60%, 45%)`;
         pfp.textContent = username[0].toUpperCase();
-        pfp.style.backgroundColor = color;
+        pfp.style.backgroundColor = `hsl(${username.length * 40}, 60%, 45%)`;
 
         const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
         if(pfpDoc.exists() && pfpDoc.data().data) {
@@ -237,7 +221,6 @@
         }
     });
 
-    // --- UI ACTIONS ---
     window.toggleMenu = () => document.body.classList.toggle("menu-open");
     window.toggleProfile = () => {
         const dp = document.getElementById("profileDropdown");
@@ -250,19 +233,12 @@
     window.closeLogout = () => document.getElementById("logoutModal").style.display = "none";
     window.executeLogout = async () => { await signOut(auth); location.replace("index.html"); };
 
-    // --- SCROLL EFFECTS ---
-    window.addEventListener('scroll', () => {
-        const hint = document.getElementById('scrollHint');
-        if (window.scrollY > 100) { hint.style.opacity = '0'; hint.style.pointerEvents = 'none'; }
-        else { hint.style.opacity = '1'; }
-    });
-
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add("revealed"); });
     }, { threshold: 0.15 });
     document.querySelectorAll(".scroll-card").forEach(card => observer.observe(card));
 
-    // --- OPTIMIZED STARS ---
+    // Optimized Stars
     const starField = document.getElementById('starField');
     const frag = document.createDocumentFragment();
     for (let i = 0; i < 90; i++) {
@@ -275,6 +251,5 @@
     }
     starField.appendChild(frag);
 </script>
-
 </body>
 </html>
