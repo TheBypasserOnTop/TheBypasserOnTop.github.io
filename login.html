@@ -38,7 +38,6 @@
             50% { opacity: 0.6; transform: scale(1.2); }
         }
 
-        /* Glassmorphism Card */
         .auth-card {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(25px);
@@ -62,8 +61,6 @@
             outline: none !important;
             color: white;
         }
-        .input-valid { border-color: var(--success) !important; }
-        .input-error { border-color: var(--error) !important; }
         input:focus { border-color: var(--accent) !important; }
 
         .btn-primary {
@@ -91,7 +88,7 @@
     <script>
         if (!sessionStorage.getItem('notFirstLoad')) {
             sessionStorage.setItem('notFirstLoad', 'true');
-            window.location.replace("loading.html"); 
+            window.location.replace("index.html"); 
         }
     </script>
 
@@ -136,21 +133,13 @@
                 <div class="space-y-4 text-left">
                     <div id="emailContainer">
                         <input id="suEmail" placeholder="Email Address" class="w-full p-4 rounded-xl">
-                        <div id="emailCheck" class="error-msg"></div>
                     </div>
                     <div>
                         <input id="suUsername" placeholder="Unique Username" class="w-full p-4 rounded-xl">
-                        <div id="usernameCheck" class="error-msg"></div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <input id="suPassword" type="password" placeholder="Password (8+)" class="w-full p-4 rounded-xl">
-                            <div id="passwordCheck" class="error-msg"></div>
-                        </div>
-                        <div>
-                            <input id="suPasswordRepeat" type="password" placeholder="Repeat" class="w-full p-4 rounded-xl">
-                            <div id="passwordRepeatCheck" class="error-msg"></div>
-                        </div>
+                        <input id="suPassword" type="password" placeholder="Password (8+)" class="w-full p-4 rounded-xl">
+                        <input id="suPasswordRepeat" type="password" placeholder="Repeat" class="w-full p-4 rounded-xl">
                     </div>
                 </div>
 
@@ -181,12 +170,11 @@
 
         let isGoogleCompletion = false;
 
-        // --- UI UTILITIES ---
         window.toggleOverlay = (id, show) => {
             document.getElementById(id).style.display = show ? 'flex' : 'none';
         };
 
-        // Optimized Star Generation
+        // Optimized Stars
         const starField = document.getElementById('starField');
         const frag = document.createDocumentFragment();
         for (let i = 0; i < 60; i++) {
@@ -201,26 +189,25 @@
         }
         starField.appendChild(frag);
 
-        // --- AUTH LOGIC ---
-
+        // --- GOOGLE LOGIN FIX ---
         window.googleLogin = async () => {
             const gBtn = document.getElementById("googleBtn");
+            const errDisplay = document.getElementById("loginError");
             gBtn.disabled = true;
-            gBtn.innerText = "Syncing...";
+            gBtn.innerText = "Connecting...";
 
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 
-                // CRITICAL: Check if profile exists in Firestore
+                // Check Firestore for profile
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 
                 if (!userDoc.exists()) {
-                    // NEW GOOGLE USER: Trigger overlay
                     isGoogleCompletion = true;
                     document.getElementById("signupTitle").textContent = "Complete Profile";
                     document.getElementById("emailContainer").style.display = "none";
-                    document.getElementById("closeOverlayBtn").style.display = "none"; // Force them to finish
+                    document.getElementById("closeOverlayBtn").style.display = "none";
                     document.getElementById("submitBtn").textContent = "Finalize & Enter";
                     toggleOverlay('signupOverlay', true);
                     gBtn.disabled = false;
@@ -229,7 +216,8 @@
                     window.location.replace("dashboard.html");
                 }
             } catch(e) { 
-                document.getElementById("loginError").textContent = "Google Authentication Failed.";
+                console.error("Full Error Object:", e); // Check your console (F12) for this!
+                errDisplay.textContent = `Error: ${e.code || "Auth Failed"}`;
                 gBtn.disabled = false;
                 gBtn.innerText = "Continue with Google";
             }
@@ -247,16 +235,13 @@
             if(pass !== rep) return err.textContent = "Passwords do not match";
 
             try {
-                // Check username availability
                 const nameSnap = await getDoc(doc(db, "usernames", user));
-                if(nameSnap.exists()) return err.textContent = "Username already taken";
+                if(nameSnap.exists()) return err.textContent = "Username taken";
 
                 if (isGoogleCompletion) {
-                    const currentUser = auth.currentUser;
-                    // Update password and save records
-                    await updatePassword(currentUser, pass);
-                    await setDoc(doc(db, "usernames", user), { uid: currentUser.uid, email: currentUser.email });
-                    await setDoc(doc(db, "users", currentUser.uid), { username: user, email: currentUser.email });
+                    await updatePassword(auth.currentUser, pass);
+                    await setDoc(doc(db, "usernames", user), { uid: auth.currentUser.uid, email: auth.currentUser.email });
+                    await setDoc(doc(db, "users", auth.currentUser.uid), { username: user, email: auth.currentUser.email });
                 } else {
                     const cred = await createUserWithEmailAndPassword(auth, email, pass);
                     await setDoc(doc(db, "usernames", user), { uid: cred.user.uid, email });
