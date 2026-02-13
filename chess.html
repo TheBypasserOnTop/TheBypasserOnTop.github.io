@@ -19,26 +19,9 @@
             min-height: 100vh; overflow-x: hidden;
         }
 
-        /* Dashboard UI Elements */
         .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
-
-        #sidePanel {
-            position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
-            background: rgba(5, 5, 15, 0.9); backdrop-filter: blur(45px);
-            border-right: 1px solid var(--border); z-index: 200;
-            transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 2.5rem;
-        }
-        body.menu-open #sidePanel { left: 0; }
-
-        .nav-item {
-            padding: 1rem; border-radius: 12px; margin-bottom: 0.5rem;
-            transition: 0.3s; color: rgba(255,255,255,0.4);
-            cursor: pointer; font-size: 0.9rem; font-weight: 600; text-transform: capitalize;
-        }
-        .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
-        .nav-item.active { color: white; background: var(--accent); }
 
         #profileDropdown {
             position: absolute; top: 70px; right: 40px; width: 220px;
@@ -47,11 +30,17 @@
             border: 1px solid var(--border); border-radius: 20px; padding: 1rem;
         }
 
-        /* Chess Specifics */
         #myBoard { width: 450px; max-width: 90vw; margin: 0 auto; border: 4px solid var(--border); border-radius: 12px; }
         .input-box { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); padding: 18px; border-radius: 16px; width: 100%; color: white; text-align: center; outline: none; }
         .btn-action { background: white; color: black; padding: 12px 24px; border-radius: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
         .btn-action:hover { background: var(--accent); color: white; transform: translateY(-2px); }
+        
+        .overlay-bg {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px); display: none; z-index: 1000;
+            align-items: center; justify-content: center;
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -60,10 +49,8 @@
 <div class="stars-container" id="starField"></div>
 
 <nav class="fixed top-0 w-full px-10 py-8 flex justify-between items-center z-50">
-    <button onclick="toggleMenu()" class="flex flex-col gap-1.5 opacity-60 hover:opacity-100 transition">
-        <div class="w-6 h-0.5 bg-white"></div>
-        <div class="w-6 h-0.5 bg-white"></div>
-        <div class="w-6 h-0.5 bg-white"></div>
+    <button onclick="confirmExit()" class="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition flex items-center gap-2">
+        <span class="text-lg">←</span> Return to Games
     </button>
     
     <div class="relative">
@@ -73,23 +60,24 @@
                 <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">Syncing...</p>
                 <p class="text-[8px] text-white/20 font-bold tracking-widest uppercase text-purple-400">Grandmaster</p>
             </div>
-            <div id="dynamicProfileLinks"></div>
-            <button onclick="location.replace('dashboard.html')" class="w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition">Return to Base</button>
+            <button onclick="confirmExit()" class="w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition">Return to Base</button>
         </div>
     </div>
 </nav>
 
-<aside id="sidePanel" class="flex flex-col">
-    <div class="mb-8 relative">
-        <h1 class="text-xl font-black text-purple-400 tracking-widest">COSMIC</h1>
-        <div class="h-px w-full bg-white/5 mt-4"></div>
-        <button onclick="toggleMenu()" class="absolute -top-2 -right-4 text-white/20 hover:text-white p-2">✕</button>
+<div id="exitModal" class="overlay-bg">
+    <div class="bg-[#050510] border border-white/10 p-10 max-w-sm w-full mx-4 text-center rounded-3xl shadow-2xl">
+        <h3 class="text-lg font-bold mb-2 uppercase tracking-tighter">Abandon Sector?</h3>
+        <p class="text-white/30 text-xs mb-8 uppercase tracking-widest font-medium">Leaving now will forfeit your active chess session.</p>
+        <div class="flex gap-3">
+            <button onclick="closeExitModal()" class="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 transition text-xs font-bold uppercase">Stay</button>
+            <button onclick="executeExit()" class="flex-1 py-4 rounded-xl bg-purple-600 hover:bg-purple-500 transition text-xs font-bold uppercase">Leave</button>
+        </div>
     </div>
-    <nav class="flex-1" id="dynamicSidebarNav"></nav>
-</aside>
+</div>
 
 <div id="menu-view" class="text-center z-10">
-    <h2 class="text-5xl font-black mb-8 uppercase tracking-tighter">Chess Module</h2>
+    <h2 class="text-5xl font-black mb-8 uppercase tracking-tighter italic">Chess Module</h2>
     <div class="flex flex-col gap-4">
         <button onclick="setupGame('host')" class="btn-action">Create Lobby</button>
         <p class="text-[10px] font-bold opacity-30 uppercase tracking-[0.5em] cursor-pointer hover:opacity-100" onclick="setupGame('join')">or Join Lobby</p>
@@ -104,15 +92,15 @@
 
 <div id="lobby-view" class="hidden text-center z-10">
     <p class="text-[10px] font-bold opacity-30 uppercase mb-2">Access Code</p>
-    <h1 id="display-code" class="text-7xl font-black text-purple-500 mb-6">0000</h1>
+    <h1 id="display-code" class="text-7xl font-black text-purple-500 mb-6 tracking-tighter">0000</h1>
     <p id="lobby-status" class="text-xs font-bold uppercase animate-pulse">1/2 Players Connected</p>
 </div>
 
 <div id="game-view" class="hidden text-center z-10 py-20">
-    <div id="opponent-name" class="mb-4 text-xs font-bold opacity-40 uppercase tracking-widest">Waiting for Opponent...</div>
+    <div id="opponent-name" class="mb-4 text-xs font-bold opacity-40 uppercase tracking-widest">Waiting...</div>
     <div id="myBoard"></div>
-    <div id="my-name" class="mt-4 text-xs font-bold uppercase tracking-widest text-purple-400">Identity Loading...</div>
-    <p id="game-status" class="mt-8 text-[10px] font-black uppercase bg-white/5 px-6 py-2 rounded-full inline-block">White's Turn</p>
+    <div id="my-name" class="mt-4 text-xs font-bold uppercase tracking-widest text-purple-400">Loading...</div>
+    <p id="game-status" class="mt-8 text-[10px] font-black uppercase bg-white/5 px-6 py-2 rounded-full inline-block tracking-widest">White's Turn</p>
 </div>
 
 <script type="module">
@@ -125,43 +113,40 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const currentPage = "chess";
-    let myUsername = "";
-    let gameCode = "";
-    let playerRole = ""; 
+    let myUsername = "", gameCode = "", playerRole = "", board = null;
     let game = new Chess();
-    let board = null;
 
-    // --- PROTECT ROUTE & SYNC USER ---
+    // --- EXIT LOGIC ---
+    window.confirmExit = () => document.getElementById("exitModal").style.display = "flex";
+    window.closeExitModal = () => document.getElementById("exitModal").style.display = "none";
+    window.executeExit = () => { window.onbeforeunload = null; location.replace('games.html'); };
+
+    // Standard browser refresh protection
+    window.onbeforeunload = function() {
+        return "Game in progress. Your session will be lost.";
+    };
+
     onAuthStateChanged(auth, async user => {
         if (!user) { location.replace("index.html"); return; }
-        
-        // Sync Username
         const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
         const snap = await getDocs(q);
         myUsername = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
-        
-        // Update UI
         document.getElementById("profileUserText").textContent = myUsername;
         const pfp = document.getElementById("profilePic");
         pfp.textContent = myUsername[0].toUpperCase();
-        
         const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
         if(pfpDoc.exists() && pfpDoc.data().data) {
             pfp.style.backgroundImage = `url(${pfpDoc.data().data})`;
             pfp.textContent = "";
         }
-        loadTabs();
     });
 
-    // --- GAME SETUP ---
+    // --- GAME ENGINE ---
     window.setupGame = async (mode) => {
         if (mode === 'host') {
             gameCode = Math.floor(1000 + Math.random() * 9000).toString();
             playerRole = 'white';
-            await setDoc(doc(db, "chess", gameCode), {
-                hostName: myUsername, guestName: "", fen: "start", turn: "w", status: "waiting"
-            });
+            await setDoc(doc(db, "chess", gameCode), { hostName: myUsername, guestName: "", fen: "start", turn: "w", status: "waiting" });
             startSync();
         } else {
             document.getElementById('menu-view').classList.add('hidden');
@@ -174,7 +159,6 @@
         playerRole = 'black';
         const lobbyRef = doc(db, "chess", gameCode);
         const snap = await getDoc(lobbyRef);
-        
         if (snap.exists()) {
             await updateDoc(lobbyRef, { guestName: myUsername, status: "connecting" });
             startSync();
@@ -190,11 +174,7 @@
         onSnapshot(doc(db, "chess", gameCode), (snap) => {
             const data = snap.data();
             if (!data) return;
-
-            if ((data.status === "connecting" || data.status === "playing") && !board) {
-                initBoard(data);
-            }
-
+            if ((data.status === "connecting" || data.status === "playing") && !board) initBoard(data);
             if (data.status === "playing" && board) {
                 if (data.fen !== game.fen()) {
                     game.load(data.fen);
@@ -209,12 +189,8 @@
         document.getElementById('lobby-view').classList.add('hidden');
         document.getElementById('game-view').classList.remove('hidden');
         document.getElementById('my-name').innerText = myUsername;
-        document.getElementById('opponent-name').innerText = (playerRole === 'white') ? (data.guestName || "Waiting for guest...") : data.hostName;
-
         const config = {
-            draggable: true,
-            position: game.fen(),
-            orientation: playerRole,
+            draggable: true, position: game.fen(), orientation: playerRole,
             pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
             onDragStart: (s, p) => {
                 if (game.game_over()) return false;
@@ -239,31 +215,11 @@
         if(data.guestName) document.getElementById('opponent-name').innerText = (playerRole === 'white') ? data.guestName : data.hostName;
     }
 
-    // --- DASHBOARD UI UTILS ---
-    window.toggleMenu = () => document.body.classList.toggle("menu-open");
     window.toggleProfile = () => {
         const dp = document.getElementById("profileDropdown");
         dp.style.display = dp.style.display === "flex" ? "none" : "flex";
     };
 
-    async function loadTabs() {
-        try {
-            const response = await fetch(`tabs.txt?v=${Date.now()}`);
-            const text = await response.text();
-            const tabs = text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
-            const sidebar = document.getElementById('dynamicSidebarNav');
-            sidebar.innerHTML = '';
-            tabs.forEach(tab => {
-                const navItem = document.createElement('div');
-                navItem.className = `nav-item ${tab.toLowerCase() === currentPage ? 'active' : ''}`;
-                navItem.textContent = tab;
-                navItem.onclick = () => location.href = `${tab.toLowerCase()}.html`;
-                sidebar.appendChild(navItem);
-            });
-        } catch (e) { console.error(e); }
-    }
-
-    // Stars
     for (let i = 0; i < 60; i++) {
         const star = document.createElement('div');
         star.className = 'star';
