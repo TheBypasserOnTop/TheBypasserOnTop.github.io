@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSMIC | Join Lobby</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --accent: #a855f7; --border: rgba(255, 255, 255, 0.1); }
+        
+        body {
+            margin: 0; padding: 0;
+            background: radial-gradient(circle at top, #1e1b4b, #020617);
+            color: #e6f0ff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
+
+        .input-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 15px; border-radius: 12px;
+            width: 100%; color: white; text-align: center;
+            outline: none; transition: 0.3s; font-weight: bold;
+        }
+        .input-box:focus { border-color: var(--accent); background: rgba(168, 85, 247, 0.1); }
+
+        .player-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px; border-radius: 10px;
+            font-size: 1rem; border: 1px solid rgba(255,255,255,0.05);
+            animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="stars-container" id="starField"></div>
+
+    <div id="step-pin" class="max-w-xs w-full p-8 text-center">
+        <h1 class="text-2xl font-black mb-6 tracking-widest uppercase">Enter PIN</h1>
+        <input type="number" id="pinInput" class="input-box mb-4" placeholder="000000">
+        <button onclick="checkPin()" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-purple-500 hover:text-white transition">Validate</button>
+    </div>
+
+    <div id="step-name" class="hidden max-w-xs w-full p-8 text-center">
+        <h1 class="text-2xl font-black mb-6 tracking-widest uppercase">Nickname</h1>
+        <input type="text" id="nameInput" class="input-box mb-4" placeholder="COSMIC_USER">
+        <button onclick="joinLobby()" class="w-full bg-purple-600 text-white py-4 rounded-xl font-black text-xs uppercase hover:bg-purple-500 transition">Join Session</button>
+    </div>
+
+    <div id="step-lobby" class="hidden max-w-2xl w-full p-8 text-center">
+        <h1 class="text-sm font-bold opacity-40 tracking-[0.5em] uppercase mb-2">Connected to</h1>
+        <div id="lobby-title" class="text-2xl font-black mb-8">------</div>
+        
+        <div class="h-px w-32 bg-purple-500 mx-auto mb-8"></div>
+        
+        <div id="player-list" class="flex flex-wrap justify-center gap-4">
+            </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        const config = { 
+            apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", 
+            authDomain: "login-34954.firebaseapp.com", 
+            projectId: "login-34954", 
+            storageBucket: "login-34954.firebasestorage.app", 
+            messagingSenderId: "422184727508", 
+            appId: "1:422184727508:web:cef39fc913d526febe9c41" 
+        };
+        
+        const app = initializeApp(config);
+        const db = getFirestore(app);
+
+        let currentPin = "";
+
+        // CHECK IF LOBBY EXISTS
+        window.checkPin = async () => {
+            const pin = document.getElementById('pinInput').value;
+            const lobbyRef = doc(db, "lobbies", pin);
+            const snap = await getDoc(lobbyRef);
+
+            if (snap.exists()) {
+                currentPin = pin;
+                document.getElementById('lobby-title').innerText = snap.data().quizTitle;
+                document.getElementById('step-pin').classList.add('hidden');
+                document.getElementById('step-name').classList.remove('hidden');
+            } else {
+                alert("Invalid Access Code");
+            }
+        };
+
+        // JOIN AND START LISTENING
+        window.joinLobby = async () => {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) return alert("Enter a name");
+
+            // Add player to the sub-collection
+            const playerID = Math.random().toString(36).substring(7);
+            await setDoc(doc(db, "lobbies", currentPin, "players", playerID), {
+                username: name,
+                joinedAt: Date.now()
+            });
+
+            document.getElementById('step-name').classList.add('hidden');
+            document.getElementById('step-lobby').classList.remove('hidden');
+
+            // Listen for all players in this lobby
+            listenForOthers(currentPin);
+        };
+
+        function listenForOthers(pin) {
+            const playersRef = collection(db, "lobbies", pin, "players");
+            onSnapshot(playersRef, (snapshot) => {
+                const list = document.getElementById('player-list');
+                list.innerHTML = "";
+                snapshot.forEach(doc => {
+                    const div = document.createElement('div');
+                    div.className = "player-tag";
+                    div.innerText = doc.data().username;
+                    list.appendChild(div);
+                });
+            });
+        }
+
+        // Stars Logic
+        const starField = document.getElementById('starField');
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
+            starField.appendChild(star);
+        }
+    </script>
+</body>
+</html>
