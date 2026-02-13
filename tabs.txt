@@ -1,5 +1,6 @@
 Dashboard
 Proxies
 Alt Generator
+Games
 Status
 Settings
