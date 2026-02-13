@@ -14,15 +14,14 @@
             color: #e6f0ff;
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            overflow-x: hidden;
-            display: none; /* Hidden until Auth confirms user */
+            display: none; /* Guarded by Auth */
         }
 
         .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
-        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; will-change: transform; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
 
-        /* Animations */
+        /* Transitions */
         .fade-in { animation: fadeIn 0.8s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .exit-anim { opacity: 0; transform: scale(0.95); transition: all 0.6s ease; pointer-events: none; }
@@ -32,55 +31,39 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
             border-radius: 24px;
-            transition: all 0.3s ease;
+            transition: 0.3s;
         }
-        .quiz-card:hover {
-            border-color: var(--accent);
-            background: rgba(168, 85, 247, 0.05);
-            transform: translateY(-5px);
-        }
+        .quiz-card:hover { border-color: var(--accent); background: rgba(168, 85, 247, 0.05); transform: translateY(-5px); }
 
         /* Lobby UI */
         .header-pin {
             background: rgba(255, 255, 255, 0.1);
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 2.5rem;
-            font-weight: 900;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            letter-spacing: 4px;
-        }
-
-        .sidebar-count {
-            position: absolute; right: 50px; top: 50%;
-            transform: translateY(-50%); text-align: center;
-        }
-
-        .count-num {
-            width: 70px; height: 70px;
-            background: white; color: #1e1b4b;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; font-weight: 900;
-            margin: 0 auto 10px auto;
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
-        }
-
-        .divider {
-            height: 3px; background: var(--accent);
-            width: 60px; margin: 20px auto; border-radius: 10px;
+            padding: 15px 45px; border-radius: 50px;
+            font-size: 3rem; font-weight: 900;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);
+            letter-spacing: 8px; box-shadow: 0 0 40px rgba(0,0,0,0.5);
         }
 
         .player-tag {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 12px 28px;
-            border-radius: 12px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(5px);
-            animation: fadeIn 0.5s ease forwards;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 24px; border-radius: 15px;
+            font-size: 1.2rem; font-weight: 600;
+            border: 1px solid var(--border);
+            display: flex; align-items: center; gap: 15px;
+            transition: 0.3s;
+        }
+        .player-tag:hover { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+
+        .kick-btn { color: #ef4444; font-size: 0.7rem; font-weight: 900; cursor: pointer; opacity: 0.4; transition: 0.2s; }
+        .player-tag:hover .kick-btn { opacity: 1; }
+
+        .sidebar-count {
+            position: absolute; right: 50px; top: 50%; transform: translateY(-50%);
+        }
+        .count-circle {
+            width: 80px; height: 80px; background: white; color: #1e1b4b;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem; font-weight: 900; box-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
         }
     </style>
 </head>
@@ -89,86 +72,67 @@
     <div class="stars-container" id="starField"></div>
 
     <div id="selection-view" class="max-w-6xl mx-auto px-6 py-20 fade-in">
-        <h1 class="text-4xl font-black text-center mb-4 tracking-tight uppercase">Host Lobby</h1>
-        <p class="text-center text-white/40 uppercase tracking-widest text-[10px] font-bold mb-16">Select terminal protocol to begin</p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="quiz-card p-8 flex flex-col">
-                <span class="text-[10px] font-bold text-purple-400 uppercase mb-2 tracking-widest">Trivia</span>
-                <h3 class="text-xl font-bold mb-4">Cosmic Knowledge</h3>
-                <ul class="text-white/30 text-xs space-y-2 mb-8 flex-1">
-                    <li>• Star-system identification</li>
-                    <li>• Light-speed variables</li>
-                </ul>
-                <button onclick="hostGame('Cosmic Knowledge')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-purple-500 hover:text-white transition">Host Game</button>
+        <h1 class="text-4xl font-black text-center mb-12 tracking-tight uppercase">Initialize Host Session</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="quiz-card p-8">
+                <h3 class="text-xl font-bold mb-4">Cosmic Trivia</h3>
+                <p class="text-white/30 text-xs mb-8">Test knowledge on stellar phenomena and orbital mechanics.</p>
+                <button onclick="hostGame('Cosmic Trivia')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-purple-500 hover:text-white transition">Select</button>
             </div>
-
-            <div class="quiz-card p-8 flex flex-col">
-                <span class="text-[10px] font-bold text-blue-400 uppercase mb-2 tracking-widest">Cyber</span>
+            <div class="quiz-card p-8 border-blue-500/30">
                 <h3 class="text-xl font-bold mb-4">Shield Protocols</h3>
-                <ul class="text-white/30 text-xs space-y-2 mb-8 flex-1">
-                    <li>• Encryption mastery</li>
-                    <li>• Network defense</li>
-                </ul>
-                <button onclick="hostGame('Shield Protocols')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-blue-500 hover:text-white transition">Host Game</button>
+                <p class="text-white/30 text-xs mb-8">Cyber-security modules and encryption logic gates.</p>
+                <button onclick="hostGame('Shield Protocols')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-blue-500 hover:text-white transition">Select</button>
             </div>
-
-            <div class="quiz-card p-8 flex flex-col">
-                <span class="text-[10px] font-bold text-emerald-400 uppercase mb-2 tracking-widest">Logic</span>
+            <div class="quiz-card p-8 border-emerald-500/30">
                 <h3 class="text-xl font-bold mb-4">Quantum Math</h3>
-                <ul class="text-white/30 text-xs space-y-2 mb-8 flex-1">
-                    <li>• Probability waves</li>
-                    <li>• Equation solving</li>
-                </ul>
-                <button onclick="hostGame('Quantum Math')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-emerald-500 hover:text-white transition">Host Game</button>
+                <p class="text-white/30 text-xs mb-8">Advanced variables and probability wave calculations.</p>
+                <button onclick="hostGame('Quantum Math')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-emerald-500 hover:text-white transition">Select</button>
             </div>
         </div>
     </div>
 
-    <div id="lobby-view" class="hidden h-screen w-screen flex flex-col items-center pt-20 relative">
+    <div id="lobby-view" class="hidden h-screen w-screen flex flex-col items-center pt-24 relative">
         <div class="header-pin" id="display-pin">000000</div>
         
-        <div class="sidebar-count">
-            <div class="count-num" id="player-count">0</div>
-            <p class="text-[10px] font-bold uppercase tracking-widest opacity-40">Connected</p>
+        <div class="sidebar-count text-center">
+            <div class="count-circle" id="player-count">0</div>
+            <p class="text-[10px] font-bold uppercase tracking-widest mt-4 opacity-40">Operators</p>
         </div>
 
-        <div class="mt-20 w-full max-w-2xl text-center">
-            <h2 class="text-xs font-bold uppercase tracking-[0.5em] opacity-60">Participants</h2>
-            <div class="divider"></div>
+        <div class="mt-24 w-full max-w-3xl text-center">
+            <p class="text-[10px] font-bold uppercase tracking-[0.5em] opacity-30 mb-8">Authorized Participants</p>
             <div id="player-list" class="flex flex-wrap justify-center gap-4 px-10">
-                <p id="waiting-msg" class="text-white/20 italic">Awaiting operator connection...</p>
+                <p id="waiting-msg" class="text-white/10 italic">Awaiting secure connections...</p>
             </div>
         </div>
 
-        <button onclick="startGame()" class="fixed bottom-10 px-16 py-5 bg-purple-600 rounded-2xl font-black uppercase tracking-widest hover:bg-purple-500 transition shadow-2xl">Start Session</button>
+        <button id="startBtn" onclick="initiateStart()" class="fixed bottom-12 px-20 py-6 bg-purple-600 rounded-2xl font-black uppercase tracking-[0.3em] hover:bg-purple-500 transition shadow-2xl">Start Session</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
         const config = { apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954", storageBucket: "login-34954.firebasestorage.app", messagingSenderId: "422184727508", appId: "1:422184727508:web:cef39fc913d526febe9c41" };
         const app = initializeApp(config);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- AUTH GUARD (DASHBOARD STYLE) ---
+        let activePin = null;
+
+        // AUTH GUARD
         onAuthStateChanged(auth, user => {
-            if (!user) {
-                location.replace("index.html");
-            } else {
-                document.body.style.display = "block";
-                initStars();
-            }
+            if (!user) { location.replace("index.html"); } 
+            else { document.body.style.display = "block"; initStars(); }
         });
 
-        // --- HOSTING LOGIC ---
+        // HOST LOGIC
         window.hostGame = async (title) => {
-            const pin = Math.floor(100000 + Math.random() * 900000).toString();
+            activePin = Math.floor(100000 + Math.random() * 900000).toString();
             try {
-                await setDoc(doc(db, "lobbies", pin), {
+                await setDoc(doc(db, "lobbies", activePin), {
                     quizTitle: title,
                     status: "waiting",
                     hostId: auth.currentUser.uid,
@@ -180,49 +144,75 @@
                     document.getElementById('selection-view').classList.add('hidden');
                     document.getElementById('lobby-view').classList.remove('hidden');
                     document.getElementById('lobby-view').classList.add('fade-in');
-                    document.getElementById('display-pin').innerText = pin;
-                    listenForPlayers(pin);
+                    document.getElementById('display-pin').innerText = activePin;
+                    listenForPlayers(activePin);
                 }, 600);
-            } catch (e) { console.error("Lobby creation failed", e); }
+            } catch (e) { alert("Lobby creation failed. Check Console."); }
         };
 
         function listenForPlayers(pin) {
-            const playersRef = collection(db, "lobbies", pin, "players");
-            onSnapshot(playersRef, (snap) => {
+            onSnapshot(collection(db, "lobbies", pin, "players"), (snap) => {
                 const list = document.getElementById('player-list');
                 const count = document.getElementById('player-count');
                 list.innerHTML = "";
                 count.innerText = snap.size;
 
                 if (snap.empty) {
-                    list.innerHTML = '<p class="text-white/20 italic">Awaiting operator connection...</p>';
+                    list.innerHTML = '<p class="text-white/10 italic">Awaiting secure connections...</p>';
                 } else {
-                    snap.forEach(doc => {
+                    snap.forEach(playerDoc => {
                         const tag = document.createElement('div');
                         tag.className = "player-tag";
-                        tag.innerText = doc.data().username;
+                        tag.innerHTML = `
+                            <span>${playerDoc.data().username}</span>
+                            <span class="kick-btn" onclick="kickPlayer('${playerDoc.id}')">KICK</span>
+                        `;
                         list.appendChild(tag);
                     });
                 }
             });
         }
 
-        window.startGame = () => { alert("Initializing sequence..."); };
-
-        // --- STARS ANIMATION ---
-        function initStars() {
-            const starField = document.getElementById('starField');
-            const frag = document.createDocumentFragment();
-            for (let i = 0; i < 80; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
-                star.style.left = `${Math.random() * 100}%`;
-                star.style.top = `${Math.random() * 100}%`;
-                star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
-                frag.appendChild(star);
+        window.kickPlayer = async (playerId) => {
+            if(confirm("Kick this operator?")) {
+                await deleteDoc(doc(db, "lobbies", activePin, "players", playerId));
             }
-            starField.appendChild(frag);
+        };
+
+        window.initiateStart = async () => {
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = true;
+            startBtn.innerText = "Initializing...";
+            
+            // Set status to countdown - Players' screens will respond to this
+            await updateDoc(doc(db, "lobbies", activePin), {
+                status: "countdown",
+                startTime: Date.now() + 5000 // 5 second lead
+            });
+
+            // Host side countdown UI
+            let seconds = 5;
+            const timer = setInterval(() => {
+                seconds--;
+                if(seconds <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('lobby-view').innerHTML = `<h1 class="text-8xl font-black animate-pulse">LIVE</h1>`;
+                } else {
+                    startBtn.innerText = `STARTING IN ${seconds}`;
+                }
+            }, 1000);
+        };
+
+        function initStars() {
+            const field = document.getElementById('starField');
+            for (let i = 0; i < 80; i++) {
+                const s = document.createElement('div');
+                s.className = 'star';
+                s.style.width = s.style.height = `${Math.random() * 2 + 1}px`;
+                s.style.left = `${Math.random() * 100}%`; s.style.top = `${Math.random() * 100}%`;
+                s.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
+                field.appendChild(s);
+            }
         }
     </script>
 </body>
