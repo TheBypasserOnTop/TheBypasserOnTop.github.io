@@ -3,205 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COSMIC | Host Lobby</title>
+    <title>COSMIC | Host Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root { --accent: #a855f7; --border: rgba(255, 255, 255, 0.1); }
-        
         body {
             margin: 0; padding: 0;
             background: radial-gradient(circle at top, #1e1b4b, #020617);
-            color: #e6f0ff;
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: none; /* Guarded by Auth */
+            color: #e6f0ff; font-family: 'Inter', sans-serif;
+            min-height: 100vh; display: none;
         }
-
         .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
-
-        /* Transitions */
-        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .exit-anim { opacity: 0; transform: scale(0.95); transition: all 0.6s ease; pointer-events: none; }
-
-        /* Quiz Cards */
-        .quiz-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            transition: 0.3s;
-        }
-        .quiz-card:hover { border-color: var(--accent); background: rgba(168, 85, 247, 0.05); transform: translateY(-5px); }
-
-        /* Lobby UI */
-        .header-pin {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px 45px; border-radius: 50px;
-            font-size: 3rem; font-weight: 900;
-            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);
-            letter-spacing: 8px; box-shadow: 0 0 40px rgba(0,0,0,0.5);
-        }
-
-        .player-tag {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px 24px; border-radius: 15px;
-            font-size: 1.2rem; font-weight: 600;
-            border: 1px solid var(--border);
-            display: flex; align-items: center; gap: 15px;
-            transition: 0.3s;
-        }
-        .player-tag:hover { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
-
-        .kick-btn { color: #ef4444; font-size: 0.7rem; font-weight: 900; cursor: pointer; opacity: 0.4; transition: 0.2s; }
-        .player-tag:hover .kick-btn { opacity: 1; }
-
-        .sidebar-count {
-            position: absolute; right: 50px; top: 50%; transform: translateY(-50%);
-        }
-        .count-circle {
-            width: 80px; height: 80px; background: white; color: #1e1b4b;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 2.2rem; font-weight: 900; box-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
-        }
+        .quiz-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 24px; transition: 0.3s; padding: 2rem; }
+        .quiz-card:hover { border-color: var(--accent); background: rgba(168, 85, 247, 0.05); }
+        .header-pin { background: rgba(255, 255, 255, 0.1); padding: 15px 45px; border-radius: 50px; font-size: 3rem; font-weight: 900; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); letter-spacing: 8px; }
+        .player-tag { background: rgba(255, 255, 255, 0.05); padding: 10px 20px; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+        .kick-btn { color: #ef4444; font-size: 0.7rem; font-weight: 900; cursor: pointer; opacity: 0.5; }
+        .ans-bar { height: 10px; background: var(--accent); border-radius: 5px; transition: width 0.5s ease; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <div class="stars-container" id="starField"></div>
 
-    <div id="selection-view" class="max-w-6xl mx-auto px-6 py-20 fade-in">
-        <h1 class="text-4xl font-black text-center mb-12 tracking-tight uppercase">Initialize Host Session</h1>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="quiz-card p-8">
-                <h3 class="text-xl font-bold mb-4">Cosmic Trivia</h3>
-                <p class="text-white/30 text-xs mb-8">Test knowledge on stellar phenomena and orbital mechanics.</p>
-                <button onclick="hostGame('Cosmic Trivia')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-purple-500 hover:text-white transition">Select</button>
-            </div>
-            <div class="quiz-card p-8 border-blue-500/30">
-                <h3 class="text-xl font-bold mb-4">Shield Protocols</h3>
-                <p class="text-white/30 text-xs mb-8">Cyber-security modules and encryption logic gates.</p>
-                <button onclick="hostGame('Shield Protocols')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-blue-500 hover:text-white transition">Select</button>
-            </div>
-            <div class="quiz-card p-8 border-emerald-500/30">
-                <h3 class="text-xl font-bold mb-4">Quantum Math</h3>
-                <p class="text-white/30 text-xs mb-8">Advanced variables and probability wave calculations.</p>
-                <button onclick="hostGame('Quantum Math')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-emerald-500 hover:text-white transition">Select</button>
-            </div>
-        </div>
+    <div id="selection-view" class="max-w-6xl mx-auto px-6 py-20">
+        <h1 class="text-4xl font-black text-center mb-12 uppercase tracking-tighter">Initialize Quiz Module</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="quiz-options"></div>
     </div>
 
-    <div id="lobby-view" class="hidden h-screen w-screen flex flex-col items-center pt-24 relative">
+    <div id="lobby-view" class="hidden h-screen w-screen flex flex-col items-center pt-20 relative">
         <div class="header-pin" id="display-pin">000000</div>
+        <div class="mt-20 w-full max-w-3xl text-center">
+            <div id="player-list" class="flex flex-wrap justify-center gap-4 px-10"></div>
+        </div>
+        <button onclick="initiateStart()" class="fixed bottom-12 px-20 py-6 bg-purple-600 rounded-2xl font-black uppercase tracking-widest hover:bg-purple-500 transition">Start Session</button>
+    </div>
+
+    <div id="game-view" class="hidden h-screen w-screen flex flex-col items-center justify-center p-10">
+        <div id="timer-display" class="text-6xl font-black mb-8">10</div>
+        <h2 id="question-text" class="text-3xl font-bold mb-12 text-center">Question?</h2>
         
-        <div class="sidebar-count text-center">
-            <div class="count-circle" id="player-count">0</div>
-            <p class="text-[10px] font-bold uppercase tracking-widest mt-4 opacity-40">Operators</p>
-        </div>
-
-        <div class="mt-24 w-full max-w-3xl text-center">
-            <p class="text-[10px] font-bold uppercase tracking-[0.5em] opacity-30 mb-8">Authorized Participants</p>
-            <div id="player-list" class="flex flex-wrap justify-center gap-4 px-10">
-                <p id="waiting-msg" class="text-white/10 italic">Awaiting secure connections...</p>
+        <div id="answer-stats" class="w-full max-w-xl space-y-6 mb-12">
             </div>
-        </div>
 
-        <button id="startBtn" onclick="initiateStart()" class="fixed bottom-12 px-20 py-6 bg-purple-600 rounded-2xl font-black uppercase tracking-[0.3em] hover:bg-purple-500 transition shadow-2xl">Start Session</button>
+        <button id="next-btn" onclick="nextQuestion()" class="hidden px-12 py-4 bg-white text-black rounded-xl font-black uppercase hover:bg-purple-500 hover:text-white transition">Next Question</button>
+    </div>
+
+    <div id="leaderboard-view" class="hidden h-screen w-screen flex flex-col items-center justify-center p-10">
+        <h1 class="text-4xl font-black mb-10 uppercase tracking-widest">Final Leaderboard</h1>
+        <div id="leaderboard-list" class="w-full max-w-md space-y-4"></div>
+        <button onclick="location.reload()" class="mt-10 text-white/40 uppercase font-bold text-xs tracking-widest">End Session</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
         const config = { apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954", storageBucket: "login-34954.firebasestorage.app", messagingSenderId: "422184727508", appId: "1:422184727508:web:cef39fc913d526febe9c41" };
         const app = initializeApp(config);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let activePin = null;
-
-        // AUTH GUARD
-        onAuthStateChanged(auth, user => {
-            if (!user) { location.replace("index.html"); } 
-            else { document.body.style.display = "block"; initStars(); }
-        });
-
-        // HOST LOGIC
-        window.hostGame = async (title) => {
-            activePin = Math.floor(100000 + Math.random() * 900000).toString();
-            try {
-                await setDoc(doc(db, "lobbies", activePin), {
-                    quizTitle: title,
-                    status: "waiting",
-                    hostId: auth.currentUser.uid,
-                    createdAt: Date.now()
-                });
-
-                document.getElementById('selection-view').classList.add('exit-anim');
-                setTimeout(() => {
-                    document.getElementById('selection-view').classList.add('hidden');
-                    document.getElementById('lobby-view').classList.remove('hidden');
-                    document.getElementById('lobby-view').classList.add('fade-in');
-                    document.getElementById('display-pin').innerText = activePin;
-                    listenForPlayers(activePin);
-                }, 600);
-            } catch (e) { alert("Lobby creation failed. Check Console."); }
+        // --- PRE-MADE TEMPLATES ---
+        const QUIZZES = {
+            "Cosmic Trivia": [
+                { q: "Which planet is known as the Red Planet?", a: ["Venus", "Mars", "Jupiter", "Saturn"], correct: 1 },
+                { q: "What is the speed of light approx?", a: ["300k km/s", "150k km/s", "1m km/s", "500k km/s"], correct: 0 }
+            ],
+            "Shield Protocols": [
+                { q: "What does VPN stand for?", a: ["Virtual Private Net", "Very Personal Node", "Virtual Proxy Network", "Valid Port Name"], correct: 0 },
+                { q: "Which is a hashing algorithm?", a: ["AES", "RSA", "SHA-256", "HTTP"], correct: 2 }
+            ],
+            "Quantum Math": [
+                { q: "Solve: 12 * 12", a: ["122", "144", "164", "142"], correct: 1 },
+                { q: "Square root of 81?", a: ["7", "8", "9", "10"], correct: 2 }
+            ]
         };
 
-        function listenForPlayers(pin) {
-            onSnapshot(collection(db, "lobbies", pin, "players"), (snap) => {
-                const list = document.getElementById('player-list');
-                const count = document.getElementById('player-count');
-                list.innerHTML = "";
-                count.innerText = snap.size;
+        let activePin = null;
+        let selectedQuiz = [];
+        let currentQIndex = 0;
+        let timerInterval;
+        let playerCount = 0;
 
-                if (snap.empty) {
-                    list.innerHTML = '<p class="text-white/10 italic">Awaiting secure connections...</p>';
-                } else {
-                    snap.forEach(playerDoc => {
-                        const tag = document.createElement('div');
-                        tag.className = "player-tag";
-                        tag.innerHTML = `
-                            <span>${playerDoc.data().username}</span>
-                            <span class="kick-btn" onclick="kickPlayer('${playerDoc.id}')">KICK</span>
-                        `;
-                        list.appendChild(tag);
-                    });
+        // --- PREVENT ACCIDENTAL REFRESH ---
+        window.onbeforeunload = () => "Are you sure you want to leave? This will end the game.";
+
+        // --- AUTH & INIT ---
+        onAuthStateChanged(auth, user => {
+            if (!user) location.replace("index.html");
+            else { document.body.style.display = "block"; renderSelection(); initStars(); }
+        });
+
+        function renderSelection() {
+            const container = document.getElementById('quiz-options');
+            Object.keys(QUIZZES).forEach(key => {
+                const card = document.createElement('div');
+                card.className = "quiz-card";
+                card.innerHTML = `<h3 class="text-xl font-bold mb-4">${key}</h3><button onclick="hostGame('${key}')" class="w-full bg-white text-black py-3 rounded-xl font-black text-xs uppercase hover:bg-purple-500 hover:text-white transition">Host</button>`;
+                container.appendChild(card);
+            });
+        }
+
+        window.hostGame = async (name) => {
+            selectedQuiz = QUIZZES[name];
+            activePin = Math.floor(100000 + Math.random() * 900000).toString();
+            await setDoc(doc(db, "lobbies", activePin), { status: "waiting", quizName: name, currentQ: -1, totalQs: selectedQuiz.length });
+            
+            document.getElementById('selection-view').classList.add('hidden');
+            document.getElementById('lobby-view').classList.remove('hidden');
+            document.getElementById('display-pin').innerText = activePin;
+            listenForPlayers();
+        };
+
+        function listenForPlayers() {
+            onSnapshot(collection(db, "lobbies", activePin, "players"), (snap) => {
+                const list = document.getElementById('player-list');
+                playerCount = snap.size;
+                list.innerHTML = "";
+                snap.forEach(pDoc => {
+                    const div = document.createElement('div');
+                    div.className = "player-tag";
+                    div.innerHTML = `<span>${pDoc.data().username}</span><span class="kick-btn" onclick="kick('${pDoc.id}')">✕</span>`;
+                    list.appendChild(div);
+                });
+            });
+        }
+
+        window.kick = async (id) => await deleteDoc(doc(db, "lobbies", activePin, "players", id));
+
+        window.initiateStart = async () => {
+            await updateDoc(doc(db, "lobbies", activePin), { status: "countdown" });
+            setTimeout(loadQuestion, 5000);
+        };
+
+        async function loadQuestion() {
+            if (currentQIndex >= selectedQuiz.length) return showLeaderboard();
+
+            document.getElementById('lobby-view').classList.add('hidden');
+            document.getElementById('game-view').classList.remove('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            
+            const qData = selectedQuiz[currentQIndex];
+            document.getElementById('question-text').innerText = qData.q;
+            
+            // Reset answer counts for the new question
+            await updateDoc(doc(db, "lobbies", activePin), { 
+                currentQ: currentQIndex, 
+                status: "live",
+                answersReceived: 0 
+            });
+
+            startTimer(10);
+            monitorAnswers();
+        }
+
+        function startTimer(seconds) {
+            let timeLeft = seconds;
+            const display = document.getElementById('timer-display');
+            display.innerText = timeLeft;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                display.innerText = timeLeft;
+                if (timeLeft <= 0) endQuestion();
+            }, 1000);
+        }
+
+        function monitorAnswers() {
+            const unsub = onSnapshot(doc(db, "lobbies", activePin), (snap) => {
+                const data = snap.data();
+                if (data.answersReceived >= playerCount && playerCount > 0) {
+                    unsub();
+                    endQuestion();
                 }
             });
         }
 
-        window.kickPlayer = async (playerId) => {
-            if(confirm("Kick this operator?")) {
-                await deleteDoc(doc(db, "lobbies", activePin, "players", playerId));
-            }
-        };
-
-        window.initiateStart = async () => {
-            const startBtn = document.getElementById('startBtn');
-            startBtn.disabled = true;
-            startBtn.innerText = "Initializing...";
+        async function endQuestion() {
+            clearInterval(timerInterval);
+            await updateDoc(doc(db, "lobbies", activePin), { status: "review" });
             
-            // Set status to countdown - Players' screens will respond to this
-            await updateDoc(doc(db, "lobbies", activePin), {
-                status: "countdown",
-                startTime: Date.now() + 5000 // 5 second lead
-            });
+            // Show stats on host screen
+            const qData = selectedQuiz[currentQIndex];
+            const statsDiv = document.getElementById('answer-stats');
+            statsDiv.innerHTML = `<p class="text-center font-bold text-green-400 mb-4 uppercase">Correct Answer: ${qData.a[qData.correct]}</p>`;
+            
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
 
-            // Host side countdown UI
-            let seconds = 5;
-            const timer = setInterval(() => {
-                seconds--;
-                if(seconds <= 0) {
-                    clearInterval(timer);
-                    document.getElementById('lobby-view').innerHTML = `<h1 class="text-8xl font-black animate-pulse">LIVE</h1>`;
-                } else {
-                    startBtn.innerText = `STARTING IN ${seconds}`;
-                }
-            }, 1000);
+        window.nextQuestion = () => {
+            currentQIndex++;
+            loadQuestion();
         };
+
+        async function showLeaderboard() {
+            document.getElementById('game-view').classList.add('hidden');
+            document.getElementById('leaderboard-view').classList.remove('hidden');
+            
+            const snap = await getDocs(collection(db, "lobbies", activePin, "players"));
+            let players = [];
+            snap.forEach(d => players.push(d.data()));
+            players.sort((a, b) => b.score - a.score);
+
+            const list = document.getElementById('leaderboard-list');
+            players.forEach((p, i) => {
+                list.innerHTML += `<div class="p-4 bg-white/5 rounded-xl border border-white/10 flex justify-between">
+                    <span>${i+1}. ${p.username}</span><span class="font-black text-purple-400">${p.score || 0} pts</span>
+                </div>`;
+            });
+            await updateDoc(doc(db, "lobbies", activePin), { status: "finished" });
+        }
 
         function initStars() {
             const field = document.getElementById('starField');
