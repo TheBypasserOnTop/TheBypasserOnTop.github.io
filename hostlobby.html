@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSMIC | Host Lobby</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --accent: #a855f7; --border: rgba(255, 255, 255, 0.1); }
+        
+        body {
+            margin: 0; padding: 0;
+            background: radial-gradient(circle at top, #1e1b4b, #020617);
+            color: #e6f0ff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: none; /* Hidden until Auth confirms user */
+        }
+
+        .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; will-change: transform; }
+        @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .exit-anim { opacity: 0; transform: scale(0.95); transition: all 0.6s ease; pointer-events: none; }
+
+        /* Quiz Cards */
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+        }
+        .quiz-card:hover {
+            border-color: var(--accent);
+            background: rgba(168, 85, 247, 0.05);
+            transform: translateY(-5px);
+        }
+
+        /* Lobby UI */
+        .header-pin {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 2.5rem;
+            font-weight: 900;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            letter-spacing: 4px;
+        }
+
+        .sidebar-count {
+            position: absolute; right: 50px; top: 50%;
+            transform: translateY(-50%); text-align: center;
+        }
+
+        .count-num {
+            width: 70px; height: 70px;
+            background: white; color: #1e1b4b;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; font-weight: 900;
+            margin: 0 auto 10px auto;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .divider {
+            height: 3px; background: var(--accent);
+            width: 60px; margin: 20px auto; border-radius: 10px;
+        }
+
+        .player-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stars-container" id="starField"></div>
+
+    <div id="selection-view" class="max-w-6xl mx-auto px-6 py-20 fade-in">
+        <h1 class="text-4xl font-black text-center mb-4 tracking-tight uppercase">Host Lobby</h1>
+        <p class="text-center text-white/40 uppercase tracking-widest text-[10px] font-bold mb-16">Select terminal protocol to begin</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="quiz-card p-8 flex flex-col">
+                <span class="text-[10px] font-bold text-purple-400 uppercase mb-2 tracking-widest">Trivia</span>
+                <h3 class="text-xl font-bold mb-4">Cosmic Knowledge</h3>
+                <ul class="text-white/30 text-xs space-y-2 mb-8 flex-1">
+                    <li>• Star-system identification</li>
+                    <li>• Light-speed variables</li>
+                </ul>
+                <button onclick="hostGame('Cosmic Knowledge')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-purple-500 hover:text-white transition">Host Game</button>
+            </div>
+
+            <div class="quiz-card p-8 flex flex-col">
+                <span class="text-[10px] font-bold text-blue-400 uppercase mb-2 tracking-widest">Cyber</span>
+                <h3 class="text-xl font-bold mb-4">Shield Protocols</h3>
+                <ul class="text-white/30 text-xs space-y-2 mb-8 flex-1">
+                    <li>• Encryption mastery</li>
+                    <li>• Network defense</li>
+                </ul>
+                <button onclick="hostGame('Shield Protocols')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-blue-500 hover:text-white transition">Host Game</button>
+            </div>
+
+            <div class="quiz-card p-8 flex flex-col">
+                <span class="text-[10px] font-bold text-emerald-400 uppercase mb-2 tracking-widest">Logic</span>
+                <h3 class="text-xl font-bold mb-4">Quantum Math</h3>
+                <ul class="text-white/30 text-xs space-y-2 mb-8 flex-1">
+                    <li>• Probability waves</li>
+                    <li>• Equation solving</li>
+                </ul>
+                <button onclick="hostGame('Quantum Math')" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-emerald-500 hover:text-white transition">Host Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lobby-view" class="hidden h-screen w-screen flex flex-col items-center pt-20 relative">
+        <div class="header-pin" id="display-pin">000000</div>
+        
+        <div class="sidebar-count">
+            <div class="count-num" id="player-count">0</div>
+            <p class="text-[10px] font-bold uppercase tracking-widest opacity-40">Connected</p>
+        </div>
+
+        <div class="mt-20 w-full max-w-2xl text-center">
+            <h2 class="text-xs font-bold uppercase tracking-[0.5em] opacity-60">Participants</h2>
+            <div class="divider"></div>
+            <div id="player-list" class="flex flex-wrap justify-center gap-4 px-10">
+                <p id="waiting-msg" class="text-white/20 italic">Awaiting operator connection...</p>
+            </div>
+        </div>
+
+        <button onclick="startGame()" class="fixed bottom-10 px-16 py-5 bg-purple-600 rounded-2xl font-black uppercase tracking-widest hover:bg-purple-500 transition shadow-2xl">Start Session</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        const config = { apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954", storageBucket: "login-34954.firebasestorage.app", messagingSenderId: "422184727508", appId: "1:422184727508:web:cef39fc913d526febe9c41" };
+        const app = initializeApp(config);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- AUTH GUARD (DASHBOARD STYLE) ---
+        onAuthStateChanged(auth, user => {
+            if (!user) {
+                location.replace("index.html");
+            } else {
+                document.body.style.display = "block";
+                initStars();
+            }
+        });
+
+        // --- HOSTING LOGIC ---
+        window.hostGame = async (title) => {
+            const pin = Math.floor(100000 + Math.random() * 900000).toString();
+            try {
+                await setDoc(doc(db, "lobbies", pin), {
+                    quizTitle: title,
+                    status: "waiting",
+                    hostId: auth.currentUser.uid,
+                    createdAt: Date.now()
+                });
+
+                document.getElementById('selection-view').classList.add('exit-anim');
+                setTimeout(() => {
+                    document.getElementById('selection-view').classList.add('hidden');
+                    document.getElementById('lobby-view').classList.remove('hidden');
+                    document.getElementById('lobby-view').classList.add('fade-in');
+                    document.getElementById('display-pin').innerText = pin;
+                    listenForPlayers(pin);
+                }, 600);
+            } catch (e) { console.error("Lobby creation failed", e); }
+        };
+
+        function listenForPlayers(pin) {
+            const playersRef = collection(db, "lobbies", pin, "players");
+            onSnapshot(playersRef, (snap) => {
+                const list = document.getElementById('player-list');
+                const count = document.getElementById('player-count');
+                list.innerHTML = "";
+                count.innerText = snap.size;
+
+                if (snap.empty) {
+                    list.innerHTML = '<p class="text-white/20 italic">Awaiting operator connection...</p>';
+                } else {
+                    snap.forEach(doc => {
+                        const tag = document.createElement('div');
+                        tag.className = "player-tag";
+                        tag.innerText = doc.data().username;
+                        list.appendChild(tag);
+                    });
+                }
+            });
+        }
+
+        window.startGame = () => { alert("Initializing sequence..."); };
+
+        // --- STARS ANIMATION ---
+        function initStars() {
+            const starField = document.getElementById('starField');
+            const frag = document.createDocumentFragment();
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
+                frag.appendChild(star);
+            }
+            starField.appendChild(frag);
+        }
+    </script>
+</body>
+</html>
