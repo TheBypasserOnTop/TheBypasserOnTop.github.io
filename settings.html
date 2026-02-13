@@ -6,27 +6,24 @@
     <title>COSMIC | Settings</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --accent: #a855f7; --glass: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.1); }
+        :root { --accent: #a855f7; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
         body { margin: 0; padding: 0; background: radial-gradient(circle at top, #1e1b4b, #020617); color: #e6f0ff; font-family: 'Inter', sans-serif; min-height: 100vh; transition: opacity 0.5s ease; }
         body.leaving { opacity: 0; pointer-events: none; }
         .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
         
-        #sidePanel { position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: rgba(5, 5, 15, 0.95); backdrop-filter: blur(45px); border-right: 1px solid var(--border); z-index: 200; transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 2.5rem; }
+        #sidePanel { position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: rgba(5, 5, 15, 0.98); backdrop-filter: blur(40px); border-right: 1px solid var(--border); z-index: 200; transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 2.5rem; }
         body.menu-open #sidePanel { left: 0; }
         
+        #profileDropdown { position: absolute; top: 70px; right: 40px; width: 220px; display: none; flex-direction: column; z-index: 100; background: rgba(10, 10, 25, 0.98); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 20px; padding: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         .nav-item { padding: 1rem; border-radius: 12px; margin-bottom: 0.5rem; transition: 0.3s; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 0.9rem; font-weight: 600; text-transform: capitalize; }
-        .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
-        .nav-item.active { color: white; background: var(--accent); }
+        .nav-item:hover, .nav-item.active { color: white; background: rgba(255,255,255,0.05); }
 
-        #profileDropdown { position: absolute; top: 70px; right: 40px; width: 220px; display: none; flex-direction: column; z-index: 100; background: rgba(10, 10, 25, 0.95); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 20px; padding: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        
         .glass-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; }
-        .overlay-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: none; z-index: 300; align-items: center; justify-content: center; }
+        .overlay-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); display: none; z-index: 300; align-items: center; justify-content: center; }
         
-        input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; transition: 0.3s; padding: 1rem; border-radius: 0.75rem; width: 100%; }
-        input:focus { outline: none; border-color: var(--accent); background: rgba(255,255,255,0.08); }
+        input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 1rem; border-radius: 12px; width: 100%; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
@@ -35,32 +32,25 @@
 
 <nav class="fixed top-0 w-full px-10 py-8 flex justify-between items-center z-50">
     <button onclick="toggleMenu()" class="flex flex-col gap-1.5 opacity-60 hover:opacity-100 transition">
-        <div class="w-6 h-0.5 bg-white"></div>
-        <div class="w-6 h-0.5 bg-white"></div>
-        <div class="w-6 h-0.5 bg-white"></div>
+        <div class="w-6 h-0.5 bg-white"></div><div class="w-6 h-0.5 bg-white"></div><div class="w-6 h-0.5 bg-white"></div>
     </button>
     
     <div class="relative">
         <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center overflow-hidden text-sm">?</div>
-        
         <div id="profileDropdown">
-            <div class="px-3 pb-3 mb-3 border-b border-white/5">
-                <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">Operator</p>
-                <p class="text-[8px] text-white/20 font-bold tracking-widest uppercase">Verified</p>
-            </div>
+            <p id="profileUserText" class="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3 px-3">Operator</p>
             <div id="dynamicProfileLinks"></div>
-            <button onclick="confirmLogout()" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold transition">Logout</button>
+            <button onclick="signOutUser()" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg text-xs font-bold transition">Logout</button>
         </div>
     </div>
 </nav>
 
-<aside id="sidePanel" class="flex flex-col">
-    <div class="mb-8 relative">
+<aside id="sidePanel">
+    <div class="flex justify-between items-center mb-10">
         <h1 class="text-xl font-black text-purple-400 tracking-widest">COSMIC</h1>
-        <div class="h-px w-full bg-white/5 mt-4"></div>
-        <button onclick="toggleMenu()" class="absolute -top-2 -right-4 text-white/20 hover:text-white p-2 text-xl">✕</button>
+        <button onclick="toggleMenu()" class="text-white/20 hover:text-white text-xl">✕</button>
     </div>
-    <nav class="flex-1" id="dynamicSidebarNav"></nav>
+    <nav id="dynamicSidebarNav"></nav>
 </aside>
 
 <main class="max-w-2xl mx-auto px-6 pt-32 pb-20">
@@ -70,7 +60,7 @@
         <div class="flex items-center gap-6 mb-12 p-6 rounded-3xl bg-white/[0.02] border border-white/5">
             <div id="pfpPreview" class="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black border-2 border-purple-500/30 bg-cover bg-center overflow-hidden"></div>
             <div>
-                <p class="text-[10px] font-black uppercase tracking-widest text-white/30 mb-3">Identity Avatar</p>
+                <p class="text-[10px] font-black uppercase tracking-widest text-white/30 mb-3">Identity Image</p>
                 <button onclick="document.getElementById('pfpFile').click()" class="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold uppercase transition">Upload</button>
                 <input type="file" id="pfpFile" accept="image/*" class="hidden">
             </div>
@@ -79,33 +69,62 @@
         <div class="space-y-8">
             <div class="flex justify-between items-center border-b border-white/5 pb-6">
                 <div><p class="text-[10px] font-black uppercase tracking-widest text-white/30 mb-1">Username</p><p id="usernameDisplay" class="font-bold text-lg">---</p></div>
+                <button onclick="openModal('usernameOverlay')" class="p-3 bg-purple-600/10 text-purple-400 rounded-xl hover:bg-purple-600/20">✎</button>
+            </div>
+
+            <div class="flex justify-between items-center border-b border-white/5 pb-6">
+                <div><p class="text-[10px] font-black uppercase tracking-widest text-white/30 mb-1">Security Key</p><p class="font-bold text-lg">••••••••</p></div>
+                <button onclick="openModal('passwordOverlay')" class="p-3 bg-white/5 text-white/40 rounded-xl hover:bg-white/10">🔒</button>
             </div>
 
             <div id="adminToggleContainer">
-                <button onclick="requestAdminAccess()" class="text-[10px] font-black text-purple-400/30 hover:text-purple-400 transition uppercase tracking-widest">Enable Admin Mode</button>
+                <button onclick="requestAdminAccess()" class="text-[10px] font-black text-purple-400/20 hover:text-purple-400 transition uppercase tracking-widest">Enable Admin Mode</button>
             </div>
 
             <div id="adminSection" class="hidden pt-6 border-t border-red-500/20">
-                <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-4 italic">Owner Access Active</p>
+                <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-4">Master Control</p>
                 <button onclick="openAdminPortal()" class="w-full py-4 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 rounded-xl text-xs font-black uppercase tracking-widest transition">
-                    View All Registered Accounts
+                    View Registered Accounts
                 </button>
             </div>
         </div>
     </div>
 </main>
 
+<div id="usernameOverlay" class="overlay-bg">
+    <div class="bg-[#050510] border border-white/10 p-8 max-w-sm w-full mx-4 rounded-3xl">
+        <h3 class="font-bold mb-6 uppercase tracking-widest text-xs">Update Username</h3>
+        <input id="newUsername" placeholder="New Username">
+        <div class="flex gap-2">
+            <button onclick="closeModal('usernameOverlay')" class="flex-1 py-4 bg-white/5 rounded-xl text-xs font-bold">Cancel</button>
+            <button id="saveUsernameBtn" class="flex-1 py-4 bg-purple-600 rounded-xl text-xs font-bold">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="passwordOverlay" class="overlay-bg">
+    <div class="bg-[#050510] border border-white/10 p-8 max-w-sm w-full mx-4 rounded-3xl">
+        <h3 class="font-bold mb-6 uppercase tracking-widest text-xs">Change Password</h3>
+        <input type="password" id="currentPass" placeholder="Current Password">
+        <input type="password" id="newPass" placeholder="New Password">
+        <div class="flex gap-2">
+            <button onclick="closeModal('passwordOverlay')" class="flex-1 py-4 bg-white/5 rounded-xl text-xs font-bold">Cancel</button>
+            <button id="savePasswordBtn" class="flex-1 py-4 bg-purple-600 rounded-xl text-xs font-bold">Update</button>
+        </div>
+    </div>
+</div>
+
 <div id="adminPortal" class="overlay-bg">
     <div class="bg-[#050510] border border-white/10 p-8 max-w-2xl w-full mx-4 rounded-3xl relative">
-        <button onclick="closeModal('adminPortal')" class="absolute top-6 right-6 text-white/40 hover:text-white">✕</button>
-        <h3 class="font-black mb-6 uppercase tracking-widest text-sm text-red-500 italic">User Directory Access</h3>
+        <button onclick="closeModal('adminPortal')" class="absolute top-6 right-6 text-white/40">✕</button>
+        <h3 class="font-black mb-6 uppercase tracking-widest text-sm text-red-500">Database Viewer</h3>
         <div id="accountsList" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
     const config = { apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954", storageBucket: "login-34954.firebasestorage.app", messagingSenderId: "422184727508", appId: "1:422184727508:web:cef39fc913d526febe9c41" };
@@ -113,58 +132,55 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const currentPage = "settings";
-
+    // Initial Load
     onAuthStateChanged(auth, async user => {
-        if (!user) { location.replace("index.html"); return; }
+        if (!user) { window.location.href = "index.html"; return; }
+        loadIdentity(user);
+        checkAdminStatus(user);
         loadTabs();
+    });
 
-        // Admin Persistence Check
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists() && userDoc.data().role === "admin") {
-            document.getElementById('adminSection').classList.remove('hidden');
-            document.getElementById('adminToggleContainer').classList.add('hidden');
-        }
-
-        // Username & PFP Logic
+    async function loadIdentity(user) {
+        // Load Username
         const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
         const snap = await getDocs(q);
-        const uname = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
-        document.getElementById("usernameDisplay").textContent = uname;
-        document.getElementById("profileUserText").textContent = uname;
+        const name = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
+        document.getElementById("usernameDisplay").innerText = name;
+        document.getElementById("profileUserText").innerText = name;
 
+        // Load PFP
         const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
         const pfpEl = document.getElementById("profilePic");
         const prevEl = document.getElementById("pfpPreview");
         
         if(pfpDoc.exists() && pfpDoc.data().data) {
-            [pfpEl, prevEl].forEach(el => {
-                el.style.backgroundImage = `url(${pfpDoc.data().data})`;
-                el.textContent = "";
-            });
+            const img = pfpDoc.data().data;
+            [pfpEl, prevEl].forEach(el => { el.style.backgroundImage = `url(${img})`; el.innerText = ""; });
         } else {
-            [pfpEl, prevEl].forEach(el => {
-                el.textContent = uname[0].toUpperCase();
-                el.style.backgroundColor = `hsl(${uname.length * 40}, 60%, 45%)`;
-            });
+            [pfpEl, prevEl].forEach(el => { el.innerText = name[0].toUpperCase(); el.style.backgroundColor = '#a855f7'; });
         }
-    });
+    }
+
+    async function checkAdminStatus(user) {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (uDoc.exists() && uDoc.data().role === "admin") {
+            document.getElementById('adminSection').classList.remove('hidden');
+            document.getElementById('adminToggleContainer').classList.add('hidden');
+        }
+    }
 
     window.requestAdminAccess = async () => {
-        const code = prompt("ENTER OVERRIDE CODE:");
+        const code = prompt("OVERRIDE CODE:");
         if (code === "Kenzie8725!") {
-            await setDoc(doc(db, "users", auth.currentUser.uid), { 
-                role: "admin", 
-                email: auth.currentUser.email 
-            }, { merge: true });
-            alert("ADMIN PRIVILEGES GRANTED.");
+            await setDoc(doc(db, "users", auth.currentUser.uid), { role: "admin", email: auth.currentUser.email }, { merge: true });
+            alert("ADMIN ACCESS ACTIVATED");
             location.reload();
         }
     };
 
     window.openAdminPortal = async () => {
         const list = document.getElementById('accountsList');
-        list.innerHTML = "<p class='text-center py-10 opacity-20'>Accessing Database...</p>";
+        list.innerHTML = "<p class='text-center opacity-20'>Accessing Records...</p>";
         document.getElementById('adminPortal').style.display = "flex";
 
         const usersSnap = await getDocs(collection(db, "users"));
@@ -174,21 +190,19 @@
             const data = uDoc.data();
             const uid = uDoc.id;
             
-            const userQ = query(collection(db, "usernames"), where("uid", "==", uid));
-            const userSnap = await getDocs(userQ);
-            const uname = !userSnap.empty ? userSnap.docs[0].id : "Unknown User";
+            // Sub-query for username/pfp
+            const uQ = query(collection(db, "usernames"), where("uid", "==", uid));
+            const uSnap = await getDocs(uQ);
+            const uname = !uSnap.empty ? uSnap.docs[0].id : "Unknown";
             
-            const pfpSnap = await getDoc(doc(db, "userPFPs", uid));
-            const pfp = pfpSnap.exists() ? pfpSnap.data().data : "";
+            const pSnap = await getDoc(doc(db, "userPFPs", uid));
+            const pfp = pSnap.exists() ? pSnap.data().data : "";
 
             const div = document.createElement('div');
             div.className = "bg-white/5 p-4 rounded-2xl flex items-center gap-4 border border-white/5";
             div.innerHTML = `
-                <div class="w-10 h-10 rounded-full bg-cover bg-center border border-white/10" style="background-image:url(${pfp})"></div>
-                <div class="flex-1 text-left">
-                    <p class="text-xs font-black uppercase text-white">${uname}</p>
-                    <p class="text-[9px] text-white/30 font-bold">${data.email || 'No Email'}</p>
-                </div>
+                <div class="w-10 h-10 rounded-full bg-cover bg-center" style="background-image:url(${pfp}); background-color:#333"></div>
+                <div class="flex-1"><p class="text-xs font-black uppercase text-white">${uname}</p><p class="text-[9px] text-white/30">${data.email || 'No Email'}</p></div>
                 <div class="flex gap-2">
                     <button onclick="adminAction('${uid}', 'reset')" class="px-3 py-2 bg-white/5 rounded-lg text-[8px] font-black uppercase">Reset</button>
                     <button onclick="adminAction('${uid}', 'remove')" class="px-3 py-2 bg-red-600/20 text-red-400 rounded-lg text-[8px] font-black uppercase">Purge</button>
@@ -201,55 +215,53 @@
     window.adminAction = async (uid, type) => {
         if (type === 'reset') {
             const uDoc = await getDoc(doc(db, "users", uid));
-            if (uDoc.exists() && uDoc.data().email) {
-                await sendPasswordResetEmail(auth, uDoc.data().email);
-                alert("Security Link Dispatched to " + uDoc.data().email);
-            }
-        } else if (type === 'remove' && confirm("Purge user from database?")) {
+            if (uDoc.data().email) await sendPasswordResetEmail(auth, uDoc.data().email);
+            alert("Reset link sent.");
+        } else if (type === 'remove' && confirm("Purge user?")) {
             await deleteDoc(doc(db, "users", uid));
-            await deleteDoc(doc(db, "userPFPs", uid));
-            alert("Record Purged.");
+            alert("User purged.");
             openAdminPortal();
         }
     };
 
-    // UI Handlers
+    // UI Utilities
     window.toggleMenu = () => document.body.classList.toggle("menu-open");
     window.toggleProfile = () => {
-        const dp = document.getElementById("profileDropdown");
-        dp.style.display = (dp.style.display === "flex") ? "none" : "flex";
+        const d = document.getElementById("profileDropdown");
+        d.style.display = d.style.display === "flex" ? "none" : "flex";
     };
+    window.openModal = (id) => document.getElementById(id).style.display = "flex";
     window.closeModal = (id) => document.getElementById(id).style.display = "none";
-    window.confirmLogout = () => signOut(auth).then(() => location.href="index.html");
+    window.signOutUser = () => signOut(auth).then(() => location.href = "index.html");
 
+    // Load Tabs
     async function loadTabs() {
         try {
-            const response = await fetch('tabs.txt');
-            const text = await response.text();
-            const tabs = text.split('\n').map(t => t.trim()).filter(t => t.length > 0);
-            const sidebar = document.getElementById('dynamicSidebarNav');
-            sidebar.innerHTML = '';
+            const r = await fetch('tabs.txt');
+            const t = await r.text();
+            const tabs = t.split('\n').filter(x => x.trim().length > 0);
+            const nav = document.getElementById('dynamicSidebarNav');
+            nav.innerHTML = '';
             tabs.forEach(tab => {
-                const isCurrent = tab.toLowerCase() === currentPage;
-                const div = document.createElement('div');
-                div.className = `nav-item ${isCurrent ? 'active' : ''}`;
-                div.textContent = tab;
-                div.onclick = () => isCurrent ? toggleMenu() : location.href=`${tab.toLowerCase()}.html`;
-                sidebar.appendChild(div);
+                const item = document.createElement('div');
+                item.className = `nav-item ${tab.toLowerCase() === 'settings' ? 'active' : ''}`;
+                item.innerText = tab;
+                item.onclick = () => location.href = `${tab.toLowerCase()}.html`;
+                nav.appendChild(item);
             });
-        } catch (e) {}
+        } catch(e) {}
     }
 
-    // Star Field Generator
-    const starField = document.getElementById('starField');
-    for (let i = 0; i < 60; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.width = star.style.height = '1px';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
-        starField.appendChild(star);
+    // Stars
+    const sf = document.getElementById('starField');
+    for (let i = 0; i < 50; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        s.style.width = s.style.height = '1px';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top = Math.random() * 100 + '%';
+        s.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+        sf.appendChild(s);
     }
 </script>
 </body>
