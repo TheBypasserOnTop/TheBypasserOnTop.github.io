@@ -15,6 +15,7 @@
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
             display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
         }
 
         .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
@@ -24,126 +25,180 @@
         .input-box {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border);
-            padding: 15px; border-radius: 12px;
+            padding: 18px; border-radius: 16px;
             width: 100%; color: white; text-align: center;
-            outline: none; transition: 0.3s; font-weight: bold;
+            outline: none; transition: 0.3s; font-weight: 800;
+            letter-spacing: 2px;
         }
-        .input-box:focus { border-color: var(--accent); background: rgba(168, 85, 247, 0.1); }
+        .input-box.error { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); animation: shake 0.4s ease-in-out; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
         .player-tag {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px; border-radius: 10px;
-            font-size: 1rem; border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 24px; border-radius: 12px;
+            font-size: 1.1rem; border: 1px solid rgba(255,255,255,0.05);
             animation: fadeIn 0.5s ease forwards;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .hidden { display: none; }
+        /* Game Header */
+        .game-header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            padding: 20px 40px; display: flex; justify-content: space-between;
+            align-items: center; background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <div class="stars-container" id="starField"></div>
 
-    <div id="step-pin" class="max-w-xs w-full p-8 text-center">
-        <h1 class="text-2xl font-black mb-6 tracking-widest uppercase">Enter PIN</h1>
-        <input type="number" id="pinInput" class="input-box mb-4" placeholder="000000">
-        <button onclick="checkPin()" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-purple-500 hover:text-white transition">Validate</button>
+    <div id="lobby-header" class="game-header hidden">
+        <div>
+            <p class="text-[10px] font-bold opacity-40 uppercase tracking-widest">Game PIN</p>
+            <p id="header-pin" class="text-xl font-black tracking-widest text-purple-400">000000</p>
+        </div>
+        <div class="text-right">
+            <p class="text-[10px] font-bold opacity-40 uppercase tracking-widest">Participants</p>
+            <p id="header-count" class="text-xl font-black">0</p>
+        </div>
     </div>
 
-    <div id="step-name" class="hidden max-w-xs w-full p-8 text-center">
-        <h1 class="text-2xl font-black mb-6 tracking-widest uppercase">Nickname</h1>
-        <input type="text" id="nameInput" class="input-box mb-4" placeholder="COSMIC_USER">
-        <button onclick="joinLobby()" class="w-full bg-purple-600 text-white py-4 rounded-xl font-black text-xs uppercase hover:bg-purple-500 transition">Join Session</button>
+    <div id="step-pin" class="max-w-xs w-full p-8 text-center fade-in">
+        <h1 class="text-3xl font-black mb-2 tracking-tighter uppercase">Join Game</h1>
+        <p class="text-[10px] font-bold opacity-30 tracking-[0.4em] uppercase mb-8">Enter access code</p>
+        
+        <input type="number" id="pinInput" class="input-box mb-2" placeholder="PIN">
+        <p id="pin-error" class="text-red-500 text-[10px] font-bold uppercase tracking-widest mb-4 opacity-0 transition">Invalid PIN</p>
+        
+        <button onclick="checkPin()" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-purple-500 hover:text-white transition">Verify</button>
     </div>
 
-    <div id="step-lobby" class="hidden max-w-2xl w-full p-8 text-center">
-        <h1 class="text-sm font-bold opacity-40 tracking-[0.5em] uppercase mb-2">Connected to</h1>
-        <div id="lobby-title" class="text-2xl font-black mb-8">------</div>
+    <div id="step-name" class="hidden max-w-xs w-full p-8 text-center fade-in">
+        <h1 class="text-3xl font-black mb-8 tracking-tighter uppercase">Identify</h1>
+        <input type="text" id="nameInput" class="input-box mb-6" placeholder="NICKNAME">
+        <button onclick="joinLobby()" class="w-full bg-purple-600 text-white py-4 rounded-xl font-black text-xs uppercase hover:bg-purple-500 transition shadow-lg">Enter Void</button>
+    </div>
+
+    <div id="step-lobby" class="hidden max-w-3xl w-full p-8 text-center fade-in">
+        <div id="countdown-display" class="hidden text-9xl font-black mb-8 italic text-purple-500">5</div>
         
-        <div class="h-px w-32 bg-purple-500 mx-auto mb-8"></div>
-        
-        <div id="player-list" class="flex flex-wrap justify-center gap-4">
-            </div>
+        <div id="lobby-content">
+            <h1 id="lobby-title" class="text-2xl font-black mb-2 uppercase tracking-tight">Lobby</h1>
+            <p class="text-white/20 text-xs font-bold tracking-widest uppercase mb-12 italic">Waiting for host to initiate...</p>
+            
+            <div id="player-list" class="flex flex-wrap justify-center gap-4">
+                </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-        const config = { 
-            apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", 
-            authDomain: "login-34954.firebaseapp.com", 
-            projectId: "login-34954", 
-            storageBucket: "login-34954.firebasestorage.app", 
-            messagingSenderId: "422184727508", 
-            appId: "1:422184727508:web:cef39fc913d526febe9c41" 
-        };
-        
+        const config = { apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954", storageBucket: "login-34954.firebasestorage.app", messagingSenderId: "422184727508", appId: "1:422184727508:web:cef39fc913d526febe9c41" };
         const app = initializeApp(config);
         const db = getFirestore(app);
 
         let currentPin = "";
+        let myId = Math.random().toString(36).substring(7);
 
-        // CHECK IF LOBBY EXISTS
+        // UI FEEDBACK FOR PIN
         window.checkPin = async () => {
-            const pin = document.getElementById('pinInput').value;
-            const lobbyRef = doc(db, "lobbies", pin);
-            const snap = await getDoc(lobbyRef);
+            const input = document.getElementById('pinInput');
+            const errorText = document.getElementById('pin-error');
+            const pin = input.value;
 
-            if (snap.exists()) {
+            const lobbySnap = await getDoc(doc(db, "lobbies", pin));
+
+            if (snapExists(lobbySnap)) {
                 currentPin = pin;
-                document.getElementById('lobby-title').innerText = snap.data().quizTitle;
+                document.getElementById('header-pin').innerText = pin;
                 document.getElementById('step-pin').classList.add('hidden');
                 document.getElementById('step-name').classList.remove('hidden');
             } else {
-                alert("Invalid Access Code");
+                input.classList.add('error');
+                errorText.classList.remove('opacity-0');
+                setTimeout(() => { 
+                    input.classList.remove('error');
+                    errorText.classList.add('opacity-0');
+                }, 2000);
             }
         };
 
-        // JOIN AND START LISTENING
+        function snapExists(snap) { return snap.exists(); }
+
         window.joinLobby = async () => {
             const name = document.getElementById('nameInput').value.trim();
-            if (!name) return alert("Enter a name");
+            if (!name) return;
 
-            // Add player to the sub-collection
-            const playerID = Math.random().toString(36).substring(7);
-            await setDoc(doc(db, "lobbies", currentPin, "players", playerID), {
-                username: name,
-                joinedAt: Date.now()
-            });
+            const playerRef = doc(db, "lobbies", currentPin, "players", myId);
+            await setDoc(playerRef, { username: name, joinedAt: Date.now() });
 
             document.getElementById('step-name').classList.add('hidden');
             document.getElementById('step-lobby').classList.remove('hidden');
+            document.getElementById('lobby-header').classList.remove('hidden');
 
-            // Listen for all players in this lobby
-            listenForOthers(currentPin);
-        };
+            // 1. Listen for Kick
+            onSnapshot(playerRef, (snap) => {
+                if (!snap.exists()) {
+                    window.location.reload(); // Boot to start
+                }
+            });
 
-        function listenForOthers(pin) {
-            const playersRef = collection(db, "lobbies", pin, "players");
-            onSnapshot(playersRef, (snapshot) => {
+            // 2. Listen for Participants & Game Status
+            const lobbyRef = doc(db, "lobbies", currentPin);
+            onSnapshot(lobbyRef, (snap) => {
+                const data = snap.data();
+                if (data.status === "countdown") {
+                    runCountdown();
+                }
+            });
+
+            onSnapshot(collection(db, "lobbies", currentPin, "players"), (snap) => {
                 const list = document.getElementById('player-list');
+                document.getElementById('header-count').innerText = snap.size;
                 list.innerHTML = "";
-                snapshot.forEach(doc => {
-                    const div = document.createElement('div');
-                    div.className = "player-tag";
-                    div.innerText = doc.data().username;
-                    list.appendChild(div);
+                snap.forEach(doc => {
+                    const tag = document.createElement('div');
+                    tag.className = "player-tag";
+                    tag.innerText = doc.data().username;
+                    list.appendChild(tag);
                 });
             });
+        };
+
+        function runCountdown() {
+            const content = document.getElementById('lobby-content');
+            const countUI = document.getElementById('countdown-display');
+            content.classList.add('hidden');
+            countUI.classList.remove('hidden');
+
+            let timer = 5;
+            const interval = setInterval(() => {
+                timer--;
+                countUI.innerText = timer;
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    countUI.innerText = "GO!";
+                    // Transition to question code here
+                }
+            }, 1000);
         }
 
-        // Stars Logic
-        const starField = document.getElementById('starField');
-        for (let i = 0; i < 50; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
-            star.style.left = `${Math.random() * 100}%`;
-            star.style.top = `${Math.random() * 100}%`;
-            star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
-            starField.appendChild(star);
+        // Stars Init
+        const field = document.getElementById('starField');
+        for (let i = 0; i < 60; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            s.style.width = s.style.height = `${Math.random() * 2 + 1}px`;
+            s.style.left = `${Math.random() * 100}%`; s.style.top = `${Math.random() * 100}%`;
+            s.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
+            field.appendChild(s);
         }
     </script>
 </body>
