@@ -10,28 +10,26 @@
         :root { --accent: #a855f7; --border: rgba(255, 255, 255, 0.1); }
         body { margin: 0; padding: 0; background: radial-gradient(circle at top, #1e1b4b, #020617); color: #e6f0ff; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
         
-        /* Grid Styling */
-        .grid-container { display: grid; grid-template-columns: repeat(10, 30px); grid-template-rows: repeat(10, 30px); gap: 2px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 8px; border: 1px solid var(--border); }
-        .cell { width: 30px; height: 30px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; position: relative; }
-        .cell:hover { background: rgba(168, 85, 247, 0.2); }
+        .grid-container { display: grid; grid-template-columns: repeat(10, 32px); grid-template-rows: repeat(10, 32px); gap: 1px; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 4px; border: 1px solid var(--border); }
+        .cell { width: 32px; height: 32px; background: rgba(255,255,255,0.02); position: relative; transition: 0.1s; }
         
-        /* State Colors */
-        .cell.ship { background: #64748b; border: 1px solid #94a3b8; } /* Your Ship */
-        .cell.hit { background: #ef4444 !important; box-shadow: inset 0 0 10px #000; } /* Hit */
-        .cell.miss { background: #3b82f6 !important; opacity: 0.5; } /* Miss */
-        .cell.selected { border: 2px solid var(--accent); }
-
-        .side-panel { width: 300px; background: rgba(10, 10, 25, 0.7); backdrop-filter: blur(30px); border: 1px solid var(--border); height: 75vh; border-radius: 28px; display: flex; flex-direction: column; }
+        /* Ship Visuals */
+        .ship-placed { background: #64748b !important; border: 1px solid #94a3b8; }
+        .hit { background: #ef4444 !important; box-shadow: inset 0 0 10px #000; }
+        .miss { background: #3b82f6 !important; opacity: 0.4; }
+        
+        .side-panel { width: 320px; background: rgba(10, 10, 25, 0.7); backdrop-filter: blur(30px); border: 1px solid var(--border); height: 75vh; border-radius: 28px; display: flex; flex-direction: column; }
         .chat-area { flex-grow: 1; overflow-y: auto; padding: 15px; font-size: 12px; scrollbar-width: none; }
-        .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
-        .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.8; } }
-        .hidden { display: none !important; }
+        
+        /* Ghost placement styles */
+        .ghost-valid { background: rgba(168, 85, 247, 0.4) !important; }
+        .ghost-invalid { background: rgba(239, 68, 68, 0.4) !important; }
+
+        .btn-action { background: white; color: black; padding: 12px 24px; border-radius: 12px; font-weight: 900; text-transform: uppercase; transition: 0.3s; }
+        .btn-action:hover { background: var(--accent); color: white; }
     </style>
 </head>
 <body class="flex flex-col items-center">
-
-<div class="stars-container" id="starField"></div>
 
 <nav class="w-full px-10 py-8 flex justify-between items-center z-50">
     <button onclick="location.href='games.html'" class="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition">← Return</button>
@@ -41,89 +39,75 @@
 <div id="menu-view" class="mt-20 text-center z-10">
     <h2 class="text-5xl font-black mb-8 uppercase tracking-tighter italic">Battleship</h2>
     <div class="flex flex-col gap-4">
-        <button onclick="setupGame('host')" class="px-10 py-4 bg-white text-black font-black rounded-xl hover:bg-purple-500 hover:text-white transition uppercase">Host Battle</button>
+        <button onclick="setupGame()" class="btn-action">Host Battle</button>
         <p class="text-[10px] font-bold opacity-30 uppercase tracking-[0.5em] cursor-pointer hover:opacity-100" onclick="$('#join-input-area').toggle()">Join Fleet</p>
     </div>
     <div id="join-input-area" class="hidden mt-6">
-        <input type="text" id="joinCodeInput" placeholder="CODE" class="bg-white/5 border border-white/10 p-4 rounded-xl text-center text-white mb-4 outline-none">
+        <input type="text" id="joinCodeInput" placeholder="CODE" class="bg-white/5 border border-white/10 p-4 rounded-xl text-center text-white mb-4 outline-none focus:border-purple-500">
         <button onclick="executeJoin()" class="block mx-auto text-xs font-bold text-purple-400 uppercase">Connect</button>
     </div>
+</div>
+
+<div id="lobby-view" class="hidden mt-20 text-center z-10">
+    <p class="text-[10px] font-bold opacity-30 uppercase mb-2">Access Code</p>
+    <h1 id="display-code" class="text-7xl font-black text-purple-500 mb-6 tracking-tighter">0000</h1>
+    <p class="text-xs font-bold uppercase animate-pulse">Waiting for Guest...</p>
 </div>
 
 <div id="game-view" class="hidden flex gap-8 mt-10 w-full px-10 justify-center items-start">
     
     <div class="side-panel p-6">
-        <h3 class="font-black text-[10px] uppercase tracking-widest text-white/40 mb-4">Tactical Status</h3>
-        <div id="status-text" class="text-sm font-bold text-purple-400 mb-6">Placing Ships...</div>
-        <div id="placement-controls">
-            <p class="text-[10px] text-white/40 mb-2">Click 5 cells to place your fleet.</p>
-            <button onclick="submitShips()" class="w-full py-3 bg-white/10 border border-white/20 rounded-xl text-[10px] font-bold uppercase hover:bg-purple-600 transition">Confirm Fleet</button>
-        </div>
-        <div id="game-stats" class="hidden mt-auto space-y-2 text-[10px] uppercase font-bold text-white/20">
-            <div class="flex justify-between"><span>Your Hits</span><span id="stat-hits" class="text-white">0</span></div>
-            <div class="flex justify-between"><span>Turn</span><span id="stat-turn" class="text-white">-</span></div>
+        <div id="status-text" class="text-sm font-black text-purple-400 uppercase mb-4">Placing Fleet</div>
+        <div id="setup-controls">
+            <p id="ship-name" class="text-[10px] font-bold text-white/60 mb-2 uppercase">Carrier (5)</p>
+            <button onclick="rotateShip()" class="w-full py-2 bg-white/5 border border-white/10 rounded-lg text-[10px] uppercase font-bold mb-4 hover:bg-white/10">Rotate (R)</button>
+            <p class="text-[8px] uppercase opacity-30">Place your ships on the defense grid</p>
         </div>
     </div>
 
-    <div class="flex flex-col gap-8 items-center">
-        <div class="flex flex-col items-center">
-            <span class="text-[10px] font-black uppercase tracking-widest mb-2 opacity-30">Attack Grid (Enemy)</span>
+    <div class="flex flex-col gap-8">
+        <div id="enemy-grid-wrapper" class="hidden flex flex-col items-center">
+            <span class="text-[10px] font-black uppercase tracking-widest mb-2 opacity-30">Enemy Territory</span>
             <div id="attack-grid" class="grid-container"></div>
         </div>
         <div class="flex flex-col items-center">
-            <span class="text-[10px] font-black uppercase tracking-widest mb-2 opacity-30">Defense Grid (You)</span>
+            <span class="text-[10px] font-black uppercase tracking-widest mb-2 opacity-30">Your Grid</span>
             <div id="defense-grid" class="grid-container"></div>
         </div>
     </div>
 
     <div class="side-panel">
-        <div class="p-6 border-b border-white/5 font-black text-[10px] uppercase tracking-widest text-white/40">Comms</div>
+        <div class="p-6 border-b border-white/5 font-black text-[10px] uppercase text-white/40">Chat</div>
         <div id="chatArea" class="chat-area"></div>
-        <div class="p-6">
-            <input type="text" id="chatInput" placeholder="Transmission..." class="bg-white/5 border border-white/10 p-4 rounded-2xl w-full text-xs outline-none focus:border-purple-500" onkeydown="if(event.key==='Enter') sendChat()">
-        </div>
+        <div class="p-6"><input type="text" id="chatInput" placeholder="Message..." class="bg-white/5 border border-white/10 p-4 rounded-2xl w-full text-xs outline-none" onkeydown="if(event.key==='Enter') sendChat()"></div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc, collection, query, addDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc, collection, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
     const config = { apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954", storageBucket: "login-34954.firebasestorage.app", messagingSenderId: "422184727508", appId: "1:422184727508:web:cef39fc913d526febe9c41" };
     const app = initializeApp(config);
-    const auth = getAuth(app);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    let myUsername = "", gameCode = "", playerRole = "";
-    let myShips = []; 
-    let myTurn = false;
-    let gameData = null;
+    let myUsername = "", gameCode = "", playerRole = "", gameData = null;
+    let shipsToPlace = [ {n: 'Carrier', l: 5}, {n: 'Battleship', l: 4}, {n: 'Cruiser', l: 3}, {n: 'Submarine', l: 3}, {n: 'Destroyer', l: 2} ];
+    let currentShipIndex = 0;
+    let horizontal = true;
+    let myPlacedShips = []; // Flat array of all occupied indices
 
-    onAuthStateChanged(auth, async user => {
-        if (!user) return;
-        myUsername = user.email.split('@')[0];
-        const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
-        if(pfpDoc.exists()) document.getElementById("profilePic").style.backgroundImage = `url(${pfpDoc.data().data})`;
-    });
-
-    // Create Grids
-    function createGrids() {
-        for (let i = 0; i < 100; i++) {
-            $('#defense-grid').append(`<div class="cell" data-index="${i}" onclick="placeShip(${i})"></div>`);
-            $('#attack-grid').append(`<div class="cell" data-index="${i}" onclick="fireShot(${i})"></div>`);
-        }
-    }
+    onAuthStateChanged(auth, async user => { if(user) myUsername = user.email.split('@')[0]; });
 
     window.setupGame = async () => {
         gameCode = Math.floor(1000 + Math.random() * 9000).toString();
         playerRole = 'host';
-        await setDoc(doc(db, "battleship", gameCode), {
-            host: myUsername, guest: "", 
-            hostShips: [], guestShips: [],
-            hostHits: [], guestHits: [],
-            status: "placing", turn: "host", lastShotResult: ""
-        });
+        await setDoc(doc(db, "battleship", gameCode), { host: myUsername, guest: "", hostShips: [], guestShips: [], hostHits: [], guestHits: [], turn: "host", status: "waiting" });
+        $('#menu-view').hide();
+        $('#lobby-view').show();
+        $('#display-code').text(gameCode);
         startSync();
     };
 
@@ -131,135 +115,122 @@
         gameCode = $('#joinCodeInput').val().trim();
         playerRole = 'guest';
         const snap = await getDoc(doc(db, "battleship", gameCode));
-        if (snap.exists()) {
-            await updateDoc(doc(db, "battleship", gameCode), { guest: myUsername });
+        if(snap.exists()) {
+            await updateDoc(doc(db, "battleship", gameCode), { guest: myUsername, status: "placing" });
+            $('#menu-view').hide();
             startSync();
         }
     };
 
     function startSync() {
-        $('#menu-view').addClass('hidden');
-        $('#game-view').removeClass('hidden');
-        createGrids();
-
         onSnapshot(doc(db, "battleship", gameCode), (snap) => {
             gameData = snap.data();
-            renderGrids();
-            checkGameState();
+            if(gameData.status === "placing" || gameData.status === "playing") {
+                $('#lobby-view').hide();
+                $('#game-view').removeClass('hidden');
+                if(!$('#defense-grid').children().length) initGrids();
+            }
+            if(gameData.hostShips.length > 0 && gameData.guestShips.length > 0 && gameData.status === "placing") {
+                updateDoc(doc(db, "battleship", gameCode), { status: "playing" });
+            }
+            renderStatus();
         });
 
         const chatQuery = query(collection(db, `battleship/${gameCode}/messages`), orderBy("time", "asc"));
         onSnapshot(chatQuery, (snap) => {
             const chatArea = document.getElementById('chatArea');
             chatArea.innerHTML = "";
-            snap.forEach(m => {
-                chatArea.innerHTML += `<div class="mb-2"><span class="text-purple-400 font-bold">${m.data().user}:</span> <span>${m.data().msg}</span></div>`;
-            });
+            snap.forEach(m => chatArea.innerHTML += `<div><span class="text-purple-400 font-bold">${m.data().user}:</span> ${m.data().msg}</div>`);
             chatArea.scrollTop = chatArea.scrollHeight;
         });
     }
 
-    window.placeShip = (i) => {
-        if (gameData.status !== "placing") return;
-        const index = myShips.indexOf(i);
-        if (index > -1) myShips.splice(index, 1);
-        else if (myShips.length < 5) myShips.push(i);
-        
-        $('#defense-grid .cell').removeClass('ship');
-        myShips.forEach(s => $(`#defense-grid .cell[data-index="${s}"]`).addClass('ship'));
-    };
-
-    window.submitShips = async () => {
-        if (myShips.length < 5) return alert("Place all 5 ships!");
-        const field = playerRole === 'host' ? 'hostShips' : 'guestShips';
-        await updateDoc(doc(db, "battleship", gameCode), { [field]: myShips });
-        $('#placement-controls').addClass('hidden');
-        $('#status-text').text("Waiting for opponent...");
-    };
-
-    function checkGameState() {
-        if (gameData.hostShips.length === 5 && gameData.guestShips.length === 5 && gameData.status === "placing") {
-            updateDoc(doc(db, "battleship", gameCode), { status: "playing" });
+    function initGrids() {
+        for(let i=0; i<100; i++) {
+            $('#defense-grid').append(`<div class="cell" data-idx="${i}" onmouseover="hoverShip(${i})" onclick="placeShip(${i})"></div>`);
+            $('#attack-grid').append(`<div class="cell" data-idx="${i}" onclick="fireShot(${i})"></div>`);
         }
+    }
 
-        if (gameData.status === "playing") {
-            myTurn = gameData.turn === playerRole;
-            $('#status-text').text(myTurn ? "Your Turn - Fire!" : "Opponent's Turn...");
-            $('#status-text').css('color', myTurn ? '#a855f7' : '#ffffff40');
-            $('#game-stats').removeClass('hidden');
-            $('#stat-turn').text(gameData.turn.toUpperCase());
+    window.rotateShip = () => horizontal = !horizontal;
+    $(document).keydown(e => { if(e.key.toLowerCase() === 'r') rotateShip(); });
+
+    window.hoverShip = (idx) => {
+        if(currentShipIndex >= shipsToPlace.length) return;
+        $('.cell').removeClass('ghost-valid ghost-invalid');
+        const ship = shipsToPlace[currentShipIndex];
+        const coords = getShipCoords(idx, ship.l, horizontal);
+        const valid = coords.length === ship.l && coords.every(c => !myPlacedShips.includes(c));
+        coords.forEach(c => $(`#defense-grid [data-idx="${c}"]`).addClass(valid ? 'ghost-valid' : 'ghost-invalid'));
+    };
+
+    function getShipCoords(start, len, isH) {
+        let c = [];
+        for(let i=0; i<len; i++) {
+            let next = isH ? start + i : start + (i * 10);
+            if(next >= 100 || (isH && Math.floor(next/10) !== Math.floor(start/10))) return [];
+            c.push(next);
+        }
+        return c;
+    }
+
+    window.placeShip = async (idx) => {
+        if(currentShipIndex >= shipsToPlace.length) return;
+        const ship = shipsToPlace[currentShipIndex];
+        const coords = getShipCoords(idx, ship.l, horizontal);
+        if(coords.length === ship.l && coords.every(c => !myPlacedShips.includes(c))) {
+            myPlacedShips.push(...coords);
+            coords.forEach(c => $(`#defense-grid [data-idx="${c}"]`).addClass('ship-placed'));
+            currentShipIndex++;
+            if(currentShipIndex < shipsToPlace.length) {
+                $('#ship-name').text(`${shipsToPlace[currentShipIndex].n} (${shipsToPlace[currentShipIndex].l})`);
+            } else {
+                $('#setup-controls').hide();
+                const field = playerRole === 'host' ? 'hostShips' : 'guestShips';
+                await updateDoc(doc(db, "battleship", gameCode), { [field]: myPlacedShips });
+            }
+        }
+    };
+
+    function renderStatus() {
+        if(gameData.status === "playing") {
+            $('#enemy-grid-wrapper').show();
+            const myTurn = gameData.turn === playerRole;
+            $('#status-text').text(myTurn ? "Your Turn - Fire!" : "Waiting for Enemy...");
+            
+            // Render hits/misses
+            const myHits = playerRole === 'host' ? gameData.hostHits : gameData.guestHits;
+            const enemyShips = playerRole === 'host' ? gameData.guestShips : gameData.hostShips;
+            myHits.forEach(i => $(`#attack-grid [data-idx="${i}"]`).addClass(enemyShips.includes(i) ? 'hit' : 'miss'));
+
+            const enemyHits = playerRole === 'host' ? gameData.guestHits : gameData.hostHits;
+            enemyHits.forEach(i => $(`#defense-grid [data-idx="${i}"]`).addClass(myPlacedShips.includes(i) ? 'hit' : 'miss'));
         }
     }
 
     window.fireShot = async (i) => {
-        if (!myTurn || gameData.status !== "playing") return;
-        
-        const enemyShips = playerRole === 'host' ? gameData.guestShips : gameData.hostShips;
+        if(gameData.turn !== playerRole || gameData.status !== "playing") return;
         const myHitsField = playerRole === 'host' ? 'hostHits' : 'guestHits';
-        const currentHits = gameData[myHitsField];
+        if(gameData[myHitsField].includes(i)) return;
 
-        if (currentHits.includes(i)) return; // Already shot here
-
+        const enemyShips = playerRole === 'host' ? gameData.guestShips : gameData.hostShips;
         const isHit = enemyShips.includes(i);
-        const newHits = [...currentHits, i];
+        let updates = { [myHitsField]: [...gameData[myHitsField], i] };
         
-        let updates = { [myHitsField]: newHits };
-
-        if (!isHit) {
-            myTurn = false; // Local block
+        if(!isHit) {
             updates.turn = playerRole === 'host' ? 'guest' : 'host';
-            // 3 Second Delay for Miss
-            $('#status-text').text("MISS! Switching turns...");
-            setTimeout(() => {
-                updateDoc(doc(db, "battleship", gameCode), updates);
-            }, 3000);
+            await updateDoc(doc(db, "battleship", gameCode), updates);
         } else {
-            // It's a hit! Check for win
-            if (newHits.filter(h => enemyShips.includes(h)).length === 5) {
-                updates.status = "finished";
-                alert("VICTORY! All enemy ships destroyed.");
-            }
-            updateDoc(doc(db, "battleship", gameCode), updates);
+            await updateDoc(doc(db, "battleship", gameCode), updates);
         }
     };
 
-    function renderGrids() {
-        // Render Defense Grid (Your ships + enemy shots)
-        const enemyHits = playerRole === 'host' ? gameData.guestHits : gameData.hostHits;
-        $('#defense-grid .cell').removeClass('hit miss');
-        enemyHits.forEach(i => {
-            const isHit = myShips.includes(i);
-            $(`#defense-grid .cell[data-index="${i}"]`).addClass(isHit ? 'hit' : 'miss');
-        });
-
-        // Render Attack Grid (Your shots)
-        const myHits = playerRole === 'host' ? gameData.hostHits : gameData.guestHits;
-        const enemyShips = playerRole === 'host' ? gameData.guestShips : gameData.hostShips;
-        $('#attack-grid .cell').removeClass('hit miss');
-        myHits.forEach(i => {
-            const isHit = enemyShips.includes(i);
-            $(`#attack-grid .cell[data-index="${i}"]`).addClass(isHit ? 'hit' : 'miss');
-        });
-        
-        $('#stat-hits').text(myHits.filter(i => enemyShips.includes(i)).length);
-    }
-
     window.sendChat = async () => {
         const input = $('#chatInput');
-        if (!input.val().trim()) return;
+        if(!input.val().trim()) return;
         await addDoc(collection(db, `battleship/${gameCode}/messages`), { user: myUsername, msg: input.val(), time: Date.now() });
         input.val("");
     };
-
-    // Stars
-    for (let i = 0; i < 50; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.width = star.style.height = '1px';
-        star.style.left = Math.random() * 100 + '%'; star.style.top = Math.random() * 100 + '%';
-        star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
-        document.getElementById('starField').appendChild(star);
-    }
 </script>
 </body>
 </html>
