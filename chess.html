@@ -9,104 +9,90 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
-        :root { --accent: #a855f7; --border: rgba(255, 255, 255, 0.1); }
-        body {
-            margin: 0; padding: 0;
-            background: radial-gradient(circle at top, #1e1b4b, #020617);
-            color: #e6f0ff; font-family: 'Inter', sans-serif;
-            min-height: 100vh; overflow-x: hidden;
-        }
-
+        :root { --accent: #a855f7; --border: rgba(255, 255, 255, 0.1); --glass: rgba(255, 255, 255, 0.03); }
+        body { margin: 0; padding: 0; background: radial-gradient(circle at top, #1e1b4b, #020617); color: #e6f0ff; font-family: 'Inter', sans-serif; min-height: 100vh; overflow: hidden; }
         .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
         .star { position: absolute; background: white; border-radius: 50%; animation: pulse var(--duration) infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.4); } }
-
-        #profileDropdown {
-            position: absolute; top: 70px; right: 40px; width: 220px;
-            display: none; flex-direction: column; z-index: 100;
-            background: rgba(10, 10, 25, 0.95); backdrop-filter: blur(25px);
-            border: 1px solid var(--border); border-radius: 20px; padding: 1rem;
-        }
-
-        #myBoard { width: 450px; max-width: 90vw; margin: 0 auto; border: 4px solid var(--border); border-radius: 12px; }
-        .input-box { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); padding: 18px; border-radius: 16px; width: 100%; color: white; text-align: center; outline: none; }
-        .btn-action { background: white; color: black; padding: 12px 24px; border-radius: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        .btn-action:hover { background: var(--accent); color: white; transform: translateY(-2px); }
         
-        .overlay-bg {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(12px); display: none; z-index: 1000;
-            align-items: center; justify-content: center;
-        }
+        /* Board Customization */
+        #myBoard { width: 450px; border: 4px solid var(--border); border-radius: 12px; }
+        .white-1e1b7 { background-color: #f0d9b5; }
+        .black-3c403 { background-color: #b58863; }
 
+        /* UI Panels */
+        .side-panel { width: 300px; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); height: calc(100vh - 120px); border-radius: 24px; display: flex; flex-direction: column; }
+        .move-history { font-family: 'Courier New', monospace; font-size: 11px; overflow-y: auto; flex-grow: 1; padding: 10px; }
+        .chat-area { flex-grow: 1; overflow-y: auto; padding: 15px; font-size: 12px; }
+        .chat-msg { margin-bottom: 8px; border-left: 2px solid var(--accent); padding-left: 8px; }
+        
+        .overlay-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: none; z-index: 1000; align-items: center; justify-content: center; }
         .hidden { display: none !important; }
+        input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; outline: none; width: 100%; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center">
+<body class="flex flex-col items-center">
 
 <div class="stars-container" id="starField"></div>
 
-<nav class="fixed top-0 w-full px-10 py-8 flex justify-between items-center z-50">
-    <button onclick="confirmExit()" class="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition flex items-center gap-2">
-        <span class="text-lg">←</span> Return to Games
-    </button>
-    
-    <div class="relative">
-        <div id="profilePic" onclick="toggleProfile()" class="w-10 h-10 rounded-full flex items-center justify-center font-bold cursor-pointer border border-white/10 bg-white/5 hover:border-purple-500 transition-all bg-cover bg-center overflow-hidden text-sm">?</div>
-        <div id="profileDropdown">
-            <div class="px-3 pb-3 mb-3 border-b border-white/5">
-                <p id="profileUserText" class="text-xs font-black uppercase tracking-widest text-white/80 truncate">Syncing...</p>
-                <p class="text-[8px] text-white/20 font-bold tracking-widest uppercase text-purple-400">Grandmaster</p>
-            </div>
-            <button onclick="confirmExit()" class="w-full text-left p-3 hover:bg-white/5 rounded-lg text-xs font-bold transition">Return to Base</button>
-        </div>
-    </div>
+<nav class="w-full px-10 py-6 flex justify-between items-center z-50">
+    <button onclick="confirmExit()" class="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition flex items-center gap-2">← Exit Lobby</button>
+    <h1 class="text-xl font-black text-purple-400 tracking-widest">COSMIC CHESS</h1>
+    <div id="profilePic" class="w-10 h-10 rounded-full border border-white/10 bg-white/5 bg-cover bg-center"></div>
 </nav>
 
-<div id="exitModal" class="overlay-bg">
-    <div class="bg-[#050510] border border-white/10 p-10 max-w-sm w-full mx-4 text-center rounded-3xl shadow-2xl">
-        <h3 class="text-lg font-bold mb-2 uppercase tracking-tighter">Abandon Sector?</h3>
-        <p class="text-white/30 text-xs mb-8 uppercase tracking-widest font-medium">Leaving now will forfeit your active chess session.</p>
-        <div class="flex gap-3">
-            <button onclick="closeExitModal()" class="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 transition text-xs font-bold uppercase">Stay</button>
-            <button onclick="executeExit()" class="flex-1 py-4 rounded-xl bg-purple-600 hover:bg-purple-500 transition text-xs font-bold uppercase">Leave</button>
+<div id="menu-view" class="mt-20 text-center">
+    <button onclick="setupGame('host')" class="px-10 py-4 bg-white text-black font-black rounded-xl hover:bg-purple-500 hover:text-white transition uppercase">Host Game</button>
+    <button onclick="toggleJoin()" class="ml-4 px-10 py-4 bg-white/5 border border-white/10 font-black rounded-xl hover:bg-white/10 transition uppercase">Join Game</button>
+    <div id="join-input-area" class="hidden mt-6">
+        <input type="text" id="joinCodeInput" placeholder="4-DIGIT CODE" class="max-w-[200px] text-center mb-4">
+        <button onclick="executeJoin()" class="block mx-auto text-xs font-bold text-purple-400 uppercase">Connect</button>
+    </div>
+</div>
+
+<div id="lobby-view" class="hidden mt-20 text-center">
+    <h1 id="display-code" class="text-8xl font-black text-purple-500 mb-4">0000</h1>
+    <p class="animate-pulse text-xs font-bold uppercase text-white/40">Waiting for opponent...</p>
+</div>
+
+<div id="game-view" class="hidden flex gap-8 mt-10 w-full px-10 justify-center">
+    
+    <div class="side-panel">
+        <div class="p-4 border-b border-white/5 font-black text-[10px] uppercase tracking-widest text-white/40">System Log</div>
+        <div id="moveHistory" class="move-history text-white/60"></div>
+    </div>
+
+    <div class="flex flex-col items-center">
+        <div id="opponent-name" class="mb-4 text-xs font-bold opacity-40 uppercase tracking-widest">Opponent</div>
+        <div id="myBoard"></div>
+        <div id="my-name" class="mt-4 text-xs font-bold uppercase tracking-widest text-purple-400">You</div>
+        <div id="game-status" class="mt-8 text-[10px] font-black uppercase bg-purple-600 px-6 py-2 rounded-full tracking-widest">Initializing...</div>
+    </div>
+
+    <div class="side-panel">
+        <div class="p-4 border-b border-white/5 font-black text-[10px] uppercase tracking-widest text-white/40">Chat Sector</div>
+        <div id="chatArea" class="chat-area"></div>
+        <div class="p-4 border-t border-white/5">
+            <input type="text" id="chatInput" placeholder="Type message..." onkeydown="if(event.key==='Enter') sendChat()">
         </div>
     </div>
 </div>
 
-<div id="menu-view" class="text-center z-10">
-    <h2 class="text-5xl font-black mb-8 uppercase tracking-tighter italic">Chess Module</h2>
-    <div class="flex flex-col gap-4">
-        <button onclick="setupGame('host')" class="btn-action">Create Lobby</button>
-        <p class="text-[10px] font-bold opacity-30 uppercase tracking-[0.5em] cursor-pointer hover:opacity-100" onclick="setupGame('join')">or Join Lobby</p>
+<div id="exitModal" class="overlay-bg">
+    <div class="bg-[#050510] border border-white/10 p-10 max-w-sm rounded-3xl text-center">
+        <h3 class="font-bold mb-4 uppercase">Abandon Game?</h3>
+        <div class="flex gap-2">
+            <button onclick="location.reload()" class="flex-1 py-4 bg-red-500 rounded-xl text-xs font-bold uppercase">Leave</button>
+            <button onclick="document.getElementById('exitModal').style.display='none'" class="flex-1 py-4 bg-white/5 rounded-xl text-xs font-bold uppercase">Stay</button>
+        </div>
     </div>
-</div>
-
-<div id="join-view" class="hidden text-center z-10 max-w-xs w-full">
-    <h3 class="text-xl font-bold mb-6 uppercase">Join Sector</h3>
-    <input type="text" id="joinCodeInput" class="input-box mb-6" placeholder="4-DIGIT CODE">
-    <button onclick="executeJoin()" class="w-full btn-action">Connect</button>
-</div>
-
-<div id="lobby-view" class="hidden text-center z-10">
-    <p class="text-[10px] font-bold opacity-30 uppercase mb-2">Access Code</p>
-    <h1 id="display-code" class="text-7xl font-black text-purple-500 mb-6 tracking-tighter">0000</h1>
-    <p id="lobby-status" class="text-xs font-bold uppercase animate-pulse">1/2 Players Connected</p>
-</div>
-
-<div id="game-view" class="hidden text-center z-10 py-20">
-    <div id="opponent-name" class="mb-4 text-xs font-bold opacity-40 uppercase tracking-widest">Waiting...</div>
-    <div id="myBoard"></div>
-    <div id="my-name" class="mt-4 text-xs font-bold uppercase tracking-widest text-purple-400">Loading...</div>
-    <p id="game-status" class="mt-8 text-[10px] font-black uppercase bg-white/5 px-6 py-2 rounded-full inline-block tracking-widest">White's Turn</p>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc, collection, query, where, getDocs, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
     const config = { apiKey: "AIzaSyDmRrflu-Ysm6DyxV65SrMZ0AL7TP58mX4", authDomain: "login-34954.firebaseapp.com", projectId: "login-34954", storageBucket: "login-34954.firebasestorage.app", messagingSenderId: "422184727508", appId: "1:422184727508:web:cef39fc913d526febe9c41" };
     const app = initializeApp(config);
@@ -116,81 +102,72 @@
     let myUsername = "", gameCode = "", playerRole = "", board = null;
     let game = new Chess();
 
-    // --- EXIT LOGIC ---
-    window.confirmExit = () => document.getElementById("exitModal").style.display = "flex";
-    window.closeExitModal = () => document.getElementById("exitModal").style.display = "none";
-    window.executeExit = () => { window.onbeforeunload = null; location.replace('games.html'); };
-
-    // Standard browser refresh protection
-    window.onbeforeunload = function() {
-        return "Game in progress. Your session will be lost.";
-    };
-
     onAuthStateChanged(auth, async user => {
         if (!user) { location.replace("index.html"); return; }
         const q = query(collection(db, "usernames"), where("uid", "==", user.uid));
         const snap = await getDocs(q);
         myUsername = !snap.empty ? snap.docs[0].id : user.email.split('@')[0];
-        document.getElementById("profileUserText").textContent = myUsername;
-        const pfp = document.getElementById("profilePic");
-        pfp.textContent = myUsername[0].toUpperCase();
         const pfpDoc = await getDoc(doc(db, "userPFPs", user.uid));
-        if(pfpDoc.exists() && pfpDoc.data().data) {
-            pfp.style.backgroundImage = `url(${pfpDoc.data().data})`;
-            pfp.textContent = "";
-        }
+        if(pfpDoc.exists()) document.getElementById("profilePic").style.backgroundImage = `url(${pfpDoc.data().data})`;
     });
 
-    // --- GAME ENGINE ---
+    window.toggleJoin = () => document.getElementById('join-input-area').classList.toggle('hidden');
+
     window.setupGame = async (mode) => {
-        if (mode === 'host') {
-            gameCode = Math.floor(1000 + Math.random() * 9000).toString();
-            playerRole = 'white';
-            await setDoc(doc(db, "chess", gameCode), { hostName: myUsername, guestName: "", fen: "start", turn: "w", status: "waiting" });
-            startSync();
-        } else {
-            document.getElementById('menu-view').classList.add('hidden');
-            document.getElementById('join-view').classList.remove('hidden');
-        }
+        gameCode = Math.floor(1000 + Math.random() * 9000).toString();
+        playerRole = 'white';
+        await setDoc(doc(db, "chess", gameCode), { hostName: myUsername, guestName: "", fen: "start", history: [], status: "waiting" });
+        startSync();
     };
 
     window.executeJoin = async () => {
         gameCode = document.getElementById('joinCodeInput').value.trim();
         playerRole = 'black';
-        const lobbyRef = doc(db, "chess", gameCode);
-        const snap = await getDoc(lobbyRef);
+        const snap = await getDoc(doc(db, "chess", gameCode));
         if (snap.exists()) {
-            await updateDoc(lobbyRef, { guestName: myUsername, status: "connecting" });
+            await updateDoc(doc(db, "chess", gameCode), { guestName: myUsername, status: "playing" });
             startSync();
-        } else { alert("Code invalid."); }
+        } else { alert("Lobby not found."); }
     };
 
     function startSync() {
         document.getElementById('menu-view').classList.add('hidden');
-        document.getElementById('join-view').classList.add('hidden');
         document.getElementById('lobby-view').classList.remove('hidden');
         document.getElementById('display-code').innerText = gameCode;
 
         onSnapshot(doc(db, "chess", gameCode), (snap) => {
             const data = snap.data();
             if (!data) return;
-            if ((data.status === "connecting" || data.status === "playing") && !board) initBoard(data);
+            if (data.status === "playing" && !board) initBoard(data);
             if (data.status === "playing" && board) {
                 if (data.fen !== game.fen()) {
                     game.load(data.fen);
-                    board.position(data.fen);
+                    board.position(data.fen, true); // TRUE = Smooth Animation
                 }
-                updateStatus(data);
+                updateUI(data);
             }
+        });
+
+        // Chat Sync
+        const chatQuery = query(collection(db, `chess/${gameCode}/messages`), orderBy("time", "asc"));
+        onSnapshot(chatQuery, (snap) => {
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML = "";
+            snap.forEach(m => {
+                chatArea.innerHTML += `<div class="chat-msg"><strong>${m.data().user}:</strong> ${m.data().msg}</div>`;
+            });
+            chatArea.scrollTop = chatArea.scrollHeight;
         });
     }
 
     function initBoard(data) {
         document.getElementById('lobby-view').classList.add('hidden');
         document.getElementById('game-view').classList.remove('hidden');
-        document.getElementById('my-name').innerText = myUsername;
-        const config = {
-            draggable: true, position: game.fen(), orientation: playerRole,
+        document.getElementById('my-name').innerText = `${myUsername} (${playerRole})`;
+        document.getElementById('opponent-name').innerText = (playerRole === 'white') ? data.guestName : data.hostName;
+
+        board = Chessboard('myBoard', {
+            draggable: true, position: 'start', orientation: playerRole,
             pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
             onDragStart: (s, p) => {
                 if (game.game_over()) return false;
@@ -200,32 +177,48 @@
             onDrop: (source, target) => {
                 let move = game.move({ from: source, to: target, promotion: 'q' });
                 if (move === null) return 'snapback';
-                updateDoc(doc(db, "chess", gameCode), { fen: game.fen(), turn: game.turn() });
-            },
-            onSnapEnd: () => board.position(game.fen())
-        };
-        board = Chessboard('myBoard', config);
-        if (playerRole === 'white') updateDoc(doc(db, "chess", gameCode), { status: "playing" });
+                
+                const history = game.history();
+                updateDoc(doc(db, "chess", gameCode), { fen: game.fen(), history: history });
+            }
+        });
     }
 
-    function updateStatus(data) {
-        let s = game.turn() === 'w' ? "White's Turn" : "Black's Turn";
-        if (game.in_checkmate()) s = "Checkmate!";
-        document.getElementById('game-status').innerText = s;
-        if(data.guestName) document.getElementById('opponent-name').innerText = (playerRole === 'white') ? data.guestName : data.hostName;
+    function updateUI(data) {
+        const turn = game.turn();
+        const statusEl = document.getElementById('game-status');
+        
+        if ( (turn === 'w' && playerRole === 'white') || (turn === 'b' && playerRole === 'black') ) {
+            statusEl.innerText = "Your Turn";
+            statusEl.classList.replace('bg-white/5', 'bg-purple-600');
+        } else {
+            statusEl.innerText = "Opponent's Turn";
+            statusEl.classList.replace('bg-purple-600', 'bg-white/5');
+        }
+
+        // History UI
+        const historyEl = document.getElementById('moveHistory');
+        historyEl.innerHTML = data.history.map((m, i) => `<span>${i+1}. ${m}</span>`).join(' ');
     }
 
-    window.toggleProfile = () => {
-        const dp = document.getElementById("profileDropdown");
-        dp.style.display = dp.style.display === "flex" ? "none" : "flex";
+    window.sendChat = async () => {
+        const input = document.getElementById('chatInput');
+        if (!input.value.trim()) return;
+        await addDoc(collection(db, `chess/${gameCode}/messages`), {
+            user: myUsername, msg: input.value, time: Date.now()
+        });
+        input.value = "";
     };
 
-    for (let i = 0; i < 60; i++) {
+    window.confirmExit = () => document.getElementById('exitModal').style.display='flex';
+
+    // Stars
+    for (let i = 0; i < 50; i++) {
         const star = document.createElement('div');
         star.className = 'star';
-        star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
-        star.style.left = `${Math.random() * 100}%`; star.style.top = `${Math.random() * 100}%`;
-        star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
+        star.style.width = star.style.height = '1px';
+        star.style.left = Math.random() * 100 + '%'; star.style.top = Math.random() * 100 + '%';
+        star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
         document.getElementById('starField').appendChild(star);
     }
 </script>
