@@ -126,7 +126,18 @@
                 </div>
             </div>
 
+            <div onclick="window.open('battleship.html', '_blank')" class="game-card group">
+                <div class="game-icon">🚢</div>
+                <div>
+                    <h4 class="font-black uppercase tracking-wider text-sm group-hover:text-purple-400 transition">Battleship</h4>
+                    <p class="text-[10px] font-bold text-white/30 uppercase mt-1">Naval Combat</p>
+                </div>
+                <div class="ml-auto opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                    <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
             </div>
+
+        </div>
     </div>
 </section>
 
@@ -142,7 +153,6 @@
 
     const currentPage = "games";
 
-    // --- AUTH PROTECTION & UI SYNC ---
     onAuthStateChanged(auth, async user => {
         if (!user) { location.replace("index.html"); return; }
         
@@ -163,7 +173,6 @@
         }
     });
 
-    // --- DYNAMIC TABS (Sidebar) ---
     async function loadTabs() {
         try {
             const response = await fetch(`tabs.txt?v=${Date.now()}`);
@@ -183,7 +192,6 @@
         } catch (e) { console.error("Tab Sync Error:", e); }
     }
 
-    // --- UI UTILS ---
     window.toggleMenu = () => document.body.classList.toggle("menu-open");
     window.toggleProfile = () => {
         const dp = document.getElementById("profileDropdown");
@@ -191,7 +199,6 @@
     };
     window.executeLogout = async () => { await signOut(auth); location.replace("index.html"); };
 
-    // Background Stars
     const starField = document.getElementById('starField');
     for (let i = 0; i < 70; i++) {
         const star = document.createElement('div');
